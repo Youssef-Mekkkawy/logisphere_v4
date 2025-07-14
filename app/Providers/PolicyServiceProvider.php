@@ -5,6 +5,7 @@ namespace App\Providers;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 
+
 // Import your models
 use App\Models\{
     Invoice,
@@ -28,28 +29,34 @@ use App\Policies\{
     AccountPolicy,
     CompanyPolicy,
     ShipmentPolicy,
-    UserPolicy
+    UserPolicy,
+    Employee
 };
+
+
+
+namespace App\Providers;
+
+use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use Illuminate\Support\Facades\Gate;
+use App\Models\Shipment;
+use App\Models\Company;
+use App\Models\Employee;
+use App\Models\User;
+use App\Policies\ShipmentPolicy;
+use App\Policies\CompanyPolicy;
+use App\Policies\EmployeePolicy;
+use App\Policies\UserPolicy;
 
 class PolicyServiceProvider extends ServiceProvider
 {
     /**
-     * The model to policy mappings for the application.
-     *
-     * @var array<class-string, class-string>
+     * The policy mappings for the application.
      */
     protected $policies = [
-        // Accounting Policies
-        Invoice::class => InvoicePolicy::class,
-        Payment::class => PaymentPolicy::class,
-        EmployeeAdvance::class => AdvancePolicy::class,
-        JobAssignment::class => JobPolicy::class,
-        Expense::class => ExpensePolicy::class,
-        Account::class => AccountPolicy::class,
-
-        // Core Business Policies
-        Company::class => CompanyPolicy::class,
         Shipment::class => ShipmentPolicy::class,
+        Company::class => CompanyPolicy::class,
+        // Employee::class => EmployeePolicy::class,
         User::class => UserPolicy::class,
     ];
 
@@ -60,9 +67,25 @@ class PolicyServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-        // Additional Gates can be defined here if needed
-        // Gate::define('custom-permission', function ($user) {
-        //     return $user->role === 'admin';
-        // });
+        // Define additional gates
+        Gate::define('manage-employees', function ($user) {
+            return $user->hasAnyRole(['admin', 'manager']);
+        });
+
+        Gate::define('manage-accounting', function ($user) {
+            return $user->hasAnyRole(['admin', 'manager']);
+        });
+
+        Gate::define('manage-settings', function ($user) {
+            return $user->hasRole('admin');
+        });
+
+        Gate::define('view-reports', function ($user) {
+            return $user->hasAnyRole(['admin', 'manager']);
+        });
+
+        Gate::define('export-data', function ($user) {
+            return $user->hasAnyRole(['admin', 'manager']);
+        });
     }
 }

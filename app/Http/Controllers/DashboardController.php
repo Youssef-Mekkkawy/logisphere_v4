@@ -7,13 +7,11 @@ use App\Models\Shipment;
 use App\Models\Company;
 use App\Models\Employee;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    function index()
+    public function index()
     {
         $stats = [
             'active_shipments' => Shipment::where('status', '!=', 'Delivered')->count(),
@@ -21,60 +19,44 @@ class DashboardController extends Controller
             'employees' => Employee::count(),
             'monthly_revenue' => 2.3 // This should be calculated from actual data
         ];
+        // dd($stats);
+        // Get key metrics
+        $metrics = [
+            'total_shipments' => Shipment::count(),
+            'active_shipments' => Shipment::whereIn('status', ['Pending', 'In Transit', 'At Port'])->count(),
+            'delivered_shipments' => Shipment::where('status', 'Delivered')->count(),
+            'total_companies' => Company::count(),
+            'active_employees' => Employee::where('status', 'Active')->count(),
+        ];
 
+        // Recent shipments
         $recentShipments = Shipment::with(['company', 'originPort', 'destinationPort'])
-            ->latest()
-            ->take(10)
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
             ->get();
 
-        return view('dashboard.index', compact('stats', 'recentShipments'));
-    }
+        // Shipments by status for chart
+        $shipmentsByStatus = Shipment::select('status', DB::raw('count(*) as count'))
+            ->groupBy('status')
+            ->get();
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
+        // Monthly shipment trends
+        $monthlyTrends = Shipment::select(
+            DB::raw('MONTH(created_at) as month'),
+            DB::raw('YEAR(created_at) as year'),
+            DB::raw('count(*) as count')
+        )
+            ->where('created_at', '>=', now()->subMonths(6))
+            ->groupBy('year', 'month')
+            ->orderBy('year', 'desc')
+            ->orderBy('month', 'desc')
+            ->get();
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
+        return view('dashboard.index', compact('metrics', 'recentShipments', 'shipmentsByStatus', 'monthlyTrends', 'stats'));
     }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(cr $cr)
+    public function getMetrics()
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(cr $cr)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, cr $cr)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(cr $cr)
-    {
-        //
+        $dashboardService = app(\App\Services\DashboardService::class);
+        return response()->json($dashboardService->getDashboardData());
     }
 }

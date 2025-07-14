@@ -55,7 +55,7 @@
             </a>
         </li>
         <li class="nav-item">
-            <a href="{{ route('settings') }}" class="nav-link {{ request()->routeIs('settings') ? 'active' : '' }}">
+            <a href="{{ route('settings.index') }}" class="nav-link {{ request()->routeIs('settings') ? 'active' : '' }}">
                 <span class="nav-icon">⚙️</span>
                 Settings
             </a>

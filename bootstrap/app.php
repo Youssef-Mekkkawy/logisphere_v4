@@ -11,7 +11,6 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
         ]);
@@ -20,5 +19,5 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })->withProviders([
         App\Providers\AppServiceProvider::class,
-        App\Providers\PolicyServiceProvider::class, // Add this new provider
+        App\Providers\PolicyServiceProvider::class, // This is your new provider
     ])->create();

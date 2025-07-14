@@ -7,70 +7,120 @@ use Illuminate\Http\Request;
 
 class CompanyController extends Controller
 {
-    public function index()
+    public function __construct()
     {
-        $companies = Company::paginate(20);
-        return view('dashboard.companies', compact('companies'));
+        $this->middleware('auth');
+        $this->middleware('role:admin,manager')->except(['index', 'show']);
     }
 
-    public function create()
+    /**
+     * Display companies with advanced filtering
+     */
+    public function index(Request $request)
     {
-        return view('companies.create');
+        $query = Company::query();
+
+        // Filter by type
+        if ($request->filled('type')) {
+            $query->where('type', $request->type);
+        }
+
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Search
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('company_code', 'like', "%{$search}%");
+            });
+        }
+
+        $companies = $query->orderBy('name')->paginate(20);
+
+        return view('companies.index', compact('companies'));
     }
 
+    /**
+     * Store new company with validation
+     */
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
             'type' => 'required|in:Client,Supplier',
-            'contact_person' => 'required|string|max:255',
-            'email' => 'nullable|email',
+            'email' => 'required|email|unique:companies,email',
             'phone' => 'nullable|string',
-            'country' => 'nullable|string',
-            'address' => 'nullable|string',
-            'service_type' => 'nullable|string'
+            'address' => 'required|string',
+            'contact_person' => 'required|string',
+            'tax_number' => 'nullable|string|unique:companies,tax_number',
+            'service_type' => 'nullable|string',
+            'credit_limit' => 'nullable|numeric|min:0',
+            'payment_terms' => 'nullable|integer|min:0'
         ]);
 
-        Company::create($request->all());
+        try {
+            $validated['company_code'] = $this->generateCompanyCode($validated['type']);
+            $validated['status'] = 'Active';
 
-        return redirect()->route('companies.index')
-            ->with('success', 'Company created successfully!');
+            $company = Company::create($validated);
+
+            return redirect()->route('companies.show', $company)
+                ->with('success', 'Company created successfully!');
+        } catch (\Exception $e) {
+            return back()->withInput()
+                ->with('error', 'Failed to create company: ' . $e->getMessage());
+        }
     }
 
-    public function show(Company $company)
+    /**
+     * Generate unique company code
+     */
+    private function generateCompanyCode($type)
     {
-        return view('companies.show', compact('company'));
+        $prefix = $type === 'Client' ? 'CLT' : 'SUP';
+        $lastCode = Company::where('company_code', 'like', $prefix . '%')
+            ->orderBy('company_code', 'desc')
+            ->first();
+
+        if ($lastCode) {
+            $lastNumber = intval(substr($lastCode->company_code, 3));
+            $newNumber = $lastNumber + 1;
+        } else {
+            $newNumber = 1;
+        }
+
+        return $prefix . str_pad($newNumber, 4, '0', STR_PAD_LEFT);
     }
 
-    public function edit(Company $company)
+    public function search(Request $request)
     {
-        return view('companies.edit', compact('company'));
-    }
+        $query = Company::query();
 
-    public function update(Request $request, Company $company)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'type' => 'required|in:Client,Supplier',
-            'contact_person' => 'required|string|max:255',
-            'email' => 'nullable|email',
-            'phone' => 'nullable|string',
-            'country' => 'nullable|string',
-            'address' => 'nullable|string',
-            'service_type' => 'nullable|string'
+        if ($request->filled('q')) {
+            $search = $request->q;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('company_code', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('type')) {
+            $query->where('type', $request->type);
+        }
+
+        return response()->json([
+            'companies' => $query->limit(10)->get()
         ]);
-
-        $company->update($request->all());
-
-        return redirect()->route('companies.index')
-            ->with('success', 'Company updated successfully!');
     }
 
-    public function destroy(Company $company)
+    public function getMetrics(Company $company)
     {
-        $company->delete();
-
-        return redirect()->route('companies.index')
-            ->with('success', 'Company deleted successfully!');
+        $companyService = app(\App\Services\CompanyService::class);
+        return response()->json($companyService->getCompanyMetrics($company));
     }
 }

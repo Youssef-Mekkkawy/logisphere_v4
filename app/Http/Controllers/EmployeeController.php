@@ -7,75 +7,113 @@ use Illuminate\Http\Request;
 
 class EmployeeController extends Controller
 {
-    public function index()
+    public function __construct()
     {
-        $employees = Employee::paginate(20);
-        return view('employees.index', compact('employees'));
+        $this->middleware('auth');
+        $this->middleware('role:admin,manager')->except(['index', 'show']);
     }
 
-    public function create()
+    /**
+     * Display employees with department filtering
+     */
+    public function index(Request $request)
     {
-        return view('employees.create');
-    }
+        $query = Employee::query();
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'department' => 'required|string',
-            'position' => 'required|string',
-            'email' => 'nullable|email|unique:employees,email',
-            'phone' => 'nullable|string',
-            'hire_date' => 'nullable|date',
-            'salary' => 'nullable|numeric|min:0'
-        ]);
-
-        $data = $request->all();
-
-        // Generate employee ID if not provided
-        if (empty($data['employee_id'])) {
-            $data['employee_id'] = 'EMP-' . str_pad(Employee::count() + 1, 3, '0', STR_PAD_LEFT);
+        if ($request->filled('department')) {
+            $query->where('department', $request->department);
         }
 
-        Employee::create($data);
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
 
-        return redirect()->route('employees.index')
-            ->with('success', 'Employee created successfully!');
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('employee_id', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        $employees = $query->orderBy('name')->paginate(20);
+        $departments = Employee::distinct()->pluck('department');
+
+        return view('employees.index', compact('employees', 'departments'));
     }
 
-    public function show(Employee $employee)
+    /**
+     * Store new employee
+     */
+    public function store(Request $request)
     {
-        return view('employees.show', compact('employee'));
-    }
-
-    public function edit(Employee $employee)
-    {
-        return view('employees.edit', compact('employee'));
-    }
-
-    public function update(Request $request, Employee $employee)
-    {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
             'department' => 'required|string',
             'position' => 'required|string',
-            'email' => 'nullable|email|unique:employees,email,' . $employee->id,
-            'phone' => 'nullable|string',
-            'hire_date' => 'nullable|date',
-            'salary' => 'nullable|numeric|min:0'
+            'email' => 'required|email|unique:employees,email',
+            'phone' => 'required|string',
+            'hire_date' => 'required|date',
+            'salary' => 'required|numeric|min:0',
+            'emergency_contact' => 'nullable|string',
+            'address' => 'nullable|string'
         ]);
 
-        $employee->update($request->all());
+        try {
+            $validated['employee_id'] = $this->generateEmployeeId();
+            $validated['status'] = 'Active';
 
-        return redirect()->route('employees.index')
-            ->with('success', 'Employee updated successfully!');
+            $employee = Employee::create($validated);
+
+            return redirect()->route('employees.show', $employee)
+                ->with('success', 'Employee created successfully!');
+        } catch (\Exception $e) {
+            return back()->withInput()
+                ->with('error', 'Failed to create employee: ' . $e->getMessage());
+        }
     }
 
-    public function destroy(Employee $employee)
+    /**
+     * Generate unique employee ID
+     */
+    private function generateEmployeeId()
     {
-        $employee->delete();
+        $lastEmployee = Employee::orderBy('employee_id', 'desc')->first();
 
-        return redirect()->route('employees.index')
-            ->with('success', 'Employee deleted successfully!');
+        if ($lastEmployee) {
+            $lastNumber = intval(substr($lastEmployee->employee_id, 4));
+            $newNumber = $lastNumber + 1;
+        } else {
+            $newNumber = 1;
+        }
+
+        return 'EMP-' . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
+    }
+    public function search(Request $request)
+    {
+        $query = Employee::query();
+
+        if ($request->filled('q')) {
+            $search = $request->q;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('employee_id', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('department')) {
+            $query->where('department', $request->department);
+        }
+
+        return response()->json([
+            'employees' => $query->limit(10)->get()
+        ]);
+    }
+
+    public function getMetrics(Employee $employee)
+    {
+        $employeeService = app(\App\Services\EmployeeService::class);
+        return response()->json($employeeService->getEmployeeMetrics($employee));
     }
 }

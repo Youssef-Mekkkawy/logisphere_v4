@@ -13,25 +13,25 @@ class SubmenuController extends Controller
     //
     function index()
     {
-        return view('dashboard.submenu.index');
+        return view('submenu.index');
     }
 
     public function ports()
     {
         $ports = Port::paginate(20);
-        return view('dashboard.submenu.ports', compact('ports'));
+        return view('submenu.ports.index', compact('ports'));
     }
 
     public function agencies()
     {
         $agencies = ShippingAgency::paginate(20);
-        return view('dashboard.submenu.agencies', compact('agencies'));
+        return view('submenu.agencies.index', compact('agencies'));
     }
 
     public function types()
     {
         $types = ShipmentType::paginate(20);
-        return view('dashboard.submenu.types', compact('types'));
+        return view('submenu.coo-types.index', compact('types'));
     }
 
     public function storePorts(Request $request)

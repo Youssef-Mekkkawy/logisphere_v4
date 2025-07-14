@@ -19,7 +19,7 @@ class SettingsController extends Controller
     {
         $settings = $this->settingsService->getAllSettings();
 
-        return view('accounting.settings.index', compact('settings'));
+        return view('settings.index', compact('settings'));
     }
 
     public function update(Request $request)

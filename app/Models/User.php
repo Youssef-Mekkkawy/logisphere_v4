@@ -6,17 +6,25 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
+/**
+ * Class User
+ *
+ * @property string $role
+ * @method static \Illuminate\Database\Eloquent\Builder|User role($role)
+ * @method static \Illuminate\Database\Eloquent\Builder|User admins()
+ * @method static \Illuminate\Database\Eloquent\Builder|User managers()
+ * @method static \Illuminate\Database\Eloquent\Builder|User regularUsers()
+ */
 class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
     protected $fillable = [
         'name',
-        'username',
         'email',
+        'username',
         'password',
         'role',
-        'last_login',
     ];
 
     protected $hidden = [
@@ -24,16 +32,11 @@ class User extends Authenticatable
         'remember_token',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'last_login' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+    ];
 
-    // Role checking methods
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
@@ -59,7 +62,7 @@ class User extends Authenticatable
         return in_array($this->role, $roles);
     }
 
-    // Scope for role filtering
+    // Scopes
     public function scopeRole($query, $role)
     {
         return $query->where('role', $role);
@@ -80,7 +83,6 @@ class User extends Authenticatable
         return $query->where('role', 'user');
     }
 
-    // Update last login
     public function updateLastLogin()
     {
         $this->update(['last_login' => now()]);
