@@ -10,11 +10,32 @@ use App\Models\ShippingAgency;
 use App\Models\ShipmentType;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use RouteSeeder;
 
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        $this->call([
+            // Core system data
+            AllStatusSeeder::class,
+            NationalitiesSeeder::class,
+            AccountsSeeder::class,
+
+            // Existing seeders
+            // User::class,
+            CompanySeeder::class,
+            PortSeeder::class,
+            EmployeeSeeder::class,
+
+            // New logistics data
+            RouteSeeder::class,
+            BookingSeeder::class,
+            ContainerSeeder::class,
+            InvoiceSeeder::class,
+            AttachmentSeeder::class,
+            TrackingSeeder::class,
+        ]);
         // Create default users
         $users = [
             [

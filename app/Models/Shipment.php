@@ -4,11 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-
+use App\Traits\HasAttachments;
+use App\Traits\HasTracking;
 class Shipment extends Model
 {
-     use HasFactory;
-
+    use HasFactory;
+    // use HasAttachments, HasTracking;
     protected $fillable = [
         'shipment_id',
         'company_id',
@@ -56,5 +57,28 @@ class Shipment extends Model
     public function scopeStatus($query, $status)
     {
         return $query->where('status', $status);
+    }
+    
+    
+    // Add these relationships to existing Shipment model:
+    
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class);
+    }
+    
+    public function containers()
+    {
+        return $this->hasMany(Container::class);
+    }
+    
+    public function invoices()
+    {
+        return $this->hasMany(Invoice::class);
+    }
+    
+    public function route()
+    {
+        return $this->belongsTo(Route::class);
     }
 }
