@@ -251,4 +251,175 @@ class ShipmentController extends Controller
             'tracking_events' => $tracking
         ]);
     }
+    public function edit(Shipment $shipment)
+    {
+        $companies = Company::where('type', 'Client')->orderBy('name')->get();
+        $ports = Port::where('status', 'Active')->orderBy('name')->get();
+        $agencies = ShippingAgency::where('status', 'Active')->orderBy('name')->get();
+        $shipmentTypes = ShipmentType::where('status', 'Active')->orderBy('name')->get();
+        $employees = Employee::where('status', 'Active')->orderBy('name')->get();
+
+        return view('shipments.edit', compact('shipment', 'companies', 'ports', 'agencies', 'shipmentTypes', 'employees'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, Shipment $shipment)
+    {
+        $validated = $request->validate([
+            'company_id' => 'required|exists:companies,id',
+            'origin_port_id' => 'required|exists:ports,id',
+            'destination_port_id' => 'required|exists:ports,id|different:origin_port_id',
+            'shipping_agency_id' => 'nullable|exists:shipping_agencies,id',
+            'shipment_type_id' => 'nullable|exists:shipment_types,id',
+            'container_type' => 'nullable|string',
+            'container_number' => 'nullable|string',
+            'reference_number' => 'nullable|string|unique:shipments,reference_number,' . $shipment->id,
+            'cargo_description' => 'required|string',
+            'weight' => 'nullable|numeric|min:0',
+            'volume' => 'nullable|numeric|min:0',
+            'value' => 'nullable|numeric|min:0',
+            'currency' => 'nullable|string|max:3',
+            'etd' => 'nullable|date',
+            'eta' => 'nullable|date|after:etd',
+            'consignee_name' => 'required|string',
+            'consignee_address' => 'required|string',
+            'notify_party' => 'nullable|string',
+            'special_instructions' => 'nullable|string',
+            'employee_id' => 'required|exists:employees,id',
+            'status' => 'required|in:Pending,In Transit,At Port,Customs Clearance,Delivered,Cancelled'
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            // Store old status for tracking
+            $oldStatus = $shipment->status;
+
+            $shipment->update($validated);
+
+            // If status changed, add tracking event
+            if ($oldStatus !== $validated['status']) {
+                $this->shipmentService->updateStatus($shipment, [
+                    'status' => $validated['status'],
+                    'location' => null,
+                    'notes' => 'Status updated via shipment edit'
+                ]);
+            }
+
+            // Log activity
+            $this->logActivity('shipment_updated', $shipment->id, "Shipment {$shipment->shipment_id} updated");
+
+            DB::commit();
+
+            return redirect()->route('shipments.show', $shipment)
+                ->with('success', 'Shipment updated successfully!');
+        } catch (\Exception $e) {
+            DB::rollback();
+
+            return back()->withInput()
+                ->with('error', 'Failed to update shipment: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Shipment $shipment)
+    {
+        // Check if shipment can be deleted (only if status is Pending or Cancelled)
+        if (!in_array($shipment->status, ['Pending', 'Cancelled'])) {
+            return redirect()->route('shipments.index')
+                ->with('error', 'Cannot delete shipment. Only pending or cancelled shipments can be deleted.');
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // Check for related records
+            $hasBookings = $shipment->bookings()->count() > 0;
+            $hasInvoices = $shipment->invoices()->count() > 0;
+            $hasContainers = $shipment->containers()->count() > 0;
+
+            if ($hasBookings || $hasInvoices || $hasContainers) {
+                return redirect()->route('shipments.index')
+                    ->with('error', 'Cannot delete shipment. It has associated bookings, invoices, or containers.');
+            }
+
+            // Delete tracking events first (if any)
+            $shipment->trackingEvents()->delete();
+
+            // Log activity before deletion
+            $this->logActivity('shipment_deleted', $shipment->id, "Shipment {$shipment->shipment_id} deleted");
+
+            // Delete the shipment
+            $shipment->delete();
+
+            DB::commit();
+
+            return redirect()->route('shipments.index')
+                ->with('success', 'Shipment deleted successfully!');
+        } catch (\Exception $e) {
+            DB::rollback();
+
+            return redirect()->route('shipments.index')
+                ->with('error', 'Failed to delete shipment: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Duplicate/Clone a shipment
+     */
+    public function duplicate(Shipment $shipment)
+    {
+        try {
+            DB::beginTransaction();
+
+            $newShipmentData = $shipment->toArray();
+
+            // Remove unique fields and set new values
+            unset($newShipmentData['id']);
+            unset($newShipmentData['shipment_id']);
+            unset($newShipmentData['reference_number']);
+            unset($newShipmentData['created_at']);
+            unset($newShipmentData['updated_at']);
+
+            // Set default values for new shipment
+            $newShipmentData['status'] = 'Pending';
+            $newShipmentData['etd'] = null;
+            $newShipmentData['eta'] = null;
+
+            $newShipment = $this->shipmentService->createShipment($newShipmentData);
+
+            // Log activity
+            $this->logActivity('shipment_duplicated', $newShipment->id, "Shipment {$newShipment->shipment_id} duplicated from {$shipment->shipment_id}");
+
+            DB::commit();
+
+            return redirect()->route('shipments.edit', $newShipment)
+                ->with('success', 'Shipment duplicated successfully! Please review and update the details.');
+        } catch (\Exception $e) {
+            DB::rollback();
+
+            return back()->with('error', 'Failed to duplicate shipment: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Archive/Unarchive shipment
+     */
+    public function toggleArchive(Shipment $shipment)
+    {
+        $isArchived = $shipment->status === 'Archived';
+        $newStatus = $isArchived ? 'Pending' : 'Archived';
+
+        $shipment->update(['status' => $newStatus]);
+
+        $action = $isArchived ? 'unarchived' : 'archived';
+        $this->logActivity("shipment_{$action}", $shipment->id, "Shipment {$shipment->shipment_id} {$action}");
+
+        return redirect()->back()
+            ->with('success', "Shipment has been {$action} successfully!");
+    }
 }

@@ -1,14 +1,9 @@
 <?php
 
-// ======================================================================================
-// TRACKING EVENT MODEL
-// ======================================================================================
-
-// File: app/Models/TrackingEvent.php
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class TrackingEvent extends Model
 {
@@ -20,11 +15,20 @@ class TrackingEvent extends Model
         'location',
         'description',
         'event_date',
+        'event_time',
+        'is_milestone',
+        'is_public',
+        'vessel_name',
+        'container_number',
+        'port_id',
         'created_by'
     ];
 
     protected $casts = [
-        'event_date' => 'datetime'
+        'event_date' => 'date',
+        'event_time' => 'datetime',
+        'is_milestone' => 'boolean',
+        'is_public' => 'boolean'
     ];
 
     /**
@@ -36,10 +40,34 @@ class TrackingEvent extends Model
     }
 
     /**
+     * Get the port for this tracking event
+     */
+    public function port()
+    {
+        return $this->belongsTo(Port::class);
+    }
+
+    /**
      * Get the user who created this tracking event
      */
     public function createdBy()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * Scope for public tracking events
+     */
+    public function scopePublic($query)
+    {
+        return $query->where('is_public', true);
+    }
+
+    /**
+     * Scope for milestone events
+     */
+    public function scopeMilestones($query)
+    {
+        return $query->where('is_milestone', true);
     }
 }

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class JobAssignment extends Model
 {
     use HasFactory;
+    protected $table = 'job_assignments'; // This table doesn't exist yet
 
     protected $fillable = [
         'job_number',
@@ -21,7 +22,8 @@ class JobAssignment extends Model
         'end_date',
         'status',
         'is_billable',
-        'notes'
+        'notes',
+        'job_title',
     ];
 
     protected $casts = [
@@ -38,14 +40,14 @@ class JobAssignment extends Model
         $this->save();
         return $this;
     }
-    public function employee()
-    {
-        return $this->belongsTo(Employee::class);
-    }
+
 
     public function shipment()
     {
         return $this->belongsTo(Shipment::class);
     }
-
+    public function employee()
+    {
+        return $this->belongsTo(Employee::class);
+    }
 }
