@@ -8,35 +8,36 @@ use App\Models\Port;
 use App\Models\Employee;
 use App\Models\ShippingAgency;
 use App\Models\ShipmentType;
+use Database\Seeders\RouteSeeder;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use RouteSeeder;
+
 
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
         $this->call([
-            // Core system data
+            // Phase 1: Lookup/Reference Tables (No Dependencies)
             AllStatusSeeder::class,
             NationalitiesSeeder::class,
-            AccountsSeeder::class,
-
-            // Existing seeders
-            // User::class,
-            CompanySeeder::class,
-            PortSeeder::class,
-            EmployeeSeeder::class,
-
-            // New logistics data
-            RouteSeeder::class,
-            BookingSeeder::class,
-            ContainerSeeder::class,
-            InvoiceSeeder::class,
-            AttachmentSeeder::class,
-            TrackingSeeder::class,
+            UserSeeder::class,              // ✅ Add users first
+            
+            // Phase 2: Core Infrastructure 
+            PortSeeder::class,              // ✅ Working
+            ShippingAgencySeeder::class,    // ✅ Created
+            CompanySeeder::class,           // ✅ Created
+            
+            // Phase 3: Business Logic
+            ShipmentSeeder::class,          // ✅ Created (needs companies + ports)
+            RouteSeeder::class,             // ✅ Working (now has ports)
+            
+            // Phase 4: Dependent Tables
+            BookingSeeder::class,           // ✅ Now has shipments/companies/users
+            ContainerSeeder::class,         // ✅ Working (has bookings/shipments/ports)
         ]);
-        // Create default users
+
+        $this->command->info('🎉 All seeders completed successfully!');
         $users = [
             [
                 'name' => 'System Administrator',

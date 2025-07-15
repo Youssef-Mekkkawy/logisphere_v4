@@ -23,7 +23,7 @@ class BookingSeeder extends Seeder
 
         $bookings = [
             [
-                'booking_number' => Booking::generateBookingNumber(),
+                'booking_number' => 'BKG-2024-001', // ✅ Fixed - static booking number
                 'booking_reference' => 'BKG-REF-001',
                 'shipment_id' => $shipments->first()->id,
                 'company_id' => $companies->first()->id,
@@ -44,11 +44,11 @@ class BookingSeeder extends Seeder
                 'status' => 'Confirmed',
                 'is_confirmed' => true,
                 'confirmed_at' => now()->subDays(8),
-                'confirmed_by' => 1,
-                'created_by' => 1,
+                'confirmed_by' => null, // ✅ Fixed - no user reference
+                'created_by' => null,   // ✅ Fixed - no user reference
             ],
             [
-                'booking_number' => Booking::generateBookingNumber(),
+                'booking_number' => 'BKG-2024-002', // ✅ Fixed - static booking number
                 'booking_reference' => 'BKG-REF-002',
                 'shipment_id' => $shipments->skip(1)->first()?->id ?? $shipments->first()->id,
                 'company_id' => $companies->skip(1)->first()?->id ?? $companies->first()->id,
@@ -68,12 +68,40 @@ class BookingSeeder extends Seeder
                 'incoterms' => 'CIF',
                 'status' => 'Pending',
                 'is_confirmed' => false,
-                'created_by' => 1,
+                'created_by' => null,   // ✅ Fixed - no user reference
+            ],
+            [
+                'booking_number' => 'BKG-2024-003', // ✅ Additional booking
+                'booking_reference' => 'BKG-REF-003',
+                'shipment_id' => $shipments->skip(2)->first()?->id ?? $shipments->first()->id,
+                'company_id' => $companies->skip(2)->first()?->id ?? $companies->first()->id,
+                'shipping_agency_id' => $agencies->skip(1)->first()?->id ?? $agencies->first()?->id,
+                'vessel_name' => 'MSC MEDITERRANEAN',
+                'voyage_number' => 'V2024-003',
+                'booking_date' => now()->subDays(15),
+                'estimated_departure' => now()->subDays(5),
+                'estimated_arrival' => now()->addDays(10),
+                'cut_off_date' => now()->subDays(7),
+                'service_type' => 'FCL',
+                'container_count' => 3,
+                'container_type' => '40HC',
+                'cargo_weight' => 35000.00,
+                'cargo_volume' => 72.50,
+                'commodity_description' => 'Machinery and Industrial Equipment',
+                'incoterms' => 'CIF',
+                'status' => 'In Transit',
+                'is_confirmed' => true,
+                'confirmed_at' => now()->subDays(12),
+                'confirmed_by' => null, // ✅ Fixed - no user reference
+                'created_by' => null,   // ✅ Fixed - no user reference
             ]
         ];
 
         foreach ($bookings as $bookingData) {
-            Booking::create($bookingData);
+            Booking::firstOrCreate(
+                ['booking_number' => $bookingData['booking_number']],
+                $bookingData
+            );
         }
 
         $this->command->info('Bookings seeded successfully!');

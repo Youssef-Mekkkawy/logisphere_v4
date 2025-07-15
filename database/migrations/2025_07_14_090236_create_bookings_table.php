@@ -35,8 +35,8 @@ return new class extends Migration
             $table->text('special_instructions')->nullable();
             $table->boolean('is_confirmed')->default(false);
             $table->timestamp('confirmed_at')->nullable();
-            $table->foreignId('confirmed_by')->nullable()->constrained('users');
-            $table->foreignId('created_by')->constrained('users');
+            $table->foreignId('confirmed_by')->nullable()->constrained('users'); // ✅ Allow NULL
+            $table->foreignId('created_by')->nullable()->constrained('users');   // ✅ Allow NULL
             $table->timestamps();
 
             $table->index(['status', 'booking_date']);

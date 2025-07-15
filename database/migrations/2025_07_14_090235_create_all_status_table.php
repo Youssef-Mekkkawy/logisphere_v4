@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('all_status', function (Blueprint $table) {
             $table->id();
             $table->string('module'); // 'shipment', 'employee', 'company', 'invoice', etc.
-            $table->string('status_code')->unique();
+            $table->string('status_code'); // Remove ->unique() from here
             $table->string('status_name');
             $table->string('display_name');
             $table->string('color', 7)->default('#6b7280'); // Hex color for UI
@@ -25,6 +25,10 @@ return new class extends Migration
             $table->json('permissions')->nullable(); // Who can set this status
             $table->timestamps();
 
+            // Add composite unique constraint - SAME status_code can exist for DIFFERENT modules
+            $table->unique(['module', 'status_code'], 'unique_module_status');
+
+            // Keep existing indexes
             $table->index(['module', 'is_active']);
             $table->index('status_code');
         });

@@ -40,11 +40,11 @@ class BookingService
     private function findOptimalRoute($originPortId, $destinationPortId, $serviceType): ?Route
     {
         return Route::where('origin_port_id', $originPortId)
-            ->where('destination_port_id', $destinationPortId)
-            ->where('service_type', $serviceType)
-            ->where('status', 'Active')
-            ->orderBy('transit_days')
-            ->first();
+                   ->where('destination_port_id', $destinationPortId)
+                   ->where('service_type', $serviceType)
+                   ->where('status', 'Active')
+                   ->orderBy('transit_days')
+                   ->first();
     }
 
     /**
@@ -85,12 +85,12 @@ class BookingService
     private function calculateContainerUtilization(): array
     {
         $containers = Container::all();
-
+        
         return [
             'total_containers' => $containers->count(),
             'loaded_containers' => $containers->where('loading_status', 'Loaded')->count(),
             'empty_containers' => $containers->where('loading_status', 'Empty')->count(),
-            'utilization_rate' => $containers->count() > 0 ?
+            'utilization_rate' => $containers->count() > 0 ? 
                 ($containers->where('loading_status', '!=', 'Empty')->count() / $containers->count()) * 100 : 0
         ];
     }
@@ -101,7 +101,7 @@ class BookingService
     private function calculateAverageBookingValue(): float
     {
         return Booking::whereHas('shipment.invoices')
-            ->get()
-            ->avg(fn($booking) => $booking->shipment->invoices->sum('total_amount'));
+                     ->get()
+                     ->avg(fn($booking) => $booking->shipment->invoices->sum('total_amount'));
     }
 }

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('attachments', function (Blueprint $table) {
             $table->id();
             $table->string('attachment_code')->unique();
-            $table->morphs('attachable'); // Polymorphic relation (shipment_id, company_id, etc.)
+            $table->morphs('attachable'); // This automatically creates the index - NO NEED TO ADD AGAIN
             $table->string('file_name');
             $table->string('original_name');
             $table->string('file_path');
@@ -31,7 +31,10 @@ return new class extends Migration
             $table->json('metadata')->nullable(); // Additional file info
             $table->timestamps();
 
-            $table->index(['attachable_type', 'attachable_id']);
+            // Remove this line - it's duplicated by morphs():
+            // $table->index(['attachable_type', 'attachable_id']); // ← REMOVE THIS LINE
+
+            // Keep only the other indexes:
             $table->index('category');
             $table->index('file_type');
         });

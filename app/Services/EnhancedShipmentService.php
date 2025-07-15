@@ -1,5 +1,10 @@
 <?php
 
+// ======================================================================================
+// ENHANCED SERVICES USING NEW DATABASE STRUCTURE
+// ======================================================================================
+
+// File: app/Services/EnhancedShipmentService.php
 namespace App\Services;
 
 use App\Models\Shipment;

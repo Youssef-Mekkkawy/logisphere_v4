@@ -87,4 +87,48 @@ class User extends Authenticatable
     {
         $this->update(['last_login' => now()]);
     }
+    public function employee()
+    {
+        return $this->belongsTo(Employee::class, 'employee_id');
+    }
+
+    /**
+     * Get bookings created by this user
+     */
+    public function createdBookings()
+    {
+        return $this->hasMany(Booking::class, 'created_by');
+    }
+
+    /**
+     * Get bookings confirmed by this user
+     */
+    public function confirmedBookings()
+    {
+        return $this->hasMany(Booking::class, 'confirmed_by');
+    }
+
+    /**
+     * Get invoices created by this user
+     */
+    public function createdInvoices()
+    {
+        return $this->hasMany(Invoice::class, 'created_by');
+    }
+
+    /**
+     * Get invoices approved by this user
+     */
+    public function approvedInvoices()
+    {
+        return $this->hasMany(Invoice::class, 'approved_by');
+    }
+
+    /**
+     * Get attachments uploaded by this user
+     */
+    public function uploadedAttachments()
+    {
+        return $this->morphMany(Attachment::class, 'uploaded_by');
+    }
 }

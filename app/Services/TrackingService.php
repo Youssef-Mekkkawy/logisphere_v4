@@ -22,7 +22,7 @@ class TrackingService
                 'reported_by' => 'System',
                 'employee_id' => Auth::user()->employee_id ?? null
             ]));
-
+            
             $createdEvents[] = $event;
         }
 
@@ -50,23 +50,23 @@ class TrackingService
         }
 
         return $events->sortByDesc('event_datetime')
-            ->values()
-            ->map(function ($event) {
-                return [
-                    'id' => $event->id,
-                    'tracking_number' => $event->tracking_number,
-                    'type' => $event->trackable_type,
-                    'event_type' => $event->event_type,
-                    'description' => $event->event_description,
-                    'status' => $event->status,
-                    'location' => $event->location,
-                    'datetime' => $event->event_datetime,
-                    'is_milestone' => $event->is_milestone,
-                    'vessel_name' => $event->vessel_name,
-                    'container_number' => $event->container_number
-                ];
-            })
-            ->toArray();
+                     ->values()
+                     ->map(function ($event) {
+                         return [
+                             'id' => $event->id,
+                             'tracking_number' => $event->tracking_number,
+                             'type' => $event->trackable_type,
+                             'event_type' => $event->event_type,
+                             'description' => $event->event_description,
+                             'status' => $event->status,
+                             'location' => $event->location,
+                             'datetime' => $event->event_datetime,
+                             'is_milestone' => $event->is_milestone,
+                             'vessel_name' => $event->vessel_name,
+                             'container_number' => $event->container_number
+                         ];
+                     })
+                     ->toArray();
     }
 
     /**
@@ -75,7 +75,7 @@ class TrackingService
     public function getPublicTracking(string $trackingNumber): ?array
     {
         $shipment = Shipment::where('shipment_id', $trackingNumber)->first();
-
+        
         if (!$shipment) {
             return null;
         }
@@ -127,7 +127,7 @@ class TrackingService
     private function calculateMilestoneCompletionRate(): float
     {
         $totalShipments = Shipment::count();
-        $shipmentsWithMilestones = Shipment::whereHas('trackingEvents', function ($query) {
+        $shipmentsWithMilestones = Shipment::whereHas('trackingEvents', function($query) {
             $query->where('is_milestone', true);
         })->count();
 
@@ -140,19 +140,19 @@ class TrackingService
     private function calculateAverageTransitTime(): ?float
     {
         $deliveredShipments = Shipment::where('status', 'Delivered')
-            ->whereHas('trackingEvents', function ($query) {
-                $query->where('event_code', 'DELIVERED');
-            })
-            ->get();
+                                    ->whereHas('trackingEvents', function($query) {
+                                        $query->where('event_code', 'DELIVERED');
+                                    })
+                                    ->get();
 
         if ($deliveredShipments->isEmpty()) {
             return null;
         }
 
-        $totalDays = $deliveredShipments->sum(function ($shipment) {
+        $totalDays = $deliveredShipments->sum(function($shipment) {
             $start = $shipment->trackingEvents()->orderBy('event_datetime')->first();
             $end = $shipment->trackingEvents()->where('event_code', 'DELIVERED')->first();
-
+            
             return $start && $end ? $start->event_datetime->diffInDays($end->event_datetime) : 0;
         });
 
@@ -169,9 +169,9 @@ class TrackingService
 
         foreach ($shipments as $shipment) {
             $estimatedEvents = $shipment->trackingEvents()
-                ->whereNotNull('estimated_datetime')
-                ->whereNotNull('actual_datetime')
-                ->get();
+                                      ->whereNotNull('estimated_datetime')
+                                      ->whereNotNull('actual_datetime')
+                                      ->get();
 
             foreach ($estimatedEvents as $event) {
                 if ($event->actual_datetime > $event->estimated_datetime) {

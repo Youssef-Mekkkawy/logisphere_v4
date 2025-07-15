@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('tracking', function (Blueprint $table) {
             $table->id();
             $table->string('tracking_number')->unique();
-            $table->morphs('trackable'); // shipment_id, container_id, booking_id
+            $table->morphs('trackable'); // This automatically creates the index - NO NEED TO ADD AGAIN
             $table->string('event_type'); // 'status_change', 'location_update', 'milestone', 'alert'
             $table->string('event_code'); // Standardized event codes
             $table->string('event_description');
@@ -39,7 +39,10 @@ return new class extends Migration
             $table->boolean('send_notification')->default(false);
             $table->timestamps();
 
-            $table->index(['trackable_type', 'trackable_id']);
+            // Remove this line - it's duplicated by morphs():
+            // $table->index(['trackable_type', 'trackable_id']); // ← REMOVE THIS LINE
+
+            // Keep only the other indexes:
             $table->index(['event_datetime', 'event_type']);
             $table->index('tracking_number');
             $table->index(['status', 'is_public']);

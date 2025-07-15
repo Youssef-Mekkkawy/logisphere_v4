@@ -24,7 +24,7 @@ return new class extends Migration
             $table->string('state_province')->nullable();
             $table->string('country');
             $table->string('postal_code')->nullable();
-            $table->foreignId('country_id')->nullable()->constrained('nationalities');
+            $table->foreignId('nationality_id')->nullable()->constrained('nationalities');
             $table->string('preferred_language', 5)->default('en');
             $table->json('notification_preferences')->nullable(); // Email, SMS, Phone preferences
             $table->text('delivery_instructions')->nullable();

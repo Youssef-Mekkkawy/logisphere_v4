@@ -27,12 +27,12 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('username')->unique(); // Add this line
+            $table->string('username')->unique(); // ← Custom field
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->enum('role', ['admin', 'manager', 'user'])->default('user'); // Add this line
-            $table->timestamp('last_login')->nullable(); // Add this line
+            $table->enum('role', ['admin', 'manager', 'user'])->default('user'); // ← Custom field
+            $table->timestamp('last_login')->nullable(); // ← Custom field
             $table->rememberToken();
             $table->timestamps();
         });
