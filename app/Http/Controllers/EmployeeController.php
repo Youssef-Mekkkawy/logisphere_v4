@@ -45,78 +45,8 @@ class EmployeeController extends Controller
     }
 
     /**
-     * Store new employee
+     * Show the form for creating a new employee.
      */
-    // public function store(Request $request)
-    // {
-    //     $validated = $request->validate([
-    //         'name' => 'required|string|max:255',
-    //         'department' => 'required|string',
-    //         'position' => 'required|string',
-    //         'email' => 'required|email|unique:employees,email',
-    //         'phone' => 'required|string',
-    //         'hire_date' => 'required|date',
-    //         'salary' => 'required|numeric|min:0',
-    //         'emergency_contact' => 'nullable|string',
-    //         'address' => 'nullable|string'
-    //     ]);
-
-    //     try {
-    //         $validated['employee_id'] = $this->generateEmployeeId();
-    //         $validated['status'] = 'Active';
-
-    //         $employee = Employee::create($validated);
-
-    //         return redirect()->route('employees.show', $employee)
-    //             ->with('success', 'Employee created successfully!');
-    //     } catch (\Exception $e) {
-    //         return back()->withInput()
-    //             ->with('error', 'Failed to create employee: ' . $e->getMessage());
-    //     }
-    // }
-
-    /**
-     * Generate unique employee ID
-     */
-    private function generateEmployeeId()
-    {
-        $lastEmployee = Employee::orderBy('employee_id', 'desc')->first();
-
-        if ($lastEmployee) {
-            $lastNumber = intval(substr($lastEmployee->employee_id, 4));
-            $newNumber = $lastNumber + 1;
-        } else {
-            $newNumber = 1;
-        }
-
-        return 'EMP-' . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
-    }
-    public function search(Request $request)
-    {
-        $query = Employee::query();
-
-        if ($request->filled('q')) {
-            $search = $request->q;
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('employee_id', 'like', "%{$search}%");
-            });
-        }
-
-        if ($request->filled('department')) {
-            $query->where('department', $request->department);
-        }
-
-        return response()->json([
-            'employees' => $query->limit(10)->get()
-        ]);
-    }
-
-    public function getMetrics(Employee $employee)
-    {
-        $employeeService = app(\App\Services\EmployeeService::class);
-        return response()->json($employeeService->getEmployeeMetrics($employee));
-    }
     public function create()
     {
         $departments = [
@@ -152,49 +82,95 @@ class EmployeeController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Store a newly created employee in storage.
      */
-    // public function show(Employee $employee)
-    // {
-    //     // Load relationships
-    //     $employee->load([
-    //         'shipments' => function ($query) {
-    //             $query->latest()->take(5);
-    //         },
-    //         'jobAssignments' => function ($query) {
-    //             $query->latest()->take(5);
-    //         },
-    //         'advances' => function ($query) {
-    //             $query->latest()->take(5);
-    //         }
-    //     ]);
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'department' => 'required|string|max:100',
+            'position' => 'required|string|max:100',
+            'email' => 'nullable|email|unique:employees,email',
+            'phone' => 'nullable|string|max:50',
+            'hire_date' => 'nullable|date|before_or_equal:today',
+            'salary' => 'nullable|numeric|min:0|max:9999999999.99', // Max 10 billion
+            'emergency_contact' => 'nullable|string|max:255',
+            'address' => 'nullable|string|max:500',
+            'status' => 'required|in:Active,Inactive',
+            'nationality' => 'nullable|string|max:100',
+            'date_of_birth' => 'nullable|date|before:today',
+            'passport_number' => 'nullable|string|max:50',
+            'visa_status' => 'nullable|string|max:100',
+            'bank_account' => 'nullable|string|max:100',
+            'notes' => 'nullable|string|max:1000'
+        ], [
+            'salary.max' => 'Salary cannot exceed 9,999,999,999.99',
+            'salary.numeric' => 'Salary must be a valid number',
+            'email.unique' => 'This email address is already in use by another employee',
+            'hire_date.before_or_equal' => 'Hire date cannot be in the future',
+            'date_of_birth.before' => 'Date of birth must be in the past'
+        ]);
 
-    //     // Get employee statistics
-    //     $statistics = [
-    //         'total_shipments' => $employee->shipments()->count(),
-    //         'active_shipments' => $employee->shipments()->active()->count(),
-    //         'completed_shipments' => $employee->shipments()->where('status', 'Delivered')->count(),
-    //         'total_job_assignments' => $employee->jobAssignments()->count(),
-    //         'completed_jobs' => $employee->jobAssignments()->where('status', 'Completed')->count(),
-    //         'total_advances' => $employee->advances()->sum('amount'),
-    //         'pending_advances' => $employee->advances()->where('status', 'Pending')->sum('amount'),
-    //         'this_month_shipments' => $employee->shipments()->whereMonth('created_at', now()->month)->count(),
-    //         'this_year_shipments' => $employee->shipments()->whereYear('created_at', now()->year)->count()
-    //     ];
+        try {
+            // The employee_id will be auto-generated by the model
+            $employee = Employee::create($validated);
 
-    //     // Monthly performance for the last 6 months
-    //     $monthlyPerformance = $employee->shipments()
-    //         ->selectRaw('MONTH(created_at) as month, YEAR(created_at) as year, COUNT(*) as shipments')
-    //         ->where('created_at', '>=', now()->subMonths(6))
-    //         ->groupByRaw('YEAR(created_at), MONTH(created_at)')
-    //         ->orderByRaw('YEAR(created_at) DESC, MONTH(created_at) DESC')
-    //         ->get();
+            return redirect()->route('employees.show', $employee)
+                ->with('success', 'Employee created successfully!');
+        } catch (\Exception $e) {
+            Log::error('Employee Creation Error:', [
+                'error' => $e->getMessage(),
+                'data' => $validated
+            ]);
 
-    //     return view('employees.show', compact('employee', 'statistics', 'monthlyPerformance'));
-    // }
+            return back()->withInput()
+                ->with('error', 'Failed to create employee. Please check your input and try again.');
+        }
+    }
 
     /**
-     * Show the form for editing the specified resource.
+     * Display the specified employee.
+     */
+    public function show(Employee $employee)
+    {
+        try {
+            // Load relationships safely
+            $employee->load([
+                'shipments' => function ($query) {
+                    $query->latest()->take(5);
+                }
+            ]);
+
+            // Get employee statistics with safe defaults
+            $statistics = [
+                'total_shipments' => $employee->shipments()->count() ?? 0,
+                'active_shipments' => $employee->shipments()->whereNotIn('status', ['Delivered', 'Cancelled'])->count() ?? 0,
+                'completed_shipments' => $employee->shipments()->where('status', 'Delivered')->count() ?? 0,
+                'total_job_assignments' => 0, // Placeholder
+                'completed_jobs' => 0, // Placeholder
+                'total_advances' => 0, // Placeholder
+                'pending_advances' => 0, // Placeholder
+                'this_month_shipments' => $employee->shipments()->whereMonth('created_at', now()->month)->count() ?? 0,
+                'this_year_shipments' => $employee->shipments()->whereYear('created_at', now()->year)->count() ?? 0
+            ];
+
+            // Monthly performance for the last 6 months
+            $monthlyPerformance = $employee->shipments()
+                ->selectRaw('MONTH(created_at) as month, YEAR(created_at) as year, COUNT(*) as shipments')
+                ->where('created_at', '>=', now()->subMonths(6))
+                ->groupByRaw('YEAR(created_at), MONTH(created_at)')
+                ->orderByRaw('YEAR(created_at) DESC, MONTH(created_at) DESC')
+                ->get();
+
+            return view('employees.show', compact('employee', 'statistics', 'monthlyPerformance'));
+        } catch (\Exception $e) {
+            return redirect()->route('employees.index')
+                ->with('error', 'Error loading employee details: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Show the form for editing the specified employee.
      */
     public function edit(Employee $employee)
     {
@@ -231,49 +207,61 @@ class EmployeeController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update the specified employee in storage.
      */
-    // public function update(Request $request, Employee $employee)
-    // {
-    //     $validated = $request->validate([
-    //         'name' => 'required|string|max:255',
-    //         'department' => 'required|string|max:100',
-    //         'position' => 'required|string|max:100',
-    //         'email' => 'required|email|unique:employees,email,' . $employee->id,
-    //         'phone' => 'required|string|max:50',
-    //         'hire_date' => 'required|date|before_or_equal:today',
-    //         'salary' => 'required|numeric|min:0',
-    //         'emergency_contact' => 'nullable|string|max:255',
-    //         'address' => 'nullable|string|max:500',
-    //         'status' => 'required|in:Active,Inactive,On Leave,Terminated',
-    //         'nationality' => 'nullable|string|max:100',
-    //         'date_of_birth' => 'nullable|date|before:today',
-    //         'passport_number' => 'nullable|string|max:50',
-    //         'visa_status' => 'nullable|string|max:100',
-    //         'bank_account' => 'nullable|string|max:100',
-    //         'notes' => 'nullable|string|max:1000'
-    //     ]);
+    public function update(Request $request, Employee $employee)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'department' => 'required|string|max:100',
+            'position' => 'required|string|max:100',
+            'email' => 'nullable|email|unique:employees,email,' . $employee->id,
+            'phone' => 'nullable|string|max:50',
+            'hire_date' => 'nullable|date|before_or_equal:today',
+            'salary' => 'nullable|numeric|min:0|max:9999999999.99', // Max 10 billion
+            'status' => 'required|in:Active,Inactive',
+            'emergency_contact' => 'nullable|string|max:255',
+            'address' => 'nullable|string|max:500',
+            'nationality' => 'nullable|string|max:100',
+            'date_of_birth' => 'nullable|date|before:today',
+            'passport_number' => 'nullable|string|max:50',
+            'visa_status' => 'nullable|string|max:100',
+            'bank_account' => 'nullable|string|max:100',
+            'notes' => 'nullable|string|max:1000'
+        ], [
+            'salary.max' => 'Salary cannot exceed 9,999,999,999.99',
+            'salary.numeric' => 'Salary must be a valid number',
+            'email.unique' => 'This email address is already in use by another employee',
+            'hire_date.before_or_equal' => 'Hire date cannot be in the future',
+            'date_of_birth.before' => 'Date of birth must be in the past'
+        ]);
 
-    //     try {
-    //         $employee->update($validated);
+        try {
+            $employee->update($validated);
 
-    //         return redirect()->route('employees.show', $employee)
-    //             ->with('success', 'Employee updated successfully!');
-    //     } catch (\Exception $e) {
-    //         return back()->withInput()
-    //             ->with('error', 'Failed to update employee: ' . $e->getMessage());
-    //     }
-    // }
+            return redirect()->route('employees.show', $employee)
+                ->with('success', 'Employee updated successfully!');
+        } catch (\Exception $e) {
+            Log::error('Employee Update Error:', [
+                'error' => $e->getMessage(),
+                'employee_id' => $employee->id,
+                'data' => $validated
+            ]);
+
+            return back()->withInput()
+                ->with('error', 'Failed to update employee. Please check your input and try again.');
+        }
+    }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove the specified employee from storage.
      */
     public function destroy(Employee $employee)
     {
         // Check if employee has any related records
         $shipmentsCount = $employee->shipments()->count();
-        $jobAssignmentsCount = $employee->jobAssignments()->count();
-        $advancesCount = $employee->advances()->count();
+        $jobAssignmentsCount = method_exists($employee, 'jobAssignments') ? $employee->jobAssignments()->count() : 0;
+        $advancesCount = method_exists($employee, 'advances') ? $employee->advances()->count() : 0;
 
         if ($shipmentsCount > 0 || $jobAssignmentsCount > 0 || $advancesCount > 0) {
             return redirect()->route('employees.index')
@@ -286,81 +274,52 @@ class EmployeeController extends Controller
             return redirect()->route('employees.index')
                 ->with('success', 'Employee deleted successfully!');
         } catch (\Exception $e) {
+            Log::error('Employee Deletion Error:', [
+                'error' => $e->getMessage(),
+                'employee_id' => $employee->id
+            ]);
+
             return redirect()->route('employees.index')
-                ->with('error', 'Failed to delete employee: ' . $e->getMessage());
+                ->with('error', 'Failed to delete employee. Please try again.');
         }
     }
 
     /**
-     * Get employee performance metrics
+     * Search employees (AJAX)
      */
-    public function performance(Employee $employee)
+    public function search(Request $request)
     {
-        $performanceData = [
-            'shipment_metrics' => [
-                'total_shipments' => $employee->shipments()->count(),
-                'completed_shipments' => $employee->shipments()->where('status', 'Delivered')->count(),
-                'on_time_deliveries' => $employee->shipments()
-                    ->where('status', 'Delivered')
-                    ->whereColumn('actual_delivery_date', '<=', 'eta')
-                    ->count(),
-                'average_shipment_value' => $employee->shipments()->avg('value'),
-                'completion_rate' => $employee->shipments()->count() > 0
-                    ? round(($employee->shipments()->where('status', 'Delivered')->count() / $employee->shipments()->count()) * 100, 2)
-                    : 0
-            ],
-            'job_metrics' => [
-                'total_jobs' => $employee->jobAssignments()->count(),
-                'completed_jobs' => $employee->jobAssignments()->where('status', 'Completed')->count(),
-                'pending_jobs' => $employee->jobAssignments()->where('status', 'Pending')->count(),
-                'in_progress_jobs' => $employee->jobAssignments()->where('status', 'In Progress')->count(),
-                'average_completion_time' => $employee->jobAssignments()
-                    ->where('status', 'Completed')
-                    ->whereNotNull('completed_at')
-                    ->selectRaw('AVG(DATEDIFF(completed_at, assigned_at)) as avg_days')
-                    ->value('avg_days')
-            ],
-            'financial_metrics' => [
-                'total_advances' => $employee->advances()->sum('amount'),
-                'approved_advances' => $employee->advances()->where('status', 'Approved')->sum('amount'),
-                'pending_advances' => $employee->advances()->where('status', 'Pending')->sum('amount'),
-                'repaid_advances' => $employee->advances()->where('status', 'Repaid')->sum('amount')
-            ],
-            'monthly_trends' => $employee->shipments()
-                ->selectRaw('MONTH(created_at) as month, YEAR(created_at) as year, COUNT(*) as shipments')
-                ->where('created_at', '>=', now()->subYear())
-                ->groupByRaw('YEAR(created_at), MONTH(created_at)')
-                ->orderByRaw('YEAR(created_at) DESC, MONTH(created_at) DESC')
-                ->get()
-        ];
+        $query = Employee::query();
 
-        return view('employees.performance', compact('employee', 'performanceData'));
+        if ($request->filled('q')) {
+            $search = $request->q;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('employee_id', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('department')) {
+            $query->where('department', $request->department);
+        }
+
+        return response()->json([
+            'employees' => $query->limit(10)->get()
+        ]);
     }
 
     /**
-     * Get employee shipments
+     * Get employees by department (AJAX)
      */
-    public function shipments(Employee $employee, Request $request)
+    public function getByDepartment($department)
     {
-        $query = $employee->shipments()->with(['company', 'originPort', 'destinationPort']);
+        $employees = Employee::where('status', 'Active')
+            ->where('department', $department)
+            ->select('id', 'employee_id', 'name', 'position')
+            ->orderBy('name')
+            ->get();
 
-        // Apply filters
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        if ($request->filled('date_from')) {
-            $query->whereDate('created_at', '>=', $request->date_from);
-        }
-
-        if ($request->filled('date_to')) {
-            $query->whereDate('created_at', '<=', $request->date_to);
-        }
-
-        $shipments = $query->orderBy('created_at', 'desc')->paginate(20);
-        $statuses = ['Pending', 'In Transit', 'At Port', 'Customs Clearance', 'Delivered', 'Cancelled'];
-
-        return view('employees.shipments', compact('employee', 'shipments', 'statuses'));
+        return response()->json($employees);
     }
 
     /**
@@ -375,194 +334,5 @@ class EmployeeController extends Controller
 
         return redirect()->back()
             ->with('success', "Employee status changed from {$currentStatus} to {$newStatus}!");
-    }
-
-    /**
-     * Get employees by department
-     */
-    public function getByDepartment($department)
-    {
-        $employees = Employee::where('status', 'Active')
-            ->where('department', $department)
-            ->select('id', 'employee_id', 'name', 'position')
-            ->orderBy('name')
-            ->get();
-
-        return response()->json($employees);
-    }
-
-    /**
-     * Create employee covenant (equipment assignment)
-     */
-    public function createCovenant(Employee $employee, Request $request)
-    {
-        $validated = $request->validate([
-            'equipment_type' => 'required|string|max:100',
-            'equipment_name' => 'required|string|max:255',
-            'serial_number' => 'nullable|string|max:100',
-            'value' => 'nullable|numeric|min:0',
-            'assigned_date' => 'required|date',
-            'condition' => 'required|string|max:100',
-            'notes' => 'nullable|string|max:500'
-        ]);
-
-        try {
-            $covenant = $employee->covenants()->create($validated);
-
-            return redirect()->back()
-                ->with('success', 'Equipment covenant created successfully!');
-        } catch (\Exception $e) {
-            return back()->withInput()
-                ->with('error', 'Failed to create covenant: ' . $e->getMessage());
-        }
-    }
-    /**
-     * Display the specified resource.
-     */
-    public function show(Employee $employee)
-    {
-        try {
-            // Load relationships safely
-            $employee->load([
-                'shipments' => function ($query) {
-                    $query->latest()->take(5);
-                }
-            ]);
-
-            // Get employee statistics with safe defaults
-            $statistics = [
-                'total_shipments' => $employee->shipments()->count() ?? 0,
-                'active_shipments' => $employee->shipments()->whereNotIn('status', ['Delivered', 'Cancelled'])->count() ?? 0,
-                'completed_shipments' => $employee->shipments()->where('status', 'Delivered')->count() ?? 0,
-                'total_job_assignments' => 0, // Placeholder
-                'completed_jobs' => 0, // Placeholder
-                'total_advances' => 0, // Placeholder
-                'pending_advances' => 0, // Placeholder
-                'this_month_shipments' => $employee->shipments()->whereMonth('created_at', now()->month)->count() ?? 0,
-                'this_year_shipments' => $employee->shipments()->whereYear('created_at', now()->year)->count() ?? 0
-            ];
-
-            // Monthly performance for the last 6 months
-            $monthlyPerformance = $employee->shipments()
-                ->selectRaw('MONTH(created_at) as month, YEAR(created_at) as year, COUNT(*) as shipments')
-                ->where('created_at', '>=', now()->subMonths(6))
-                ->groupByRaw('YEAR(created_at), MONTH(created_at)')
-                ->orderByRaw('YEAR(created_at) DESC, MONTH(created_at) DESC')
-                ->get();
-
-            return view('employees.show', compact('employee', 'statistics', 'monthlyPerformance'));
-        } catch (\Exception $e) {
-            // If there's any error, redirect back with a message
-            return redirect()->route('employees.index')
-                ->with('error', 'Error loading employee details: ' . $e->getMessage());
-        }
-    }
-    /**
-     * Store new employee
-     */
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'department' => 'required|string|max:100',
-            'position' => 'required|string|max:100',
-            'email' => 'nullable|email|unique:employees,email',
-            'phone' => 'nullable|string|max:50',
-            'hire_date' => 'nullable|date|before_or_equal:today',
-            'salary' => 'nullable|numeric|min:0',
-            'emergency_contact' => 'nullable|string|max:255',
-            'address' => 'nullable|string|max:500',
-            'status' => 'required|in:Active,Inactive'
-        ]);
-
-        try {
-            // The employee_id will be auto-generated by the model
-            $employee = Employee::create($validated);
-
-            return redirect()->route('employees.show', $employee)
-                ->with('success', 'Employee created successfully!');
-        } catch (\Exception $e) {
-            return back()->withInput()
-                ->with('error', 'Failed to create employee: ' . $e->getMessage());
-        }
-    }
-    // public function update(Request $request, Employee $employee)
-    // {
-    //     $validated = $request->validate([
-    //         'name' => 'required|string|max:255',
-    //         'department' => 'required|string|max:100',
-    //         'position' => 'required|string|max:100',
-    //         'email' => 'nullable|email|unique:employees,email,' . $employee->id,
-    //         'phone' => 'nullable|string|max:50',
-    //         'hire_date' => 'nullable|date|before_or_equal:today',
-    //         'salary' => 'nullable|numeric|min:0',
-    //         'emergency_contact' => 'nullable|string|max:255',
-    //         'address' => 'nullable|string|max:500',
-    //         'status' => 'required|in:Active,Inactive',
-    //         'nationality' => 'nullable|string|max:100',
-    //         'date_of_birth' => 'nullable|date|before:today',
-    //         'passport_number' => 'nullable|string|max:50',
-    //         'visa_status' => 'nullable|string|max:100',
-    //         'bank_account' => 'nullable|string|max:100',
-    //         'notes' => 'nullable|string|max:1000'
-    //     ]);
-
-    //     try {
-    //         $employee->update($validated);
-
-    //         return redirect()->route('employees.show', $employee)
-    //             ->with('success', 'Employee updated successfully!');
-    //     } catch (\Exception $e) {
-    //         return back()->withInput()
-    //             ->with('error', 'Failed to update employee: ' . $e->getMessage());
-    //     }
-    // }
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Employee $employee)
-    {
-        // Debug: Log the incoming data
-        Log::info('Employee Update Request Data:', $request->all());
-        Log::info('Employee Before Update:', $employee->toArray());
-
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'department' => 'required|string|max:100',
-            'position' => 'required|string|max:100',
-            'email' => 'nullable|email|unique:employees,email,' . $employee->id,
-            'phone' => 'nullable|string|max:50',
-            'hire_date' => 'nullable|date|before_or_equal:today',
-            'salary' => 'nullable|numeric|min:0',
-            'status' => 'required|in:Active,Inactive',
-            'emergency_contact' => 'nullable|string|max:255',
-            'address' => 'nullable|string|max:500',
-            'nationality' => 'nullable|string|max:100',
-            'date_of_birth' => 'nullable|date|before:today',
-            'passport_number' => 'nullable|string|max:50',
-            'visa_status' => 'nullable|string|max:100',
-            'bank_account' => 'nullable|string|max:100',
-            'notes' => 'nullable|string|max:1000'
-        ]);
-
-        // Debug: Log validated data
-        Log::info('Validated Data:', $validated);
-
-        try {
-            // Update the employee
-            $employee->update($validated);
-
-            // Debug: Log employee after update
-            Log::info('Employee After Update:', $employee->fresh()->toArray());
-
-            return redirect()->route('employees.show', $employee)
-                ->with('success', 'Employee updated successfully!');
-        } catch (\Exception $e) {
-            // Debug: Log any errors
-            Log::error('Employee Update Error:', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
-
-            return back()->withInput()
-                ->with('error', 'Failed to update employee: ' . $e->getMessage());
-        }
     }
 }
