@@ -12,6 +12,7 @@ use App\Services\CompanyService;
 use App\Services\EmployeeService;
 use App\Services\DashboardService;
 use App\Services\PDFService;
+use Illuminate\Support\Facades\Gate;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -34,6 +35,33 @@ class AppServiceProvider extends ServiceProvider
         $this->shareViewData();
         $this->configureApplication();
         $this->registerViewComposers();
+        // Define Gates for permissions
+        Gate::before(function (User $user, string $ability) {
+            // Check if user has the permission
+            if ($user->hasPermission($ability)) {
+                return true;
+            }
+
+            // Check for admin override
+            if ($user->hasRole('admin')) {
+                return true;
+            }
+
+            return null; // Continue with other authorization checks
+        });
+
+        // Define specific gates
+        Gate::define('manage-roles', function (User $user) {
+            return $user->hasPermission('roles.view') || $user->hasRole('admin');
+        });
+
+        Gate::define('manage-permissions', function (User $user) {
+            return $user->hasPermission('roles.manage-permissions') || $user->hasRole('admin');
+        });
+
+        Gate::define('manage-users', function (User $user) {
+            return $user->hasPermission('users.view') || $user->hasRole('admin');
+        });
     }
 
     private function shareViewData(): void

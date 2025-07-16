@@ -11,7 +11,10 @@ class EmployeeController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
-        $this->middleware('role:admin,manager')->except(['index', 'show']);
+        $this->middleware('permission:employees.view')->only(['index', 'show']);
+        $this->middleware('permission:employees.create')->only(['create', 'store']);
+        $this->middleware('permission:employees.edit')->only(['edit', 'update']);
+        $this->middleware('permission:employees.delete')->only(['destroy']);
     }
 
     /**

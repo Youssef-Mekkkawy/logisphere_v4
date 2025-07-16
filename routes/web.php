@@ -19,7 +19,9 @@ use App\Http\Controllers\ShippingAgencyController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schedule;
-
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\UpdatedUserController;
 // ======================================================================================
 // GUEST ROUTES
 // ======================================================================================
@@ -219,4 +221,20 @@ Route::middleware(['auth'])->group(function () {
         // Alt+S: Service management
         Route::get('/services', [SubmenuController::class, 'services'])->name('services');
     });
+});
+
+
+Route::middleware(['auth'])->group(function () {
+    
+    // Role Management Routes
+    Route::resource('roles', RoleController::class);
+    Route::patch('roles/{role}/toggle-status', [RoleController::class, 'toggleStatus'])->name('roles.toggle-status');
+    
+    // Permission Management Routes
+    Route::resource('permissions', PermissionController::class);
+    Route::patch('permissions/{permission}/toggle-status', [PermissionController::class, 'toggleStatus'])->name('permissions.toggle-status');
+    
+    // Update existing user routes to use the new controller
+    Route::resource('users', UpdatedUserController::class);
+    
 });

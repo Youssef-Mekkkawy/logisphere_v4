@@ -35,6 +35,9 @@ class DatabaseSeeder extends Seeder
             // Phase 4: Dependent Tables
             BookingSeeder::class,           // ✅ Now has shipments/companies/users
             ContainerSeeder::class,         // ✅ Working (has bookings/shipments/ports)
+            PermissionSeeder::class,
+            RoleSeeder::class,
+            UpdatedUserSeeder::class,
         ]);
 
         $this->command->info('🎉 All seeders completed successfully!');
@@ -101,7 +104,7 @@ class DatabaseSeeder extends Seeder
             $results[] = "✅ {$userData['name']} ({$userData['username']}) - " . ($user->wasRecentlyCreated ? 'Created' : 'Updated');
         }
 
-        
+
 
         // Create sample ports
         $ports = [

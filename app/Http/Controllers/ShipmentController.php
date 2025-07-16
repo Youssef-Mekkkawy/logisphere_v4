@@ -29,6 +29,10 @@ class ShipmentController extends Controller
     {
         $this->shipmentService = $shipmentService;
         $this->middleware('auth');
+                $this->middleware('permission:shipments.view')->only(['index', 'show']);
+        $this->middleware('permission:shipments.create')->only(['create', 'store']);
+        $this->middleware('permission:shipments.edit')->only(['edit', 'update']);
+        $this->middleware('permission:shipments.delete')->only(['destroy']);
     }
 
     /**
