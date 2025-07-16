@@ -6,129 +6,180 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-/**
- * Class User
- *
- * @property string $role
- * @method static \Illuminate\Database\Eloquent\Builder|User role($role)
- * @method static \Illuminate\Database\Eloquent\Builder|User admins()
- * @method static \Illuminate\Database\Eloquent\Builder|User managers()
- * @method static \Illuminate\Database\Eloquent\Builder|User regularUsers()
- */
 class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
+    /**
+     * The attributes that are mass assignable.
+     */
     protected $fillable = [
         'name',
-        'email',
         'username',
+        'email',
         'password',
         'role',
+        'last_login',
     ];
 
+    /**
+     * The attributes that should be hidden for serialization.
+     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-        'password' => 'hashed',
-    ];
-
-    public function isAdmin(): bool
+    /**
+     * Get the attributes that should be cast.
+     */
+    protected function casts(): array
     {
-        return $this->role === 'admin';
+        return [
+            'email_verified_at' => 'datetime',
+            'last_login' => 'datetime',
+            'password' => 'hashed',
+        ];
     }
 
-    public function isManager(): bool
-    {
-        return $this->role === 'manager';
-    }
+    // ===== ROLE METHODS =====
 
-    public function isUser(): bool
-    {
-        return $this->role === 'user';
-    }
-
+    /**
+     * Check if user has specific role
+     */
     public function hasRole(string $role): bool
     {
         return $this->role === $role;
     }
 
+    /**
+     * Check if user has any of the given roles
+     */
     public function hasAnyRole(array $roles): bool
     {
         return in_array($this->role, $roles);
     }
 
-    // Scopes
+    /**
+     * Check if user is admin
+     */
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    /**
+     * Check if user is manager
+     */
+    public function isManager(): bool
+    {
+        return $this->role === 'manager';
+    }
+
+    /**
+     * Check if user is regular user
+     */
+    public function isUser(): bool
+    {
+        return $this->role === 'user';
+    }
+
+    /**
+     * Get role badge HTML
+     */
+    public function getRoleBadge(): string
+    {
+        $badges = [
+            'admin' => '<span class="status-badge" style="background: #dc2626; color: white;">Admin</span>',
+            'manager' => '<span class="status-badge" style="background: #d97706; color: white;">Manager</span>',
+            'user' => '<span class="status-badge" style="background: #059669; color: white;">User</span>',
+        ];
+
+        return $badges[$this->role] ?? '<span class="status-badge">Unknown</span>';
+    }
+
+    // ===== SCOPES =====
+
+    /**
+     * Scope a query to only include users of a given role.
+     */
     public function scopeRole($query, $role)
     {
         return $query->where('role', $role);
     }
 
-    public function scopeAdmins($query)
+    /**
+     * Scope a query to only include active users (logged in recently).
+     */
+    public function scopeActive($query, $days = 30)
     {
-        return $query->where('role', 'admin');
+        return $query->where('last_login', '>=', now()->subDays($days));
     }
 
-    public function scopeManagers($query)
-    {
-        return $query->where('role', 'manager');
-    }
+    // ===== RELATIONSHIPS =====
 
-    public function scopeRegularUsers($query)
+    /**
+     * Get the employees for the user (if applicable).
+     */
+    public function employees()
     {
-        return $query->where('role', 'user');
-    }
-
-    public function updateLastLogin()
-    {
-        $this->update(['last_login' => now()]);
-    }
-    public function employee()
-    {
-        return $this->belongsTo(Employee::class, 'employee_id');
+        return $this->hasMany(Employee::class, 'manager_id', 'username');
     }
 
     /**
-     * Get bookings created by this user
+     * Get created shipments by this user.
      */
-    public function createdBookings()
+    public function createdShipments()
     {
-        return $this->hasMany(Booking::class, 'created_by');
+        return $this->hasMany(Shipment::class, 'created_by');
+    }
+
+    // ===== HELPER METHODS =====
+
+    /**
+     * Get the user's display name
+     */
+    public function getDisplayNameAttribute(): string
+    {
+        return $this->name . ' (' . $this->username . ')';
     }
 
     /**
-     * Get bookings confirmed by this user
+     * Get the user's initials
      */
-    public function confirmedBookings()
+    public function getInitialsAttribute(): string
     {
-        return $this->hasMany(Booking::class, 'confirmed_by');
+        $names = explode(' ', $this->name);
+        $initials = '';
+
+        foreach ($names as $name) {
+            $initials .= strtoupper(substr($name, 0, 1));
+        }
+
+        return substr($initials, 0, 2); // Max 2 initials
     }
 
     /**
-     * Get invoices created by this user
+     * Check if user has logged in recently
      */
-    public function createdInvoices()
+    public function hasLoggedInRecently($days = 7): bool
     {
-        return $this->hasMany(Invoice::class, 'created_by');
+        if (!$this->last_login) {
+            return false;
+        }
+
+        return $this->last_login->get(now()->subDays($days));
     }
 
     /**
-     * Get invoices approved by this user
+     * Get the time since last login
      */
-    public function approvedInvoices()
+    public function getLastLoginHumanAttribute(): string
     {
-        return $this->hasMany(Invoice::class, 'approved_by');
-    }
+        if (!$this->last_login) {
+            return 'Never';
+        }
 
-    /**
-     * Get attachments uploaded by this user
-     */
-    public function uploadedAttachments()
-    {
-        return $this->morphMany(Attachment::class, 'uploaded_by');
+        return $this->last_login->diffForHumans();
     }
 }

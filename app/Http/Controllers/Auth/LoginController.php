@@ -38,27 +38,29 @@ class LoginController extends Controller
     {
         // Validate the login request
         $this->validateLogin($request);
+        $credentials = $request->only('username', 'password');
 
+        // dd($credentials);
         // Check if too many login attempts
         if ($this->hasTooManyLoginAttempts($request)) {
             $this->fireLockoutEvent($request);
             return $this->sendLockoutResponse($request);
         }
-
+        // dd($request);
         // Attempt to log the user in
         if ($this->attemptLogin($request)) {
             $request->session()->regenerate();
             $this->clearLoginAttempts($request);
-            
+            // dd('test');
             // Update last login time
             Auth::user()->update(['last_login' => now()]);
-            
+
             return $this->sendLoginResponse($request);
         }
 
         // If login was unsuccessful, increment login attempts
         $this->incrementLoginAttempts($request);
-
+        // dd('final');
         return $this->sendFailedLoginResponse($request);
     }
 
@@ -85,8 +87,10 @@ class LoginController extends Controller
     protected function attemptLogin(Request $request)
     {
         $credentials = $this->credentials($request);
+        // dd($credentials);
         $remember = $request->boolean('remember');
-
+        // dd($remember);
+        // dd(Auth::attempt($credentials, $remember));
         return Auth::attempt($credentials, $remember);
     }
 
@@ -96,12 +100,12 @@ class LoginController extends Controller
     protected function credentials(Request $request)
     {
         $username = $request->input('username');
-        
+
         // Check if the input is an email or username
-        $field = filter_var($username, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+        $field = filter_var($username) ? 'username' : 'username';
         
         return [
-            $field => $username,
+            'username' => $username,
             'password' => $request->input('password'),
         ];
     }
@@ -112,7 +116,7 @@ class LoginController extends Controller
     protected function sendLoginResponse(Request $request)
     {
         $user = Auth::user();
-        
+
         return redirect()->intended($this->redirectPath())
             ->with('success', "Welcome back, {$user->name}!");
     }
@@ -159,9 +163,9 @@ class LoginController extends Controller
     {
         $maxAttempts = 5; // Maximum login attempts
         $decayMinutes = 1; // Lockout duration in minutes
-        
+
         $key = $this->throttleKey($request);
-        
+
         return cache()->has($key) && cache()->get($key) >= $maxAttempts;
     }
 
@@ -172,7 +176,7 @@ class LoginController extends Controller
     {
         $key = $this->throttleKey($request);
         $attempts = cache()->get($key, 0) + 1;
-        
+
         cache()->put($key, $attempts, now()->addMinutes(1));
     }
 
@@ -198,7 +202,7 @@ class LoginController extends Controller
     protected function sendLockoutResponse(Request $request)
     {
         $seconds = 60; // Lockout duration in seconds
-        
+
         return redirect()->back()
             ->withInput($request->except('password'))
             ->withErrors(['username' => "Too many login attempts. Please try again in {$seconds} seconds."]);

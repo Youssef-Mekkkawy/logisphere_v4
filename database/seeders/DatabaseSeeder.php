@@ -22,22 +22,52 @@ class DatabaseSeeder extends Seeder
             AllStatusSeeder::class,
             NationalitiesSeeder::class,
             UserSeeder::class,              // ✅ Add users first
-            
+
             // Phase 2: Core Infrastructure 
             PortSeeder::class,              // ✅ Working
             ShippingAgencySeeder::class,    // ✅ Created
             CompanySeeder::class,           // ✅ Created
-            
+
             // Phase 3: Business Logic
             ShipmentSeeder::class,          // ✅ Created (needs companies + ports)
             RouteSeeder::class,             // ✅ Working (now has ports)
-            
+
             // Phase 4: Dependent Tables
             BookingSeeder::class,           // ✅ Now has shipments/companies/users
             ContainerSeeder::class,         // ✅ Working (has bookings/shipments/ports)
         ]);
 
         $this->command->info('🎉 All seeders completed successfully!');
+        // $users = [
+        //     [
+        //         'name' => 'System Administrator',
+        //         'username' => 'admin',
+        //         'email' => 'admin@logiflow.com',
+        //         'password' => Hash::make('admin123'),
+        //         'role' => 'admin'
+        //     ],
+        //     [
+        //         'name' => 'Operations Manager',
+        //         'username' => 'manager',
+        //         'email' => 'manager@logiflow.com',
+        //         'password' => Hash::make('manager123'),
+        //         'role' => 'manager'
+        //     ],
+        //     [
+        //         'name' => 'Standard User',
+        //         'username' => 'user',
+        //         'email' => 'user@logiflow.com',
+        //         'password' => Hash::make('user123'),
+        //         'role' => 'user'
+        //     ]
+        // ];
+
+        // foreach ($users as $userData) {
+        //     User::firstOrCreate(
+        //         ['username' => $userData['username']],
+        //         $userData
+        //     );
+        // }
         $users = [
             [
                 'name' => 'System Administrator',
@@ -62,12 +92,16 @@ class DatabaseSeeder extends Seeder
             ]
         ];
 
+        $results = [];
         foreach ($users as $userData) {
-            User::firstOrCreate(
+            $user = \App\Models\User::updateOrCreate(
                 ['username' => $userData['username']],
                 $userData
             );
+            $results[] = "✅ {$userData['name']} ({$userData['username']}) - " . ($user->wasRecentlyCreated ? 'Created' : 'Updated');
         }
+
+        
 
         // Create sample ports
         $ports = [
