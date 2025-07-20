@@ -1,9 +1,5 @@
 <?php
 
-use App\Http\Controllers\Accounting\AccountController;
-use App\Http\Controllers\Accounting\AccountingDashboardController;
-use App\Http\Controllers\Accounting\JobController;
-use App\Http\Controllers\PortController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
@@ -14,106 +10,103 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\SubmenuController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\PortController;
 use App\Http\Controllers\ShipmentTypeController;
 use App\Http\Controllers\ShippingAgencyController;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Schedule;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\PermissionController;
-use App\Http\Controllers\UpdatedUserController;
+use App\Http\Controllers\Accounting\AccountController;
+use App\Http\Controllers\Accounting\AccountingDashboardController;
+use App\Http\Controllers\Accounting\JobController;
+use Illuminate\Support\Facades\Artisan;
+
 // ======================================================================================
 // GUEST ROUTES
 // ======================================================================================
-Route::get('/', function () {
-    return redirect()->route('login');
+Route::get('/', fn() => redirect()->route('login'));
+
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [LoginController::class, 'login']);
 });
 
-Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [LoginController::class, 'login']); // ✅ FIXED: Removed confusing name 'loginForm'
-
-
 // ======================================================================================
-// PUBLIC TRACKING
+// PUBLIC ROUTES
 // ======================================================================================
 Route::get('/track/{shipmentId}', [ShipmentController::class, 'track'])->name('shipments.track');
 
 // ======================================================================================
 // AUTHENTICATED ROUTES
 // ======================================================================================
-Route::middleware(['auth'])->group(function () {
+Route::middleware('auth')->group(function () {
 
-    // ===== DASHBOARD =====
+    // ===== DASHBOARD & LOGOUT =====
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
-    // ======================================================================================
-    // MAIN RESOURCE ROUTES
-    // ======================================================================================
 
-    // ===== SHIPMENT MANAGEMENT =====
+    // ===== CORE RESOURCE MANAGEMENT =====
     Route::resource('shipments', ShipmentController::class);
-    Route::patch('/shipments/{shipment}/status', [ShipmentController::class, 'updateStatus'])->name('shipments.update-status');
-    Route::get('/shipments/{shipment}/document/{type}', [ShipmentController::class, 'generateDocument'])->name('shipments.document');
-    Route::post('shipments/{shipment}/duplicate', [ShipmentController::class, 'duplicate'])->name('shipments.duplicate');
-    Route::patch('shipments/{shipment}/toggle-archive', [ShipmentController::class, 'toggleArchive'])->name('shipments.toggle-archive');
-
-    // ===== COMPANY MANAGEMENT =====
     Route::resource('companies', CompanyController::class);
-    Route::get('/companies/{company}/shipments', [CompanyController::class, 'shipments'])->name('companies.shipments');
-    Route::get('/companies/{company}/performance', [CompanyController::class, 'performance'])->name('companies.performance');
-    Route::patch('/companies/{company}/toggle-status', [CompanyController::class, 'toggleStatus'])->name('companies.toggle-status');
-
-    // ===== EMPLOYEE MANAGEMENT =====
     Route::resource('employees', EmployeeController::class);
-    Route::get('/employees/{employee}/performance', [EmployeeController::class, 'performance'])->name('employees.performance');
-    Route::get('/employees/{employee}/shipments', [EmployeeController::class, 'shipments'])->name('employees.shipments');
-    Route::patch('/employees/{employee}/toggle-status', [EmployeeController::class, 'toggleStatus'])->name('employees.toggle-status');
-    Route::post('employees/{employee}/covenant', [EmployeeController::class, 'createCovenant'])->name('employees.create-covenant');
 
-    // ===== PORTS MANAGEMENT =====
-    Route::resource('ports', PortController::class);
-    Route::patch('ports/{port}/toggle-status', [PortController::class, 'toggleStatus'])->name('ports.toggle-status');
-    Route::get('ports/{port}/statistics', [PortController::class, 'statistics'])->name('ports.statistics');
+    // ===== USER MANAGEMENT (Integrated: Users + Roles + Permissions) =====
+    Route::middleware('permission:users.view')->prefix('users')->group(function () {
+        // Main user management
+        Route::get('/', [UserController::class, 'index'])->name('users.index');
+        Route::post('/', [UserController::class, 'store'])->name('users.store')->middleware('permission:users.create');
+        Route::get('/{user}', [UserController::class, 'show'])->name('users.show');
+        Route::get('/{user}/edit', [UserController::class, 'edit'])->name('users.edit')->middleware('permission:users.edit');
+        Route::put('/{user}', [UserController::class, 'update'])->name('users.update')->middleware('permission:users.edit');
+        Route::delete('/{user}', [UserController::class, 'destroy'])->name('users.destroy')->middleware('permission:users.delete');
 
-    // ===== SHIPMENT TYPES MANAGEMENT =====
-    Route::resource('shipment-types', ShipmentTypeController::class);
-    Route::patch('shipment-types/{shipmentType}/toggle-status', [ShipmentTypeController::class, 'toggleStatus'])->name('shipment-types.toggle-status');
-    Route::get('shipment-types/{shipmentType}/statistics', [ShipmentTypeController::class, 'statistics'])->name('shipment-types.statistics');
+        // Integrated role management
+        Route::middleware('permission:roles.create')->group(function () {
+            Route::post('/roles', [UserController::class, 'storeRole'])->name('users.roles.store');
+        });
+        Route::middleware('permission:roles.delete')->group(function () {
+            Route::delete('/roles/{role}', [UserController::class, 'destroyRole'])->name('users.roles.destroy');
+        });
 
-    // ===== SHIPPING AGENCIES MANAGEMENT =====
-    Route::resource('shipping-agencies', ShippingAgencyController::class);
-    Route::patch('shipping-agencies/{shippingAgency}/toggle-status', [ShippingAgencyController::class, 'toggleStatus'])->name('shipping-agencies.toggle-status');
-    Route::get('shipping-agencies/{shippingAgency}/statistics', [ShippingAgencyController::class, 'statistics'])->name('shipping-agencies.statistics');
-
-    // ======================================================================================
-    // USER MANAGEMENT (Admin only)
-    // ======================================================================================
-    Route::middleware(['role:admin'])->group(function () {
-        Route::resource('users', UserController::class);
-        Route::patch('/users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');
+        // Integrated permission management
+        Route::middleware('permission:roles.manage-permissions')->group(function () {
+            Route::post('/permissions', [UserController::class, 'storePermission'])->name('users.permissions.store');
+            Route::delete('/permissions/{permission}', [UserController::class, 'destroyPermission'])->name('users.permissions.destroy');
+        });
     });
 
-    // ======================================================================================
-    // FILE MANAGEMENT
-    // ======================================================================================
-    Route::prefix('file')->name('file.')->group(function () {
-        Route::get('/', [FileController::class, 'index'])->name('index');
-        Route::post('/export', [FileController::class, 'export'])->name('export');
-        Route::post('/import', [FileController::class, 'import'])->name('import');
+    // ===== SHIPMENT EXTENDED ACTIONS =====
+    Route::prefix('shipments')->name('shipments.')->group(function () {
+        Route::patch('/{shipment}/status', [ShipmentController::class, 'updateStatus'])->name('update-status');
+        Route::get('/{shipment}/document/{type}', [ShipmentController::class, 'generateDocument'])->name('document');
+        Route::post('/{shipment}/duplicate', [ShipmentController::class, 'duplicate'])->name('duplicate');
+        Route::patch('/{shipment}/toggle-archive', [ShipmentController::class, 'toggleArchive'])->name('toggle-archive');
     });
 
-    // ======================================================================================
-    // SUBMENU MANAGEMENT (Navigation Only - No CRUD operations here)
-    // ======================================================================================
+    // ===== COMPANY EXTENDED ACTIONS =====
+    Route::prefix('companies')->name('companies.')->group(function () {
+        Route::get('/{company}/shipments', [CompanyController::class, 'shipments'])->name('shipments');
+        Route::get('/{company}/performance', [CompanyController::class, 'performance'])->name('performance');
+        Route::patch('/{company}/toggle-status', [CompanyController::class, 'toggleStatus'])->name('toggle-status');
+    });
+
+    // ===== EMPLOYEE EXTENDED ACTIONS =====
+    Route::prefix('employees')->name('employees.')->group(function () {
+        Route::get('/{employee}/performance', [EmployeeController::class, 'performance'])->name('performance');
+        Route::get('/{employee}/shipments', [EmployeeController::class, 'shipments'])->name('shipments');
+        Route::patch('/{employee}/toggle-status', [EmployeeController::class, 'toggleStatus'])->name('toggle-status');
+        Route::post('/{employee}/covenant', [EmployeeController::class, 'createCovenant'])->name('create-covenant');
+    });
+
+    // ===== SUBMENU CONFIGURATION =====
     Route::prefix('submenu')->name('submenu.')->group(function () {
         Route::get('/', [SubmenuController::class, 'index'])->name('index');
 
-        // Shipment Information (Display only - CRUD operations in main routes)
+        // Shipment Information Management
         Route::get('/ports', [SubmenuController::class, 'ports'])->name('ports');
         Route::get('/shipping-agency', [SubmenuController::class, 'agencies'])->name('agencies');
         Route::get('/shipment-types', [SubmenuController::class, 'types'])->name('types');
 
-        // Quick form submissions (inline forms in submenu)
+        // Quick submissions
         Route::post('/ports', [SubmenuController::class, 'storePorts'])->name('ports.store');
         Route::post('/agencies', [SubmenuController::class, 'storeAgencies'])->name('agencies.store');
         Route::post('/types', [SubmenuController::class, 'storeTypes'])->name('types.store');
@@ -129,10 +122,27 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/shippers', [SubmenuController::class, 'shippers'])->name('shippers');
     });
 
-    // ======================================================================================
-    // ACCOUNTING SYSTEM
-    // ======================================================================================
-    Route::prefix('accounting')->name('accounting.')->group(function () {
+    // ===== MASTER DATA MANAGEMENT =====
+    Route::middleware('permission:settings.manage-ports')->group(function () {
+        Route::resource('ports', PortController::class);
+        Route::patch('/ports/{port}/toggle-status', [PortController::class, 'toggleStatus'])->name('ports.toggle-status');
+        Route::get('/ports/{port}/statistics', [PortController::class, 'statistics'])->name('ports.statistics');
+    });
+
+    Route::middleware('permission:settings.manage-types')->group(function () {
+        Route::resource('shipment-types', ShipmentTypeController::class);
+        Route::patch('/shipment-types/{shipmentType}/toggle-status', [ShipmentTypeController::class, 'toggleStatus'])->name('shipment-types.toggle-status');
+        Route::get('/shipment-types/{shipmentType}/statistics', [ShipmentTypeController::class, 'statistics'])->name('shipment-types.statistics');
+    });
+
+    Route::middleware('permission:settings.manage-agencies')->group(function () {
+        Route::resource('shipping-agencies', ShippingAgencyController::class);
+        Route::patch('/shipping-agencies/{shippingAgency}/toggle-status', [ShippingAgencyController::class, 'toggleStatus'])->name('shipping-agencies.toggle-status');
+        Route::get('/shipping-agencies/{shippingAgency}/statistics', [ShippingAgencyController::class, 'statistics'])->name('shipping-agencies.statistics');
+    });
+
+    // ===== ACCOUNTING SYSTEM =====
+    Route::middleware('permission:accounting.view')->prefix('accounting')->name('accounting.')->group(function () {
         Route::get('/', [AccountingDashboardController::class, 'index'])->name('index');
 
         // Employee Jobs & Advances
@@ -144,14 +154,21 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/company-payments', [AccountingDashboardController::class, 'companyPayments'])->name('company-payments');
 
         // Financial Reports
-        Route::get('/reports', [AccountingDashboardController::class, 'reports'])->name('reports');
-        Route::get('/reports/employee-summary', [AccountingDashboardController::class, 'employeeSummary'])->name('reports.employee-summary');
-        Route::get('/reports/company-summary', [AccountingDashboardController::class, 'companySummary'])->name('reports.company-summary');
+        Route::middleware('permission:accounting.generate-reports')->group(function () {
+            Route::get('/reports', [AccountingDashboardController::class, 'reports'])->name('reports');
+            Route::get('/reports/employee-summary', [AccountingDashboardController::class, 'employeeSummary'])->name('reports.employee-summary');
+            Route::get('/reports/company-summary', [AccountingDashboardController::class, 'companySummary'])->name('reports.company-summary');
+        });
     });
 
-    // ======================================================================================
-    // SETTINGS
-    // ======================================================================================
+    // ===== FILE MANAGEMENT =====
+    Route::middleware('permission:files.view')->prefix('file')->name('file.')->group(function () {
+        Route::get('/', [FileController::class, 'index'])->name('index');
+        Route::post('/export', [FileController::class, 'export'])->name('export')->middleware('permission:reports.export');
+        Route::post('/import', [FileController::class, 'import'])->name('import')->middleware('permission:files.upload');
+    });
+
+    // ===== SETTINGS =====
     Route::prefix('settings')->name('settings.')->group(function () {
         Route::get('/', [SettingsController::class, 'index'])->name('index');
         Route::post('/preferences', [SettingsController::class, 'updatePreferences'])->name('update-preferences');
@@ -162,79 +179,67 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/change-password', [SettingsController::class, 'updatePassword'])->name('update-password');
 
         // System Settings (Admin only)
-        Route::middleware('can:manage-settings')->group(function () {
+        Route::middleware('permission:settings.edit-system')->group(function () {
             Route::get('/system', [SettingsController::class, 'systemSettings'])->name('system');
             Route::post('/system', [SettingsController::class, 'updateSystemSettings'])->name('update-system');
         });
     });
 
-    // ======================================================================================
-    // API ROUTES FOR AJAX CALLS
-    // ======================================================================================
+    // ===== STANDALONE ROLE & PERMISSION MANAGEMENT (Optional - Direct Access) =====
+    Route::middleware('permission:roles.view')->group(function () {
+        Route::resource('roles', RoleController::class);
+        Route::patch('/roles/{role}/toggle-status', [RoleController::class, 'toggleStatus'])->name('roles.toggle-status');
+    });
+
+    Route::middleware('permission:roles.manage-permissions')->group(function () {
+        Route::resource('permissions', PermissionController::class);
+        Route::patch('/permissions/{permission}/toggle-status', [PermissionController::class, 'toggleStatus'])->name('permissions.toggle-status');
+    });
+
+    // ===== KEYBOARD SHORTCUTS =====
+    Route::prefix('quick')->name('quick.')->group(function () {
+        Route::get('/shipment/create', [ShipmentController::class, 'create'])->name('shipment.create'); // Ctrl+F1
+        Route::get('/employees', [EmployeeController::class, 'index'])->name('employees'); // Ctrl+E
+        Route::get('/change-password', [SettingsController::class, 'changePassword'])->name('change-password'); // Ctrl+G
+        Route::get('/services', [SubmenuController::class, 'services'])->name('services'); // Alt+S
+    });
+
+    // ===== API ENDPOINTS =====
     Route::prefix('api')->name('api.')->group(function () {
 
-        // Dashboard Data
+        // Dashboard
         Route::get('/dashboard-metrics', [DashboardController::class, 'getMetrics'])->name('dashboard.metrics');
 
-        // Shipment API
+        // Shipments
         Route::get('/shipments/search', [ShipmentController::class, 'search'])->name('shipments.search');
         Route::get('/shipments/{shipment}/tracking', [ShipmentController::class, 'getTracking'])->name('shipments.tracking');
 
-        // Company API
+        // Companies
         Route::get('/companies/search', [CompanyController::class, 'search'])->name('companies.search');
         Route::get('/companies/{company}/metrics', [CompanyController::class, 'getMetrics'])->name('companies.metrics');
 
-        // Employee API
+        // Employees
         Route::get('/employees/search', [EmployeeController::class, 'search'])->name('employees.search');
         Route::get('/employees/{employee}/metrics', [EmployeeController::class, 'getMetrics'])->name('employees.metrics');
         Route::get('/employees/department/{department}', [EmployeeController::class, 'getByDepartment'])->name('employees.by-department');
 
-        // Ports API
+        // Master Data
         Route::get('/ports/active', [PortController::class, 'getActive'])->name('ports.active');
-
-        // Shipment Types API
         Route::get('/shipment-types/active', [ShipmentTypeController::class, 'getActive'])->name('shipment-types.active');
         Route::get('/shipment-types/category/{category}', [ShipmentTypeController::class, 'getByCategory'])->name('shipment-types.by-category');
-
-        // Shipping Agencies API
         Route::get('/shipping-agencies/active', [ShippingAgencyController::class, 'getActive'])->name('shipping-agencies.active');
         Route::get('/shipping-agencies/country/{country}', [ShippingAgencyController::class, 'getByCountry'])->name('shipping-agencies.by-country');
         Route::get('/shipping-agencies/search', [ShippingAgencyController::class, 'search'])->name('shipping-agencies.search');
     });
+});
 
-    // ======================================================================================
-    // KEYBOARD SHORTCUTS MAPPING
-    // ======================================================================================
-    Route::prefix('quick')->name('quick.')->group(function () {
-        // Ctrl+F1: Create new shipment
-        Route::get('/shipment/create', [ShipmentController::class, 'create'])->name('shipment.create');
-
-        // Ctrl+U: Users section
-        Route::get('/users', [UserController::class, 'index'])->name('users');
-
-        // Ctrl+E: Employee section
-        Route::get('/employees', [EmployeeController::class, 'index'])->name('employees');
-
-        // Ctrl+G: Change password
-        Route::get('/change-password', [SettingsController::class, 'changePassword'])->name('change-password');
-
-        // Alt+S: Service management
-        Route::get('/services', [SubmenuController::class, 'services'])->name('services');
+// ======================================================================================
+// DEVELOPMENT ROUTES (Remove in production)
+// ======================================================================================
+if (app()->environment('local')) {
+    Route::get('/dev/reset-permissions', function () {
+        Artisan::call('db:seed', ['--class' => 'PermissionSeeder']);
+        Artisan::call('db:seed', ['--class' => 'RoleSeeder']);
+        return 'Permissions and roles reset successfully!';
     });
-});
-
-
-Route::middleware(['auth'])->group(function () {
-    
-    // Role Management Routes
-    Route::resource('roles', RoleController::class);
-    Route::patch('roles/{role}/toggle-status', [RoleController::class, 'toggleStatus'])->name('roles.toggle-status');
-    
-    // Permission Management Routes
-    Route::resource('permissions', PermissionController::class);
-    Route::patch('permissions/{permission}/toggle-status', [PermissionController::class, 'toggleStatus'])->name('permissions.toggle-status');
-    
-    // Update existing user routes to use the new controller
-    Route::resource('users', UpdatedUserController::class);
-    
-});
+}

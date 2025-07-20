@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Role extends Model
 {
@@ -15,101 +16,51 @@ class Role extends Model
         'description',
         'color',
         'is_active',
-        'is_system',
-        'role_id'
+        'is_system'
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
-        'is_system' => 'boolean',
+        'is_system' => 'boolean'
     ];
 
     /**
-     * Get all permissions assigned to this role
+     * Get all users with this role
      */
-    public function permissions()
-    {
-        return $this->belongsToMany(Permission::class, 'role_permissions');
-    }
-
-    /**
-     * Get all users that have this role
-     */
-    public function users()
+    public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'user_roles');
     }
 
     /**
+     * Get all permissions for this role
+     */
+    public function permissions(): BelongsToMany
+    {
+        return $this->belongsToMany(Permission::class, 'role_permissions');
+    }
+
+    /**
      * Check if role has specific permission
      */
-    public function hasPermission($permission)
+    public function hasPermission(string $permission): bool
     {
-        if (is_string($permission)) {
-            return $this->permissions()->where('slug', $permission)->exists();
-        }
-
-        return $this->permissions()->where('id', $permission->id)->exists();
+        return $this->permissions()->where('slug', $permission)->exists();
     }
 
     /**
-     * Assign permission to role
+     * Give permission to role
      */
-    public function givePermission($permission)
+    public function givePermissionTo(string $permission): void
     {
-        if (is_string($permission)) {
-            $permission = Permission::where('slug', $permission)->first();
+        $permissionModel = Permission::where('slug', $permission)->first();
+        if ($permissionModel && !$this->hasPermission($permission)) {
+            $this->permissions()->attach($permissionModel->id);
         }
-
-        if ($permission && !$this->hasPermission($permission)) {
-            $this->permissions()->attach($permission);
-        }
-
-        return $this;
     }
 
     /**
-     * Remove permission from role
-     */
-    public function removePermission($permission)
-    {
-        if (is_string($permission)) {
-            $permission = Permission::where('slug', $permission)->first();
-        }
-
-        if ($permission) {
-            $this->permissions()->detach($permission);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Sync permissions for this role
-     */
-    public function syncPermissions($permissions)
-    {
-        if (is_array($permissions)) {
-            $permissionIds = Permission::whereIn('slug', $permissions)->pluck('id');
-        } else {
-            $permissionIds = $permissions;
-        }
-
-        $this->permissions()->sync($permissionIds);
-
-        return $this;
-    }
-
-    /**
-     * Get role badge HTML
-     */
-    public function getBadgeAttribute()
-    {
-        return '<span class="status-badge" style="background: ' . $this->color . '; color: white;">' . $this->name . '</span>';
-    }
-
-    /**
-     * Scope to filter active roles
+     * Scope for active roles
      */
     public function scopeActive($query)
     {
@@ -117,7 +68,7 @@ class Role extends Model
     }
 
     /**
-     * Scope to filter non-system roles
+     * Scope for non-system roles (can be deleted)
      */
     public function scopeNonSystem($query)
     {

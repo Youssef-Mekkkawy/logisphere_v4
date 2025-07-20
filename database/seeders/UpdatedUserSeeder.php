@@ -1,6 +1,6 @@
 <?php
 
-// File: database/seeders/UpdatedUserSeeder.php
+// File: database/seeders/UpdatedUserSeeder.php (Fixed)
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
@@ -19,7 +19,7 @@ class UpdatedUserSeeder extends Seeder
                 'email' => 'admin@logisphere.com',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
-                'role' => 'admin'
+                'role_slug' => 'admin'
             ],
             [
                 'name' => 'Operations Manager',
@@ -27,7 +27,7 @@ class UpdatedUserSeeder extends Seeder
                 'email' => 'operations@logisphere.com',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
-                'role' => 'manager'
+                'role_slug' => 'manager'
             ],
             [
                 'name' => 'Customer Service',
@@ -35,7 +35,7 @@ class UpdatedUserSeeder extends Seeder
                 'email' => 'cs@logisphere.com',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
-                'role' => 'customer-service'
+                'role_slug' => 'customer-service'
             ],
             [
                 'name' => 'Finance Officer',
@@ -43,7 +43,7 @@ class UpdatedUserSeeder extends Seeder
                 'email' => 'finance@logisphere.com',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
-                'role' => 'finance'
+                'role_slug' => 'finance'
             ],
             [
                 'name' => 'Regular User',
@@ -51,23 +51,33 @@ class UpdatedUserSeeder extends Seeder
                 'email' => 'user@logisphere.com',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
-                'role' => 'user'
+                'role_slug' => 'user'
             ],
         ];
 
         foreach ($users as $userData) {
-            $role = $userData['role'];
-            unset($userData['role']);
+            $roleSlug = $userData['role_slug'];
+            unset($userData['role_slug']);
 
-            $user = User::firstOrCreate(
+            // Create or update user
+            $user = User::updateOrCreate(
                 ['email' => $userData['email']],
                 $userData
             );
 
-            // Assign role
-            $roleModel = Role::where('slug', $role)->first();
-            if ($roleModel) {
-                $user->assignRole($roleModel);
+            // Find the role by slug
+            $role = Role::where('slug', $roleSlug)->first();
+
+            if ($role) {
+                // Remove existing roles to avoid duplicates
+                $user->roles()->detach();
+
+                // Attach the new role
+                $user->roles()->attach($role->id);
+
+                $this->command->info("Role '{$role->name}' assigned to user '{$user->name}'");
+            } else {
+                $this->command->warn("Role '{$roleSlug}' not found for user '{$user->name}'");
             }
         }
 

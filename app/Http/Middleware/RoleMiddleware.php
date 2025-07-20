@@ -16,53 +16,25 @@ class RoleMiddleware
      * @param  string  ...$roles  Accept multiple roles
      */
 
-        public function handle(Request $request, Closure $next, ...$roles)
+    public function handle(Request $request, Closure $next, ...$roles)
     {
-        if (!Auth::check()) {
-            return redirect()->route('login');
-        }
+        // if (!Auth::check()) {
+        //     return redirect()->route('login');
+        // }
 
-        $user = Auth::user();
+        // $user = Auth::user();
+        // // dd($user->hasRole);
+        // // Check if user has any of the required roles
+        // foreach ($roles as $role) {
+        //     if ($user->hasRole($role)) {
+        //         return $next($request);
+        //     }
+        // }
 
-        // Check if user has any of the required roles
-        foreach ($roles as $role) {
-            if ($user->hasRole($role)) {
-                return $next($request);
-            }
-        }
-
-        // If no roles match, deny access
-        abort(403, 'Access denied. You do not have the required role.');
+        // // If no roles match, deny access
+        // abort(403, 'Access denied. You do not have the required role.');
     }
-    // public function handle(Request $request, Closure $next, string ...$roles): Response
-    // {
-    //     // Check if user is authenticated
-    //     if (!auth()->check()) {
-    //         if ($request->expectsJson()) {
-    //             return response()->json(['message' => 'Unauthenticated.'], 401);
-    //         }
-    //         return redirect()->route('login')->with('error', 'Please login to access this page.');
-    //     }
-
-    //     $user = auth()->user();
-
-    //     // Check if user has any of the required roles
-    //     if (!in_array($user->role, $roles)) {
-    //         $roleList = implode(', ', $roles);
-            
-    //         // For API routes, return JSON response
-    //         if ($request->expectsJson()) {
-    //             return response()->json([
-    //                 'message' => "Unauthorized. You need one of the following roles: {$roleList}"
-    //             ], 403);
-    //         }
-            
-    //         // For web routes, redirect with error
-    //         return redirect()->route('dashboard')->with('error', "Unauthorized. You need one of the following roles: {$roleList}");
-    //     }
-
-    //     return $next($request);
-    // }
+    
 
     /**
      * Check if user has minimum role level
@@ -78,4 +50,3 @@ class RoleMiddleware
         return ($hierarchy[$userRole] ?? 0) >= ($hierarchy[$requiredRole] ?? 0);
     }
 }
-

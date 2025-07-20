@@ -13,6 +13,10 @@ class PermissionController extends Controller
     {
         $this->middleware('auth');
         $this->middleware('permission:roles.manage-permissions');
+        $this->middleware('permission:permissions.view')->only(['index', 'show']);
+        $this->middleware('permission:permissions.create')->only(['create', 'store']);
+        $this->middleware('permission:permissions.edit')->only(['edit', 'update']);
+        $this->middleware('permission:permissions.delete')->only(['destroy']);
     }
 
     /**

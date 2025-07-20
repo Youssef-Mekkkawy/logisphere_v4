@@ -15,10 +15,18 @@ class PermissionMiddleware
     public function handle(Request $request, Closure $next, ...$permissions)
     {
         if (!Auth::check()) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Unauthenticated.'], 401);
+            }
             return redirect()->route('login');
         }
 
         $user = Auth::user();
+
+        // 🔥 If user is admin, allow everything
+        if ($user->isAdmin()) {
+            return $next($request);
+        }
 
         // Check if user has any of the required permissions
         foreach ($permissions as $permission) {
@@ -28,6 +36,14 @@ class PermissionMiddleware
         }
 
         // If no permissions match, deny access
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Access denied. You do not have the required permissions.',
+                'required_permissions' => $permissions,
+                'user_permissions' => $user->getAllPermissions()->pluck('slug')->toArray()
+            ], 403);
+        }
+
         abort(403, 'Access denied. You do not have the required permissions.');
     }
 }
