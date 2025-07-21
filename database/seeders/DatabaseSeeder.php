@@ -39,6 +39,9 @@ class DatabaseSeeder extends Seeder
             PermissionSeeder::class,
             RoleSeeder::class,
             UpdatedUserSeeder::class,
+            ConsigneeNotifySeeder::class,
+            ContainerLoadingSeeder::class,
+            DestinationSeeder::class,
 
         ]);
 

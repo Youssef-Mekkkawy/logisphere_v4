@@ -59,20 +59,22 @@
             </div>
             <div class="card-body">
                 <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                    <a href="{{ route('submenu.bosla-gomrok.index') ?? '' }}" class="btn btn-outline"
+                    <a href="{{ route('submenu.bosla-gomrok.index') }}" class="btn btn-outline"
                         style="width: 100%; justify-content: flex-start;">
                         📋 Bosla From Gomrok
                     </a>
-                    {{-- {{ route('submenu.destinations.index') ?? '' }} --}}
-                    <a href="" class="btn btn-outline" style="width: 100%; justify-content: flex-start;">
+                    <a href="{{ route('submenu.destinations.index') }}" class="btn btn-outline"
+                        style="width: 100%; justify-content: flex-start;">
                         📍 Destinations
                     </a>
-                    {{-- {{ route('submenu.container-loading.index') ?? '' }} --}}
-                    <a href="" class="btn btn-outline" style="width: 100%; justify-content: flex-start;">
+                    <!-- Update this line: -->
+                    <a href="{{ route('submenu.container-loading.index') }}" class="btn btn-outline"
+                        style="width: 100%; justify-content: flex-start;">
                         📦 Container Loading Points
                     </a>
-                    {{-- {{ route('submenu.consignee-notify.index') ?? '' }} --}}
-                    <a href="" class="btn btn-outline" style="width: 100%; justify-content: flex-start;">
+                    <!-- Update this line: -->
+                    <a href="{{ route('submenu.consignee-notify.index') }}" class="btn btn-outline"
+                        style="width: 100%; justify-content: flex-start;">
                         👥 Consignee & Notify Parties
                     </a>
                 </div>

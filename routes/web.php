@@ -22,6 +22,9 @@ use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\COOTypeController;
 use App\Http\Controllers\ShippingAgencyController;
 use App\Http\Controllers\BoslaGomrokController;
+use App\Http\Controllers\ConsigneeNotifyController;
+use App\Http\Controllers\ContainerLoadingController;
+use App\Http\Controllers\DestinationController;
 
 // ======================================================================================
 // GUEST ROUTES
@@ -137,6 +140,54 @@ Route::middleware('auth')->group(function () {
     // ===== SUBMENU CONFIGURATION =====
     Route::prefix('submenu')->name('submenu.')->group(function () {
         Route::get('/', [SubmenuController::class, 'index'])->name('index');
+
+        Route::resource('destinations', DestinationController::class, [
+            'names' => [
+                'index' => 'destinations.index',
+                'create' => 'destinations.create',
+                'store' => 'destinations.store',
+                'show' => 'destinations.show',
+                'edit' => 'destinations.edit',
+                'update' => 'destinations.update',
+                'destroy' => 'destinations.destroy'
+            ]
+        ]);
+        Route::resource('container-loading', ContainerLoadingController::class, [
+            'names' => [
+                'index' => 'container-loading.index',
+                'create' => 'container-loading.create',
+                'store' => 'container-loading.store',
+                'show' => 'container-loading.show',
+                'edit' => 'container-loading.edit',
+                'update' => 'container-loading.update',
+                'destroy' => 'container-loading.destroy'
+            ]
+        ]);
+
+        Route::resource('consignee-notify', ConsigneeNotifyController::class, [
+            'names' => [
+                'index' => 'consignee-notify.index',
+                'create' => 'consignee-notify.create',
+                'store' => 'consignee-notify.store',
+                'show' => 'consignee-notify.show',
+                'edit' => 'consignee-notify.edit',
+                'update' => 'consignee-notify.update',
+                'destroy' => 'consignee-notify.destroy'
+            ]
+        ]);
+        // Consignee & Notify Parties Resource Routes
+        Route::resource('consignee-notify', ConsigneeNotifyController::class, [
+            'names' => [
+                'index' => 'consignee-notify.index',
+                'create' => 'consignee-notify.create',
+                'store' => 'consignee-notify.store',
+                'show' => 'consignee-notify.show',
+                'edit' => 'consignee-notify.edit',
+                'update' => 'consignee-notify.update',
+                'destroy' => 'consignee-notify.destroy'
+            ]
+        ]);
+
         Route::resource('shipping-agencies', ShippingAgencyController::class, [
             'names' => [
                 'index' => 'shipping-agencies.index',

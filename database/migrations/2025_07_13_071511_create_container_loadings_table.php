@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-     public function up(): void
+    public function up(): void
     {
         Schema::create('container_loadings', function (Blueprint $table) {
             $table->id();
@@ -20,6 +20,7 @@ return new class extends Migration
             $table->text('address');
             $table->string('city');
             $table->string('country');
+            $table->foreignId('country_id')->nullable()->constrained('countries'); // Remove 'after' here
             $table->string('postal_code')->nullable();
             $table->decimal('latitude', 10, 8)->nullable();
             $table->decimal('longitude', 11, 8)->nullable();
@@ -42,7 +43,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->index(['facility_type', 'status']);
-            $table->index(['country', 'city']);
+            $table->index(['country_id', 'city']);
             $table->index('loading_point_code');
         });
     }

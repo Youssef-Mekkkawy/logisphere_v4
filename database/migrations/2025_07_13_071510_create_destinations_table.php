@@ -15,6 +15,7 @@ return new class extends Migration
             $table->string('city');
             $table->string('state_province')->nullable();
             $table->string('country');
+            $table->foreignId('country_id')->nullable()->constrained('countries'); // Remove 'after' here
             $table->string('postal_code')->nullable();
             $table->text('address')->nullable();
             $table->string('destination_type'); // 'Port', 'Airport', 'Warehouse', 'Factory', 'City'
@@ -31,7 +32,7 @@ return new class extends Migration
             $table->string('status')->default('Active');
             $table->timestamps();
 
-            $table->index(['country', 'status']);
+            $table->index(['country_id', 'status']);
             $table->index('destination_type');
             $table->index('destination_code');
         });
