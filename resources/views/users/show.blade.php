@@ -1,4 +1,4 @@
-{{-- File: resources/views/users/show.blade.php (Updated) --}}
+{{-- File: resources/views/users/show.blade.php (FIXED) --}}
 @extends('layouts.app')
 
 @section('title', $user->name . ' - LogiFlow')
@@ -8,9 +8,7 @@
     <div style="margin-bottom: 20px;">
         <a href="{{ route('users.index') }}" class="btn btn-secondary">← Back to Users</a>
         @if ($user->id !== auth()->id())
-            @can('users.edit')
-                <a href="{{ route('users.edit', $user) }}" class="btn btn-primary">Edit User</a>
-            @endcan
+            <a href="{{ route('users.edit', $user) }}" class="btn btn-primary">Edit User</a>
         @endif
     </div>
 
@@ -26,7 +24,7 @@
                     </div>
                     <div>
                         <h3 style="color: #1e40af; margin: 0;">{{ $user->name }}</h3>
-                        <p style="color: #6b7280; margin: 5px 0 0 0;">@{{ $user - > username }}</p>
+                        <p style="color: #6b7280; margin: 5px 0 0 0;">{{ '@' . $user->username }}</p>
                     </div>
                 </div>
 
@@ -35,15 +33,17 @@
                         <label
                             style="font-weight: 600; color: #374151; display: block; margin-bottom: 5px;">Username</label>
                         <p style="margin: 0; font-family: monospace; font-size: 16px; color: #1e40af;">
-                            @{{ $user - > username }}</p>
+                            {{ '@' . $user->username }}
+                        </p>
                     </div>
 
                     <div>
                         <label style="font-weight: 600; color: #374151; display: block; margin-bottom: 5px;">Roles</label>
                         <div style="display: flex; flex-wrap: wrap; gap: 5px;">
                             @forelse($user->roles as $role)
-                                <span class="status-badge"
-                                    style="background: {{ $role->color }}; color: white;">{{ $role->name }}</span>
+                                <span class="status-badge" style="background: {{ $role->color }}; color: white;">
+                                    {{ $role->name }}
+                                </span>
                             @empty
                                 <span class="status-badge" style="background: #6b7280; color: white;">No Role</span>
                             @endforelse
@@ -65,7 +65,8 @@
                         <label style="font-weight: 600; color: #374151; display: block; margin-bottom: 5px;">Last
                             Login</label>
                         <p style="margin: 0;">
-                            {{ $user->last_login ? $user->last_login->format('M d, Y H:i') : 'Never logged in' }}</p>
+                            {{ $user->last_login ? $user->last_login->format('M d, Y H:i') : 'Never logged in' }}
+                        </p>
                     </div>
 
                     <div>
@@ -95,7 +96,9 @@
                         </div>
                     </div>
                 @empty
-                    <p style="text-align: center; color: #6b7280; padding: 40px;">No permissions assigned to this user.</p>
+                    <p style="text-align: center; color: #6b7280; padding: 40px;">
+                        No permissions assigned to this user.
+                    </p>
                 @endforelse
             </div>
         </div>
@@ -119,7 +122,7 @@
 
                 <div style="margin-bottom: 10px;">
                     <small style="color: #6b7280;">Total Permissions</small>
-                    <div>{{ $user->permissions()->count() }}</div>
+                    <div>{{ $user->getAllPermissions()->count() }}</div>
                 </div>
 
                 <div style="margin-bottom: 10px;">
@@ -157,7 +160,9 @@
                         </div>
                     </div>
                 @empty
-                    <p style="text-align: center; color: #6b7280; padding: 20px;">No roles assigned to this user.</p>
+                    <p style="text-align: center; color: #6b7280; padding: 20px;">
+                        No roles assigned to this user.
+                    </p>
                 @endforelse
             </div>
 
@@ -167,11 +172,9 @@
 
                 <div style="display: flex; flex-direction: column; gap: 10px;">
                     @if ($user->id !== auth()->id())
-                        @can('users.edit')
-                            <a href="{{ route('users.edit', $user) }}" class="btn btn-primary" style="text-align: center;">
-                                Edit User
-                            </a>
-                        @endcan
+                        <a href="{{ route('users.edit', $user) }}" class="btn btn-primary" style="text-align: center;">
+                            Edit User
+                        </a>
                     @endif
 
                     @if ($user->email)
@@ -187,16 +190,14 @@
                     @endif
 
                     @if ($user->id !== auth()->id())
-                        @can('users.delete')
-                            <form method="POST" action="{{ route('users.destroy', $user) }}" style="margin-top: 10px;">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn" style="background: #dc2626; color: white; width: 100%;"
-                                    onclick="return confirm('Are you sure you want to delete this user?')">
-                                    Delete User
-                                </button>
-                            </form>
-                        @endcan
+                        <form method="POST" action="{{ route('users.destroy', $user) }}" style="margin-top: 10px;">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn" style="background: #dc2626; color: white; width: 100%;"
+                                onclick="return confirm('Are you sure you want to delete this user?')">
+                                Delete User
+                            </button>
+                        </form>
                     @else
                         <div style="text-align: center; color: #6b7280; font-size: 14px; margin-top: 10px;">
                             You cannot delete your own account

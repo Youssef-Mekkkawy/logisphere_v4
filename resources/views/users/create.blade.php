@@ -1,4 +1,4 @@
-{{-- File: resources/views/users/create.blade.php (Updated) --}}
+{{-- File: resources/views/users/create.blade.php (FIXED) --}}
 @extends('layouts.app')
 
 @section('title', 'Create User - LogiFlow')
@@ -65,10 +65,10 @@
             <h4 style="color: #1e40af; margin-bottom: 20px;">🔐 Roles & Permissions</h4>
 
             <div class="form-group">
-                <label class="form-label">Assign Roles *</label>
+                <label class="form-label">Assign Roles</label>
                 <div
                     style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 10px;">
-                    @foreach ($roles as $role)
+                    @forelse($roles as $role)
                         <label
                             style="display: flex; align-items: center; gap: 8px; padding: 12px; background: #f8fafc; border-radius: 8px; cursor: pointer; border: 2px solid transparent;">
                             <input type="checkbox" name="roles[]" value="{{ $role->id }}"
@@ -78,7 +78,9 @@
                                 {{ $role->name }}
                             </span>
                         </label>
-                    @endforeach
+                    @empty
+                        <p style="color: #6b7280;">No roles available. Please create roles first.</p>
+                    @endforelse
                 </div>
                 @error('roles')
                     <span class="error-message">{{ $message }}</span>
@@ -86,13 +88,15 @@
             </div>
 
             <!-- Role Permissions Preview -->
-            <div style="margin-top: 20px;">
-                <h5 style="color: #374151; margin-bottom: 15px;">Role Permissions Preview</h5>
-                <div id="permissions-preview"
-                    style="padding: 15px; background: #f1f5f9; border-radius: 8px; color: #6b7280;">
-                    Select roles above to see their permissions
+            @if ($roles->count() > 0)
+                <div style="margin-top: 20px;">
+                    <h5 style="color: #374151; margin-bottom: 15px;">Role Permissions Preview</h5>
+                    <div id="permissions-preview"
+                        style="padding: 15px; background: #f1f5f9; border-radius: 8px; color: #6b7280;">
+                        Select roles above to see their permissions
+                    </div>
                 </div>
-            </div>
+            @endif
         </div>
 
         <div style="margin-top: 30px;">
@@ -103,37 +107,38 @@
 @endsection
 
 @section('scripts')
-    <script>
-        // Role permissions data
-        const rolePermissions = {
-            @foreach ($roles as $role)
-                "{{ $role->id }}": {
-                    name: "{{ $role->name }}",
-                    color: "{{ $role->color }}",
-                    permissions: @json($role->permissions->pluck('name')->toArray())
-                },
-            @endforeach
-        };
+    @if ($roles->count() > 0)
+        <script>
+            // Role permissions data
+            const rolePermissions = {
+                @foreach ($roles as $role)
+                    "{{ $role->id }}": {
+                        name: "{{ $role->name }}",
+                        color: "{{ $role->color }}",
+                        permissions: @json($role->permissions->pluck('name')->toArray())
+                    },
+                @endforeach
+            };
 
-        document.addEventListener('DOMContentLoaded', function() {
-            const checkboxes = document.querySelectorAll('input[name="roles[]"]');
-            const previewDiv = document.getElementById('permissions-preview');
+            document.addEventListener('DOMContentLoaded', function() {
+                const checkboxes = document.querySelectorAll('input[name="roles[]"]');
+                const previewDiv = document.getElementById('permissions-preview');
 
-            function updatePermissionsPreview() {
-                const selectedRoles = Array.from(checkboxes)
-                    .filter(cb => cb.checked)
-                    .map(cb => cb.value);
+                function updatePermissionsPreview() {
+                    const selectedRoles = Array.from(checkboxes)
+                        .filter(cb => cb.checked)
+                        .map(cb => cb.value);
 
-                if (selectedRoles.length === 0) {
-                    previewDiv.innerHTML = '<em>Select roles above to see their permissions</em>';
-                    return;
-                }
+                    if (selectedRoles.length === 0) {
+                        previewDiv.innerHTML = '<em>Select roles above to see their permissions</em>';
+                        return;
+                    }
 
-                let html = '';
-                selectedRoles.forEach(roleId => {
-                    const role = rolePermissions[roleId];
-                    if (role) {
-                        html += `
+                    let html = '';
+                    selectedRoles.forEach(roleId => {
+                        const role = rolePermissions[roleId];
+                        if (role) {
+                            html += `
                         <div style="margin-bottom: 15px;">
                             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
                                 <span class="status-badge" style="background: ${role.color}; color: white;">${role.name}</span>
@@ -144,18 +149,19 @@
                             </div>
                         </div>
                     `;
-                    }
+                        }
+                    });
+
+                    previewDiv.innerHTML = html;
+                }
+
+                checkboxes.forEach(cb => {
+                    cb.addEventListener('change', updatePermissionsPreview);
                 });
 
-                previewDiv.innerHTML = html;
-            }
-
-            checkboxes.forEach(cb => {
-                cb.addEventListener('change', updatePermissionsPreview);
+                // Update on page load
+                updatePermissionsPreview();
             });
-
-            // Update on page load
-            updatePermissionsPreview();
-        });
-    </script>
+        </script>
+    @endif
 @endsection

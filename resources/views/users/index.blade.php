@@ -1,15 +1,12 @@
-{{-- File: resources/views/users/index.blade.php (Integrated Management) --}}
+{{-- File: resources/views/users/index.blade.php (Compatible with Your Layout) --}}
 @extends('layouts.app')
 
 @section('title', 'User Management - LogiFlow')
-@section('page-title', 'User Management (Ctrl+U)')
 
 @section('content')
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-        <div>
-            <h2 style="font-size: 1.5rem; font-weight: 600; color: #1e293b;">👥 User Management</h2>
-            <p style="color: #64748b;">Manage users, roles, and permissions</p>
-        </div>
+    <div style="margin-bottom: 2rem;">
+        <h2 style="font-size: 1.5rem; font-weight: 600; color: #1e293b; margin-bottom: 0.5rem;">👥 User Management</h2>
+        <p style="color: #64748b;">Manage users, roles, and permissions</p>
     </div>
 
     <!-- Tabs Navigation -->
@@ -23,9 +20,7 @@
     <div id="users-tab" class="tab-content active">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
             <h3>Users List</h3>
-            @can('users.create')
-                <button class="btn btn-primary" onclick="openModal('createUserModal')">+ Add New User</button>
-            @endcan
+            <button class="btn btn-primary" onclick="openModal('createUserModal')">+ Add New User</button>
         </div>
 
         <!-- Users Filter -->
@@ -75,7 +70,7 @@
                             <td>
                                 <div style="display: flex; align-items: center; gap: 10px;">
                                     <div
-                                        style="width: 40px; height: 40px; background: var(--primary-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                                        style="width: 40px; height: 40px; background: #3b82f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
                                         {{ strtoupper(substr($user->name, 0, 1)) }}
                                     </div>
                                     <div>
@@ -103,30 +98,22 @@
                                 @endif
                             </td>
                             <td style="display: flex; gap: 0.5rem;">
-                                <button class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;"
-                                    onclick="viewUser({{ $user->id }})">View</button>
-
-                                @can('users.edit')
-                                    <button class="btn btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;"
-                                        onclick="editUser({{ $user->id }})">Edit</button>
-                                @endcan
-
-                                @can('users.delete')
-                                    @if ($user->id !== auth()->id())
-                                        <button class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;"
-                                            onclick="deleteUser({{ $user->id }})">Delete</button>
-                                    @endif
-                                @endcan
+                                <a href="{{ route('users.show', $user) }}" class="btn btn-secondary"
+                                    style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">View</a>
+                                <a href="{{ route('users.edit', $user) }}" class="btn btn-primary"
+                                    style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Edit</a>
+                                @if ($user->id !== auth()->id())
+                                    <button class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;"
+                                        onclick="deleteUser({{ $user->id }})">Delete</button>
+                                @endif
                             </td>
                         </tr>
                     @empty
                         <tr>
                             <td colspan="6" style="text-align: center; padding: 2rem; color: #64748b;">
                                 No users found.
-                                @can('users.create')
-                                    <button class="btn btn-primary" onclick="openModal('createUserModal')">Create your first
-                                        user</button>
-                                @endcan
+                                <button class="btn btn-primary" onclick="openModal('createUserModal')">Create your first
+                                    user</button>
                             </td>
                         </tr>
                     @endforelse
@@ -145,9 +132,7 @@
     <div id="roles-tab" class="tab-content">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
             <h3>Roles Management</h3>
-            @can('roles.create')
-                <button class="btn btn-primary" onclick="openModal('createRoleModal')">+ Add New Role</button>
-            @endcan
+            <button class="btn btn-primary" onclick="openModal('createRoleModal')">+ Add New Role</button>
         </div>
 
         <!-- Roles Table -->
@@ -194,18 +179,10 @@
                             <td style="display: flex; gap: 0.5rem;">
                                 <button class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;"
                                     onclick="viewRole({{ $role->id }})">View</button>
-
-                                @can('roles.edit')
-                                    <button class="btn btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;"
-                                        onclick="editRole({{ $role->id }})">Edit</button>
-                                @endcan
-
-                                @can('roles.delete')
-                                    @if (!$role->is_system)
-                                        <button class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;"
-                                            onclick="deleteRole({{ $role->id }})">Delete</button>
-                                    @endif
-                                @endcan
+                                @if (!$role->is_system)
+                                    <button class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;"
+                                        onclick="deleteRole({{ $role->id }})">Delete</button>
+                                @endif
                             </td>
                         </tr>
                     @empty
@@ -224,9 +201,19 @@
     <div id="permissions-tab" class="tab-content">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
             <h3>Permissions Management</h3>
-            @can('roles.manage-permissions')
-                <button class="btn btn-primary" onclick="openModal('createPermissionModal')">+ Add New Permission</button>
-            @endcan
+            <button class="btn btn-primary" onclick="openPermissionModal()">+ Add New Permission</button>
+        </div>
+
+        <!-- Debug Section -->
+        <div
+            style="margin-bottom: 10px; padding: 10px; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 4px;">
+            <small style="color: #0369a1;">
+                <strong>Debug:</strong>
+                <button onclick="debugModal()" class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;">Test
+                    Modal</button>
+                <button onclick="testJavaScript()" class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;">Test
+                    JS</button>
+            </small>
         </div>
 
         <!-- Permissions Table -->
@@ -271,24 +258,40 @@
                             <td style="display: flex; gap: 0.5rem;">
                                 <button class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;"
                                     onclick="viewPermission({{ $permission->id }})">View</button>
-
-                                @can('roles.manage-permissions')
-                                    <button class="btn btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;"
-                                        onclick="editPermission({{ $permission->id }})">Edit</button>
-                                    <button class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;"
-                                        onclick="deletePermission({{ $permission->id }})">Delete</button>
-                                @endcan
+                                <button class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;"
+                                    onclick="deletePermission({{ $permission->id }})">Delete</button>
                             </td>
                         </tr>
                     @empty
                         <tr>
                             <td colspan="6" style="text-align: center; padding: 2rem; color: #64748b;">
-                                No permissions found.
+                                <div style="padding: 40px;">
+                                    <div style="font-size: 3rem; margin-bottom: 15px;">🔑</div>
+                                    <h4 style="margin: 0 0 10px 0; color: #374151;">No permissions found</h4>
+                                    <p style="margin: 0 0 20px 0; color: #6b7280;">
+                                        Permissions control what users can do in the system.
+                                    </p>
+                                    <button class="btn btn-primary" onclick="openPermissionModal()">
+                                        Create your first permission
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
+        </div>
+
+        {{-- Help Section --}}
+        <div
+            style="margin-top: 20px; padding: 20px; background: #f8fafc; border-radius: 12px; border-left: 4px solid #3b82f6;">
+            <h5 style="color: #1e40af; margin-bottom: 10px;">💡 Permission Tips</h5>
+            <ul style="color: #374151; margin: 0; padding-left: 20px;">
+                <li><strong>Permission Naming:</strong> Use descriptive names like "View Users", "Create Shipments"</li>
+                <li><strong>Groups:</strong> Organize permissions by module (Users, Shipments, Companies, etc.)</li>
+                <li><strong>Slug Generation:</strong> Automatically created as "group.permission-name"</li>
+                <li><strong>Role Assignment:</strong> Assign permissions to roles, then roles to users</li>
+            </ul>
         </div>
     </div>
 
@@ -410,17 +413,21 @@
                 <h4>Create New Permission</h4>
                 <button class="close" onclick="closeModal('createPermissionModal')">&times;</button>
             </div>
+            <div id="permission-form-errors"
+                style="display: none; background: #fee2e2; border: 1px solid #fecaca; color: #dc2626; padding: 10px; margin: 15px 30px; border-radius: 5px;">
+            </div>
             <form id="createPermissionForm">
                 @csrf
                 <div class="modal-body">
                     <div class="form-grid">
                         <div class="form-group">
                             <label class="form-label">Permission Name *</label>
-                            <input type="text" name="name" class="form-input" required>
+                            <input type="text" name="name" class="form-input" required
+                                placeholder="e.g., View Users">
                         </div>
                         <div class="form-group">
                             <label class="form-label">Group *</label>
-                            <select name="group" class="form-input" required>
+                            <select name="group" id="permissionGroupSelect" class="form-input" required>
                                 <option value="">Select Group</option>
                                 @foreach ($permissions->pluck('group')->unique() as $group)
                                     <option value="{{ $group }}">{{ $group }}</option>
@@ -431,13 +438,14 @@
                     </div>
 
                     <div class="form-group" id="newGroupField" style="display: none;">
-                        <label class="form-label">New Group Name</label>
-                        <input type="text" name="new_group" class="form-input" placeholder="Enter new group name">
+                        <label class="form-label">New Group Name *</label>
+                        <input type="text" name="new_group" class="form-input" placeholder="e.g., Reports">
                     </div>
 
                     <div class="form-group">
                         <label class="form-label">Description</label>
-                        <textarea name="description" class="form-input" rows="3"></textarea>
+                        <textarea name="description" class="form-input" rows="3"
+                            placeholder="Describe what this permission allows users to do"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -449,334 +457,4 @@
         </div>
     </div>
 
-@endsection
-
-@section('styles')
-    <style>
-        /* Tab Styles */
-        .tabs {
-            display: flex;
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            margin-bottom: 20px;
-        }
-
-        .tab {
-            padding: 15px 30px;
-            cursor: pointer;
-            background: #f8fafc;
-            border-right: 1px solid #e2e8f0;
-            transition: all 0.3s ease;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .tab:hover {
-            background: #f1f5f9;
-        }
-
-        .tab.active {
-            background: var(--primary-color);
-            color: white;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        /* Modal Styles */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: 15px;
-            width: 90%;
-            max-width: 600px;
-            max-height: 80vh;
-            overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 30px;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        .modal-header h4 {
-            margin: 0;
-            color: #1e40af;
-        }
-
-        .close {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #6b7280;
-        }
-
-        .close:hover {
-            color: #dc2626;
-        }
-
-        .modal-body {
-            padding: 30px;
-        }
-
-        .modal-footer {
-            display: flex;
-            gap: 15px;
-            justify-content: flex-end;
-            padding: 20px 30px;
-            border-top: 1px solid #e5e7eb;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .tabs {
-                flex-direction: column;
-            }
-
-            .tab {
-                border-right: none;
-                border-bottom: 1px solid #e2e8f0;
-            }
-
-            .modal-content {
-                width: 95%;
-                margin: 20px;
-            }
-        }
-    </style>
-@endsection
-
-@section('scripts')
-    <script>
-        // Tab functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const tabs = document.querySelectorAll('.tab');
-            const tabContents = document.querySelectorAll('.tab-content');
-
-            tabs.forEach(tab => {
-                tab.addEventListener('click', function() {
-                    // Remove active class from all tabs and contents
-                    tabs.forEach(t => t.classList.remove('active'));
-                    tabContents.forEach(content => content.classList.remove('active'));
-
-                    // Add active class to clicked tab
-                    this.classList.add('active');
-
-                    // Show corresponding content
-                    const targetContent = document.getElementById(this.dataset.tab + '-tab');
-                    if (targetContent) {
-                        targetContent.classList.add('active');
-                    }
-                });
-            });
-
-            // Group field toggle
-            const groupSelect = document.querySelector('select[name="group"]');
-            const newGroupField = document.getElementById('newGroupField');
-
-            if (groupSelect) {
-                groupSelect.addEventListener('change', function() {
-                    if (this.value === 'new') {
-                        newGroupField.style.display = 'block';
-                    } else {
-                        newGroupField.style.display = 'none';
-                    }
-                });
-            }
-
-            // Form submissions
-            document.getElementById('createUserForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                submitForm(this, '{{ route('users.store') }}', 'User created successfully!');
-            });
-
-            document.getElementById('createRoleForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                submitForm(this, '{{ route('roles.store') }}', 'Role created successfully!');
-            });
-
-            document.getElementById('createPermissionForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                submitForm(this, '{{ route('permissions.store') }}', 'Permission created successfully!');
-            });
-        });
-
-        // Modal functions
-        function openModal(modalId) {
-            document.getElementById(modalId).style.display = 'flex';
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
-
-        // Form submission
-        function submitForm(form, url, successMessage) {
-            const formData = new FormData(form);
-
-            fetch(url, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert(successMessage);
-                        location.reload();
-                    } else {
-                        alert('Error: ' + (data.message || 'Something went wrong'));
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred while processing your request');
-                });
-        }
-
-        // Action functions
-        function viewUser(id) {
-            window.location.href = `/users/${id}`;
-        }
-
-        function editUser(id) {
-            window.location.href = `/users/${id}/edit`;
-        }
-
-        function deleteUser(id) {
-            if (confirm('Are you sure you want to delete this user?')) {
-                fetch(`/users/${id}`, {
-                        method: 'DELETE',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert('User deleted successfully!');
-                            location.reload();
-                        } else {
-                            alert('Error: ' + (data.message || 'Something went wrong'));
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('An error occurred while deleting the user');
-                    });
-            }
-        }
-
-        function viewRole(id) {
-            // You can implement a modal or redirect to a detail view
-            alert('Role view functionality - ID: ' + id);
-        }
-
-        function editRole(id) {
-            // You can implement a modal or redirect to edit form
-            alert('Role edit functionality - ID: ' + id);
-        }
-
-        function deleteRole(id) {
-            if (confirm('Are you sure you want to delete this role?')) {
-                fetch(`/roles/${id}`, {
-                        method: 'DELETE',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert('Role deleted successfully!');
-                            location.reload();
-                        } else {
-                            alert('Error: ' + (data.message || 'Something went wrong'));
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('An error occurred while deleting the role');
-                    });
-            }
-        }
-
-        function viewPermission(id) {
-            alert('Permission view functionality - ID: ' + id);
-        }
-
-        function editPermission(id) {
-            alert('Permission edit functionality - ID: ' + id);
-        }
-
-        function deletePermission(id) {
-            if (confirm('Are you sure you want to delete this permission?')) {
-                fetch(`/permissions/${id}`, {
-                        method: 'DELETE',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert('Permission deleted successfully!');
-                            location.reload();
-                        } else {
-                            alert('Error: ' + (data.message || 'Something went wrong'));
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('An error occurred while deleting the permission');
-                    });
-            }
-        }
-
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            const modals = document.querySelectorAll('.modal');
-            modals.forEach(modal => {
-                if (event.target === modal) {
-                    modal.style.display = 'none';
-                }
-            });
-        }
-
-        // Ctrl+U keyboard shortcut
-        document.addEventListener('keydown', function(e) {
-            if (e.ctrlKey && e.key === 'u') {
-                e.preventDefault();
-                document.querySelector('input[name="search"]')?.focus();
-            }
-        });
-    </script>
 @endsection

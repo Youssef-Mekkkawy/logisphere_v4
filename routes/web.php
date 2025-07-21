@@ -49,30 +49,64 @@ Route::middleware('auth')->group(function () {
     Route::resource('companies', CompanyController::class);
     Route::resource('employees', EmployeeController::class);
 
-    // ===== USER MANAGEMENT (Integrated: Users + Roles + Permissions) =====
-    Route::middleware('permission:users.view')->prefix('users')->group(function () {
-        // Main user management
-        Route::get('/', [UserController::class, 'index'])->name('users.index');
-        Route::post('/', [UserController::class, 'store'])->name('users.store')->middleware('permission:users.create');
-        Route::get('/{user}', [UserController::class, 'show'])->name('users.show');
-        Route::get('/{user}/edit', [UserController::class, 'edit'])->name('users.edit')->middleware('permission:users.edit');
-        Route::put('/{user}', [UserController::class, 'update'])->name('users.update')->middleware('permission:users.edit');
-        Route::delete('/{user}', [UserController::class, 'destroy'])->name('users.destroy')->middleware('permission:users.delete');
+    // // ===== USER MANAGEMENT (Integrated: Users + Roles + Permissions) =====
+    // Route::middleware('permission:users.view')->prefix('users')->group(function () {
+    //     // Main user management
+    //     Route::get('/', [UserController::class, 'index'])->name('users.index');
+    //     Route::post('/', [UserController::class, 'store'])->name('users.store')->middleware('permission:users.create');
+    //     Route::get('/{user}', [UserController::class, 'show'])->name('users.show');
+    //     Route::get('/{user}/edit', [UserController::class, 'edit'])->name('users.edit')->middleware('permission:users.edit');
+    //     Route::put('/{user}', [UserController::class, 'update'])->name('users.update')->middleware('permission:users.edit');
+    //     Route::delete('/{user}', [UserController::class, 'destroy'])->name('users.destroy')->middleware('permission:users.delete');
 
-        // Integrated role management
-        Route::middleware('permission:roles.create')->group(function () {
-            Route::post('/roles', [UserController::class, 'storeRole'])->name('users.roles.store');
-        });
-        Route::middleware('permission:roles.delete')->group(function () {
-            Route::delete('/roles/{role}', [UserController::class, 'destroyRole'])->name('users.roles.destroy');
-        });
+    //     // Integrated role management
+    //     Route::middleware('permission:roles.create')->group(function () {
+    //         Route::post('/roles', [UserController::class, 'storeRole'])->name('users.roles.store');
+    //     });
+    //     Route::middleware('permission:roles.delete')->group(function () {
+    //         Route::delete('/roles/{role}', [UserController::class, 'destroyRole'])->name('users.roles.destroy');
+    //     });
 
-        // Integrated permission management
-        Route::middleware('permission:roles.manage-permissions')->group(function () {
-            Route::post('/permissions', [UserController::class, 'storePermission'])->name('users.permissions.store');
-            Route::delete('/permissions/{permission}', [UserController::class, 'destroyPermission'])->name('users.permissions.destroy');
-        });
+    //     // Integrated permission management
+    //     Route::middleware('permission:roles.manage-permissions')->group(function () {
+    //         Route::post('/permissions', [UserController::class, 'storePermission'])->name('users.permissions.store');
+    //         Route::delete('/permissions/{permission}', [UserController::class, 'destroyPermission'])->name('users.permissions.destroy');
+    //     });
+    // });
+    Route::prefix('users')->name('users.')->group(function () {
+        // Main user CRUD
+        Route::get('/', [UserController::class, 'index'])->name('index');
+        Route::post('/', [UserController::class, 'store'])->name('store');
+        Route::get('/{user}', [UserController::class, 'show'])->name('show');
+        Route::get('/{user}/edit', [UserController::class, 'edit'])->name('edit');
+        Route::put('/{user}', [UserController::class, 'update'])->name('update');
+        Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
+
+        // 🔥 ROLE MANAGEMENT (INTEGRATED)
+        Route::post('/roles', [UserController::class, 'storeRole'])->name('roles.store');
+        Route::delete('/roles/{role}', [UserController::class, 'destroyRole'])->name('roles.destroy');
+        Route::get('/roles/{role}', [UserController::class, 'getRole'])->name('roles.get');
+
+        // 🔥 PERMISSION MANAGEMENT (INTEGRATED)  
+        Route::post('/permissions', [UserController::class, 'storePermission'])->name('permissions.store');
+        Route::delete('/permissions/{permission}', [UserController::class, 'destroyPermission'])->name('permissions.destroy');
+        Route::get('/permissions/{permission}', [UserController::class, 'getPermission'])->name('permissions.get');
+
+        // 🔥 USER AJAX ENDPOINTS
+        Route::get('/get-user/{user}', [UserController::class, 'getUser'])->name('get-user');
     });
+
+    // ===== STANDALONE ROUTES (OPTIONAL) =====
+    Route::resource('roles', RoleController::class);
+    Route::resource('permissions', PermissionController::class);
+
+    // ===== OTHER ROUTES =====
+    Route::prefix('settings')->name('settings.')->group(function () {
+        Route::get('/', [SettingsController::class, 'index'])->name('index');
+        Route::get('/change-password', [SettingsController::class, 'changePassword'])->name('change-password');
+        Route::post('/change-password', [SettingsController::class, 'updatePassword'])->name('update-password');
+    });
+
 
     // ===== SHIPMENT EXTENDED ACTIONS =====
     Route::prefix('shipments')->name('shipments.')->group(function () {

@@ -1,4 +1,4 @@
-{{-- File: resources/views/users/edit.blade.php (Updated) --}}
+{{-- File: resources/views/users/edit.blade.php (FIXED FORM STRUCTURE) --}}
 @extends('layouts.app')
 
 @section('title', 'Edit User - LogiFlow')
@@ -10,7 +10,8 @@
         <a href="{{ route('users.show', $user) }}" class="btn btn-primary">View User</a>
     </div>
 
-    <form method="POST" action="{{ route('users.update', $user) }}">
+    {{-- 🔥 UPDATE FORM (SEPARATE) --}}
+    <form method="POST" action="{{ route('users.update', $user) }}" id="updateUserForm">
         @csrf
         @method('PUT')
 
@@ -47,7 +48,7 @@
 
                 <div class="form-group">
                     <label class="form-label">New Password</label>
-                    <input type="password" name="password" class="form-input">
+                    <input type="password" name="password" class="form-input" autocomplete="new-password">
                     @error('password')
                         <span class="error-message">{{ $message }}</span>
                     @enderror
@@ -56,7 +57,7 @@
 
                 <div class="form-group">
                     <label class="form-label">Confirm New Password</label>
-                    <input type="password" name="password_confirmation" class="form-input">
+                    <input type="password" name="password_confirmation" class="form-input" autocomplete="new-password">
                     <small style="color: #6b7280; font-size: 12px;">Required only if changing password</small>
                 </div>
             </div>
@@ -67,7 +68,7 @@
             <h4 style="color: #1e40af; margin-bottom: 20px;">🔐 Roles & Permissions</h4>
 
             <div class="form-group">
-                <label class="form-label">Assign Roles *</label>
+                <label class="form-label">Assign Roles</label>
                 <div
                     style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 10px;">
                     @foreach ($roles as $role)
@@ -91,13 +92,19 @@
             <div style="margin-top: 20px;">
                 <h5 style="color: #374151; margin-bottom: 15px;">Current Permissions</h5>
                 <div style="padding: 15px; background: #f1f5f9; border-radius: 8px;">
-                    @forelse($user->permissions()->get()->groupBy('group') as $group => $permissions)
+                    @php
+                        $currentPermissions = $user->getAllPermissions()->groupBy('group');
+                    @endphp
+
+                    @forelse($currentPermissions as $group => $permissions)
                         <div style="margin-bottom: 10px;">
                             <strong style="color: #1e40af;">{{ $group }}:</strong>
                             <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px;">
                                 @foreach ($permissions as $permission)
                                     <span
-                                        style="background: #e5e7eb; padding: 2px 8px; border-radius: 4px; font-size: 12px;">{{ $permission->name }}</span>
+                                        style="background: #e5e7eb; padding: 2px 8px; border-radius: 4px; font-size: 12px;">
+                                        {{ $permission->name }}
+                                    </span>
                                 @endforeach
                             </div>
                         </div>
@@ -108,23 +115,86 @@
             </div>
         </div>
 
-        <div style="margin-top: 30px;">
-            <button type="submit" class="btn btn-primary">Update User</button>
-            <a href="{{ route('users.show', $user) }}" class="btn btn-secondary">Cancel</a>
+        {{-- 🔥 UPDATE BUTTONS (INSIDE UPDATE FORM) --}}
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+            <button type="submit" class="btn btn-primary" style="margin-right: 15px;">
+                <i class="fas fa-save"></i> Update User
+            </button>
 
-            @if ($user->id !== auth()->id())
-                @can('users.delete')
-                    <form method="POST" action="{{ route('users.destroy', $user) }}"
-                        style="display: inline; margin-left: 10px;">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn" style="background: #dc2626; color: white;"
-                            onclick="return confirm('Are you sure you want to delete this user?')">
-                            Delete User
-                        </button>
-                    </form>
-                @endcan
-            @endif
+            <a href="{{ route('users.show', $user) }}" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Cancel
+            </a>
         </div>
     </form>
+
+    {{-- 🔥 DELETE FORM (COMPLETELY SEPARATE) --}}
+    @if ($user->id !== auth()->id())
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #fee2e2;">
+            <h5 style="color: #dc2626; margin-bottom: 15px;">⚠️ Danger Zone</h5>
+            <p style="color: #6b7280; margin-bottom: 15px;">
+                Once you delete this user, there is no going back. Please be certain.
+            </p>
+
+            <form method="POST" action="{{ route('users.destroy', $user) }}" id="deleteUserForm"
+                style="display: inline-block;">
+                @csrf
+                @method('DELETE')
+                <button type="button" class="btn" style="background: #dc2626; color: white;" onclick="confirmDelete()">
+                    <i class="fas fa-trash"></i> Delete User
+                </button>
+            </form>
+        </div>
+    @endif
+
+@endsection
+
+@section('scripts')
+    <script>
+        // 🔥 FIXED: Proper delete confirmation
+        function confirmDelete() {
+            if (confirm(
+                    '⚠️ Are you sure you want to delete this user?\n\nThis action cannot be undone and will permanently remove:\n• User account\n• All associated data\n• Role assignments\n\nType "DELETE" to confirm.'
+                    )) {
+                const confirmation = prompt('Please type "DELETE" to confirm:');
+                if (confirmation === 'DELETE') {
+                    document.getElementById('deleteUserForm').submit();
+                } else {
+                    alert('Deletion cancelled. User was not deleted.');
+                }
+            }
+        }
+
+        // 🔥 FIXED: Prevent accidental form submission
+        document.addEventListener('DOMContentLoaded', function() {
+            // Ensure update form submits to correct endpoint
+            const updateForm = document.getElementById('updateUserForm');
+            const deleteForm = document.getElementById('deleteUserForm');
+
+            // Debug form actions
+            console.log('Update form action:', updateForm.action);
+            console.log('Update form method:', updateForm.method);
+
+            if (deleteForm) {
+                console.log('Delete form action:', deleteForm.action);
+                console.log('Delete form method:', deleteForm.method);
+            }
+
+            // Prevent form from submitting on Enter key unless it's the update button
+            updateForm.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && e.target.type !== 'submit') {
+                    e.preventDefault();
+                }
+            });
+
+            // Add confirmation to update form
+            updateForm.addEventListener('submit', function(e) {
+                const submitBtn = e.submitter;
+                if (submitBtn && submitBtn.type === 'submit') {
+                    // This is the update button
+                    console.log('Submitting UPDATE form');
+                    return true;
+                }
+            });
+        });
+    </script>
 @endsection

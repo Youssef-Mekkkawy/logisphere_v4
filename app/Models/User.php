@@ -31,9 +31,21 @@ class User extends Authenticatable
 
     // ===== RBAC RELATIONSHIPS =====
 
+    /**
+     * User can have multiple roles
+     */
     public function roles()
     {
         return $this->belongsToMany(Role::class, 'user_roles');
+    }
+
+    /**
+     * 🔥 FIXED: Get permissions through roles as a relationship-like method
+     * This method can be used both as $user->permissions() and $user->permissions
+     */
+    public function permissions()
+    {
+        return $this->getAllPermissions();
     }
 
     /**
@@ -41,7 +53,12 @@ class User extends Authenticatable
      */
     public function getAllPermissions()
     {
-        return $this->roles->load('permissions')->pluck('permissions')->flatten()->unique('id');
+        // Check if roles are already loaded to avoid N+1 queries
+        if ($this->relationLoaded('roles')) {
+            return $this->roles->load('permissions')->pluck('permissions')->flatten()->unique('id');
+        }
+
+        return $this->roles()->with('permissions')->get()->pluck('permissions')->flatten()->unique('id');
     }
 
     // ===== RBAC HELPER METHODS =====
@@ -70,7 +87,7 @@ class User extends Authenticatable
         // Get all permissions through roles
         $permissions = $this->getAllPermissions();
 
-        // 🔥 BUG WAS HERE: was checking 'role-slug' instead of 'slug'
+        // Check by slug
         return $permissions->where('slug', $permission)->isNotEmpty();
     }
 
@@ -142,5 +159,24 @@ class User extends Authenticatable
     public function getRoleSlugs()
     {
         return $this->roles()->pluck('slug')->toArray();
+    }
+
+    /**
+     * 🔥 ADDED: Check if user can perform action (for compatibility)
+     */
+    public function can($ability, $arguments = [])
+    {
+        // Check if it's a permission slug
+        if ($this->hasPermission($ability)) {
+            return true;
+        }
+
+        // For admin users, allow everything by default
+        if ($this->isAdmin()) {
+            return true;
+        }
+
+        // Fall back to parent implementation
+        return parent::can($ability, $arguments);
     }
 }
