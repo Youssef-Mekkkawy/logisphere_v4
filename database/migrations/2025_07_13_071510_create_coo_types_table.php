@@ -13,27 +13,29 @@ return new class extends Migration
     {
         Schema::create('coo_types', function (Blueprint $table) {
             $table->id();
-            $table->string('type_code')->unique();
-            $table->string('type_name');
-            $table->string('full_name'); // Certificate of Origin full name
-            $table->string('issuing_authority')->nullable();
-            $table->string('country_code', 2)->nullable(); // ISO country code
-            $table->text('description')->nullable();
-            $table->boolean('requires_embassy_legalization')->default(false);
-            $table->boolean('requires_chamber_attestation')->default(false);
-            $table->decimal('processing_fee', 8, 2)->nullable();
-            $table->integer('processing_days')->default(1);
-            $table->json('required_documents')->nullable(); // List of required docs
-            $table->string('template_path')->nullable(); // COO template file
-            $table->boolean('is_active')->default(true);
-            $table->integer('sort_order')->default(0);
+            $table->string('code', 20)->unique()->comment('Unique COO type code');
+            $table->string('name')->comment('COO type name');
+            $table->string('issuing_authority')->comment('Authority that issues this COO');
+            $table->boolean('is_mandatory')->default(false)->comment('Whether this COO is mandatory');
+            $table->integer('processing_days')->comment('Processing time in days');
+            $table->decimal('cost', 10, 2)->default(0)->comment('Cost in USD');
+            $table->integer('validity_months')->default(12)->comment('Validity period in months, 0 = no expiry');
+            $table->enum('status', ['Active', 'Inactive'])->default('Active');
+            $table->text('description')->nullable()->comment('Description of the COO type');
+            $table->text('required_documents')->nullable()->comment('Required documents for this COO');
             $table->timestamps();
 
-            $table->index(['country_code', 'is_active']);
-            $table->index('type_code');
+            // Indexes
+            $table->index('code');
+            $table->index('status');
+            $table->index('issuing_authority');
+            $table->index(['status', 'is_mandatory']);
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
         Schema::dropIfExists('coo_types');

@@ -10,7 +10,7 @@
             <h2 style="font-size: 1.5rem; font-weight: 600; color: #1e293b;">⚙️ Services Management</h2>
             <p style="color: #64748b;">Manage custom logistics services (Alt+S)</p>
         </div>
-        <a href="{{ route('submenu.services.create') }}" class="btn btn-primary">+ Add New Service</a>
+        <a href="{{ route('submenu.services.create') ?? '' }}" class="btn btn-primary">+ Add New Service</a>
     </div>
 
     <!-- Filters -->
@@ -38,7 +38,8 @@
             <x-form-select name="status" label="Status" :options="['Active' => 'Active', 'Inactive' => 'Inactive']" value="{{ request('status') }}" />
             <div>
                 <button type="submit" class="btn btn-primary">Filter</button>
-                <a href="{{ route('submenu.services.index') }}" class="btn btn-secondary"
+                {{-- {{ route('submenu.services.index') ?? '' }} --}}
+                <a href="" class="btn btn-secondary"
                     style="margin-left: 0.5rem;">Clear</a>
             </div>
         </form>
@@ -78,12 +79,12 @@
                                 class="status-badge status-{{ strtolower($service->status) }}">{{ $service->status }}</span>
                         </td>
                         <td style="display: flex; gap: 0.5rem;">
-                            <a href="{{ route('submenu.services.show', $service) }}" class="btn btn-outline"
+                            <a href="{{ route('submenu.services.show' ?? '', $service) }}" class="btn btn-outline"
                                 style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">View</a>
-                            <a href="{{ route('submenu.services.edit', $service) }}" class="btn btn-success"
+                            <a href="{{ route('submenu.services.edit' ?? '', $service) }}" class="btn btn-success"
                                 style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Edit</a>
                             @if (auth()->user()->isAdmin())
-                                <form action="{{ route('submenu.services.destroy', $service) }}" method="POST"
+                                <form action="{{ route('submenu.services.destroy' ?? '', $service) }}" method="POST"
                                     style="display: inline;" onsubmit="return confirm('Are you sure?')">
                                     @csrf
                                     @method('DELETE')
@@ -96,7 +97,7 @@
                 @empty
                     <tr>
                         <td colspan="8" style="text-align: center; padding: 2rem; color: #64748b;">
-                            No services found. <a href="{{ route('submenu.services.create') }}"
+                            No services found. <a href="{{ route('submenu.services.create') ?? '' }}"
                                 style="color: var(--primary-color);">Create your first service</a>
                         </td>
                     </tr>
@@ -118,7 +119,7 @@
         document.addEventListener('keydown', function(e) {
             if (e.altKey && e.key === 's') {
                 e.preventDefault();
-                window.location.href = "{{ route('submenu.services.index') }}";
+                window.location.href = "{{ route('submenu.services.index') ?? '' }}";
             }
         });
     </script>

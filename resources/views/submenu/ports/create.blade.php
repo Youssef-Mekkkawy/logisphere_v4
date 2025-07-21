@@ -6,7 +6,7 @@
 
 @section('content')
     <x-card>
-        <form action="{{ isset($port) ? route('submenu.ports.update', $port) : route('submenu.ports.store') }}"
+        <form action="{{ isset($port) ? route('submenu.ports.update' ?? '', $port) : route('submenu.ports.store') ?? '' }}"
             method="POST">
             @csrf
             @if (isset($port))
@@ -54,7 +54,7 @@
                 <button type="submit" class="btn btn-primary">
                     {{ isset($port) ? 'Update Port' : 'Create Port' }}
                 </button>
-                <a href="{{ route('submenu.ports.index') }}" class="btn btn-secondary">Cancel</a>
+                <a href="{{ route('ports.index') }}" class="btn btn-secondary">Cancel</a>
             </div>
         </form>
     </x-card>

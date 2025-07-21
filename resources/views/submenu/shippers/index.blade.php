@@ -10,7 +10,7 @@
             <h2 style="font-size: 1.5rem; font-weight: 600; color: #1e293b;">🏢 Shippers Management</h2>
             <p style="color: #64748b;">Manage shipping companies and cargo shippers</p>
         </div>
-        <a href="{{ route('submenu.shippers.create') }}" class="btn btn-primary">+ Add New Shipper</a>
+        <a href="{{ route('submenu.shippers.create') ?? '' }}" class="btn btn-primary">+ Add New Shipper</a>
     </div>
 
     <!-- Filters -->
@@ -30,7 +30,7 @@
             <x-form-select name="status" label="Status" :options="['Active' => 'Active', 'Inactive' => 'Inactive']" value="{{ request('status') }}" />
             <div>
                 <button type="submit" class="btn btn-primary">Filter</button>
-                <a href="{{ route('submenu.shippers.index') }}" class="btn btn-secondary"
+                <a href="{{ route('submenu.shippers.index') ?? '' }}" class="btn btn-secondary"
                     style="margin-left: 0.5rem;">Clear</a>
             </div>
         </form>
@@ -67,12 +67,12 @@
                                 class="status-badge status-{{ strtolower($shipper->status) }}">{{ $shipper->status }}</span>
                         </td>
                         <td style="display: flex; gap: 0.5rem;">
-                            <a href="{{ route('submenu.shippers.show', $shipper) }}" class="btn btn-outline"
+                            <a href="{{ route('submenu.shippers.show' ?? '', $shipper) }}" class="btn btn-outline"
                                 style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">View</a>
-                            <a href="{{ route('submenu.shippers.edit', $shipper) }}" class="btn btn-success"
+                            <a href="{{ route('submenu.shippers.edit' ?? '', $shipper) }}" class="btn btn-success"
                                 style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Edit</a>
                             @if (auth()->user()->isAdmin())
-                                <form action="{{ route('submenu.shippers.destroy', $shipper) }}" method="POST"
+                                <form action="{{ route('submenu.shippers.destroy' ?? '', $shipper) }}" method="POST"
                                     style="display: inline;" onsubmit="return confirm('Are you sure?')">
                                     @csrf
                                     @method('DELETE')
@@ -85,7 +85,7 @@
                 @empty
                     <tr>
                         <td colspan="8" style="text-align: center; padding: 2rem; color: #64748b;">
-                            No shippers found. <a href="{{ route('submenu.shippers.create') }}"
+                            No shippers found. <a href="{{ route('submenu.shippers.create') ?? '' }}"
                                 style="color: var(--primary-color);">Create your first shipper</a>
                         </td>
                     </tr>

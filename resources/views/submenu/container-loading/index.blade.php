@@ -10,7 +10,7 @@
             <h2 style="font-size: 1.5rem; font-weight: 600; color: #1e293b;">📦 Container Loading Points</h2>
             <p style="color: #64748b;">Manage container loading locations and facilities</p>
         </div>
-        <a href="{{ route('submenu.container-loading.create') }}" class="btn btn-primary">+ Add New Loading Point</a>
+        <a href="{{ route('submenu.container-loading.create')  ?? '' }}" class="btn btn-primary">+ Add New Loading Point</a>
     </div>
 
     <!-- Filters -->
@@ -30,7 +30,8 @@
             <x-form-select name="status" label="Status" :options="['Active' => 'Active', 'Inactive' => 'Inactive']" value="{{ request('status') }}" />
             <div>
                 <button type="submit" class="btn btn-primary">Filter</button>
-                <a href="{{ route('submenu.container-loading.index') }}" class="btn btn-secondary"
+                {{-- {{ route('submenu.container-loading.index') ?? ''  }} --}}
+                <a href="" class="btn btn-secondary"
                     style="margin-left: 0.5rem;">Clear</a>
             </div>
         </form>
@@ -66,12 +67,12 @@
                         <td><span class="status-badge status-{{ strtolower($point->status) }}">{{ $point->status }}</span>
                         </td>
                         <td style="display: flex; gap: 0.5rem;">
-                            <a href="{{ route('submenu.container-loading.show', $point) }}" class="btn btn-outline"
+                            <a href="{{ route('submenu.container-loading.show' ?? '' , $point) }}" class="btn btn-outline"
                                 style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">View</a>
-                            <a href="{{ route('submenu.container-loading.edit', $point) }}" class="btn btn-success"
+                            <a href="{{ route('submenu.container-loading.edit' ?? '' , $point) }}" class="btn btn-success"
                                 style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Edit</a>
                             @if (auth()->user()->isAdmin())
-                                <form action="{{ route('submenu.container-loading.destroy', $point) }}" method="POST"
+                                <form action="{{ route('submenu.container-loading.destroy' ?? '' , $point) }}" method="POST"
                                     style="display: inline;" onsubmit="return confirm('Are you sure?')">
                                     @csrf
                                     @method('DELETE')
@@ -84,7 +85,7 @@
                 @empty
                     <tr>
                         <td colspan="8" style="text-align: center; padding: 2rem; color: #64748b;">
-                            No loading points found. <a href="{{ route('submenu.container-loading.create') }}"
+                            No loading points found. <a href="{{ route('submenu.container-loading.create')  ?? '' }}"
                                 style="color: var(--primary-color);">Create your first loading point</a>
                         </td>
                     </tr>

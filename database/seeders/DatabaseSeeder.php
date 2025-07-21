@@ -25,7 +25,8 @@ class DatabaseSeeder extends Seeder
 
             // Phase 2: Core Infrastructure 
             PortSeeder::class,              // ✅ Working
-            ShippingAgencySeeder::class,    // ✅ Created
+            CountrySeeder::class,           // Must run first
+            ShippingAgencySeeder::class,
             CompanySeeder::class,           // ✅ Created
 
             // Phase 3: Business Logic
@@ -38,6 +39,7 @@ class DatabaseSeeder extends Seeder
             PermissionSeeder::class,
             RoleSeeder::class,
             UpdatedUserSeeder::class,
+
         ]);
 
         $this->command->info('🎉 All seeders completed successfully!');

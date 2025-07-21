@@ -6,7 +6,7 @@
 
 @section('content')
     <x-card>
-        <form action="{{ route('submenu.shipment-types.store') }}" method="POST">
+        <form action="{{ route('submenu.shipment-types.store') ?? '' }}" method="POST">
             @csrf
 
             <div class="form-grid">
@@ -49,7 +49,7 @@
 
             <div style="margin-top: 2rem; display: flex; gap: 1rem;">
                 <button type="submit" class="btn btn-primary">Create Shipment Type</button>
-                <a href="{{ route('submenu.shipment-types.index') }}" class="btn btn-secondary">Cancel</a>
+                <a href="{{ route('submenu.shipment-types.index') ?? '' }}" class="btn btn-secondary">Cancel</a>
             </div>
         </form>
     </x-card>

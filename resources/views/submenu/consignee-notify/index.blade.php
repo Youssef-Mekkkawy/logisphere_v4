@@ -10,7 +10,7 @@
             <h2 style="font-size: 1.5rem; font-weight: 600; color: #1e293b;">👥 Consignee & Notify Parties</h2>
             <p style="color: #64748b;">Manage delivery parties and notification contacts</p>
         </div>
-        <a href="{{ route('submenu.consignee-notify.create') }}" class="btn btn-primary">+ Add New Party</a>
+        <a href="{{ route('submenu.consignee-notify.create') ?? '' }}" class="btn btn-primary">+ Add New Party</a>
     </div>
 
     <!-- Filters -->
@@ -27,8 +27,8 @@
             <x-form-select name="status" label="Status" :options="['Active' => 'Active', 'Inactive' => 'Inactive']" value="{{ request('status') }}" />
             <div>
                 <button type="submit" class="btn btn-primary">Filter</button>
-                <a href="{{ route('submenu.consignee-notify.index') }}" class="btn btn-secondary"
-                    style="margin-left: 0.5rem;">Clear</a>
+                {{-- {{ route('submenu.consignee-notify.index') ?? ''  }} --}}
+                <a href="" class="btn btn-secondary" style="margin-left: 0.5rem;">Clear</a>
             </div>
         </form>
     </x-card>
@@ -65,13 +65,13 @@
                         <td><span class="status-badge status-{{ strtolower($party->status) }}">{{ $party->status }}</span>
                         </td>
                         <td style="display: flex; gap: 0.5rem;">
-                            <a href="{{ route('submenu.consignee-notify.show', $party) }}" class="btn btn-outline"
+                            <a href="{{ route('submenu.consignee-notify.show' ?? '', $party) }}" class="btn btn-outline"
                                 style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">View</a>
-                            <a href="{{ route('submenu.consignee-notify.edit', $party) }}" class="btn btn-success"
+                            <a href="{{ route('submenu.consignee-notify.edit' ?? '', $party) }}" class="btn btn-success"
                                 style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Edit</a>
                             @if (auth()->user()->isAdmin())
-                                <form action="{{ route('submenu.consignee-notify.destroy', $party) }}" method="POST"
-                                    style="display: inline;" onsubmit="return confirm('Are you sure?')">
+                                <form action="{{ route('submenu.consignee-notify.destroy' ?? '', $party) }}"
+                                    method="POST" style="display: inline;" onsubmit="return confirm('Are you sure?')">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-danger"
@@ -83,7 +83,7 @@
                 @empty
                     <tr>
                         <td colspan="8" style="text-align: center; padding: 2rem; color: #64748b;">
-                            No parties found. <a href="{{ route('submenu.consignee-notify.create') }}"
+                            No parties found. <a href="{{ route('submenu.consignee-notify.create') ?? '' }}"
                                 style="color: var(--primary-color);">Create your first party</a>
                         </td>
                     </tr>

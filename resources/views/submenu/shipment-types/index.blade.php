@@ -10,7 +10,7 @@
             <h2 style="font-size: 1.5rem; font-weight: 600; color: #1e293b;">📋 Shipment Types & Sub Types</h2>
             <p style="color: #64748b;">Manage shipment classification and categories</p>
         </div>
-        <a href="{{ route('submenu.shipment-types.create') }}" class="btn btn-primary">+ Add New Type</a>
+        <a href="{{ route('submenu.shipment-types.create') ?? '' }}" class="btn btn-primary">+ Add New Type</a>
     </div>
 
     <!-- Filters -->
@@ -66,12 +66,12 @@
                         </td>
                         <td>{{ $type->usage_count ?? 0 }}</td>
                         <td style="display: flex; gap: 0.5rem;">
-                            <a href="{{ route('submenu.shipment-types.show', $type) }}" class="btn btn-outline"
+                            <a href="{{ route('submenu.shipment-types.show' ?? '', $type) }}" class="btn btn-outline"
                                 style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">View</a>
-                            <a href="{{ route('submenu.shipment-types.edit', $type) }}" class="btn btn-success"
+                            <a href="{{ route('submenu.shipment-types.edit' ?? '', $type) }}" class="btn btn-success"
                                 style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Edit</a>
                             @if (auth()->user()->isAdmin())
-                                <form action="{{ route('submenu.shipment-types.destroy', $type) }}" method="POST"
+                                <form action="{{ route('submenu.shipment-types.destroy' ?? '', $type) }}" method="POST"
                                     style="display: inline;" onsubmit="return confirm('Are you sure?')">
                                     @csrf
                                     @method('DELETE')
@@ -84,7 +84,7 @@
                 @empty
                     <tr>
                         <td colspan="8" style="text-align: center; padding: 2rem; color: #64748b;">
-                            No shipment types found. <a href="{{ route('submenu.shipment-types.create') }}"
+                            No shipment types found. <a href="{{ route('submenu.shipment-types.create') ?? '' }}"
                                 style="color: var(--primary-color);">Create your first type</a>
                         </td>
                     </tr>

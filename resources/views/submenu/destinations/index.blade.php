@@ -10,7 +10,7 @@
             <h2 style="font-size: 1.5rem; font-weight: 600; color: #1e293b;">📍 Destinations</h2>
             <p style="color: #64748b;">Manage delivery destinations and locations</p>
         </div>
-        <a href="{{ route('submenu.destinations.create') }}" class="btn btn-primary">+ Add New Destination</a>
+        <a href="{{ route('submenu.destinations.create') ?? '' }}" class="btn btn-primary">+ Add New Destination</a>
     </div>
 
     <!-- Filters -->
@@ -32,8 +32,8 @@
             <x-form-select name="status" label="Status" :options="['Active' => 'Active', 'Inactive' => 'Inactive']" value="{{ request('status') }}" />
             <div>
                 <button type="submit" class="btn btn-primary">Filter</button>
-                <a href="{{ route('submenu.destinations.index') }}" class="btn btn-secondary"
-                    style="margin-left: 0.5rem;">Clear</a>
+                {{-- {{ route('submenu.destinations.index') ?? '' }} --}}
+                <a href="" class="btn btn-secondary" style="margin-left: 0.5rem;">Clear</a>
             </div>
         </form>
     </x-card>
@@ -69,13 +69,13 @@
                                 class="status-badge status-{{ strtolower($destination->status) }}">{{ $destination->status }}</span>
                         </td>
                         <td style="display: flex; gap: 0.5rem;">
-                            <a href="{{ route('submenu.destinations.show', $destination) }}" class="btn btn-outline"
+                            <a href="{{ route('submenu.destinations.show' ?? '', $destination) }}" class="btn btn-outline"
                                 style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">View</a>
-                            <a href="{{ route('submenu.destinations.edit', $destination) }}" class="btn btn-success"
+                            <a href="{{ route('submenu.destinations.edit' ?? '', $destination) }}" class="btn btn-success"
                                 style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Edit</a>
                             @if (auth()->user()->isAdmin())
-                                <form action="{{ route('submenu.destinations.destroy', $destination) }}" method="POST"
-                                    style="display: inline;" onsubmit="return confirm('Are you sure?')">
+                                <form action="{{ route('submenu.destinations.destroy' ?? '', $destination) }}"
+                                    method="POST" style="display: inline;" onsubmit="return confirm('Are you sure?')">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-danger"
@@ -87,7 +87,7 @@
                 @empty
                     <tr>
                         <td colspan="8" style="text-align: center; padding: 2rem; color: #64748b;">
-                            No destinations found. <a href="{{ route('submenu.destinations.create') }}"
+                            No destinations found. <a href="{{ route('submenu.destinations.create') ?? '' }}"
                                 style="color: var(--primary-color);">Create your first destination</a>
                         </td>
                     </tr>

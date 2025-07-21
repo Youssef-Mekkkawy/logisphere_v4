@@ -65,7 +65,7 @@ class PortController extends Controller
 
         Port::create($request->all());
 
-        return redirect()->route('submenu.ports.index')
+        return redirect()->route('ports.index')
             ->with('success', 'Port created successfully!');
     }
 

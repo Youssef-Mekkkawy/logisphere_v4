@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
 use App\Models\ShippingAgency;
+use App\Models\Country;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -13,27 +15,27 @@ class ShippingAgencyController extends Controller
      */
     public function index()
     {
-        $shippingAgencies = ShippingAgency::when(request('search'), function($query, $search) {
-                return $query->where('code', 'like', "%{$search}%")
-                           ->orWhere('name', 'like', "%{$search}%")
-                           ->orWhere('contact_person', 'like', "%{$search}%")
-                           ->orWhere('email', 'like', "%{$search}%")
-                           ->orWhere('country', 'like', "%{$search}%");
+        $agencies = ShippingAgency::with('country')
+            ->when(request('search'), function ($query, $search) {
+                return $query->search($search);
             })
-            ->when(request('country'), function($query, $country) {
-                return $query->where('country', $country);
+            ->when(request('country_id'), function ($query, $countryId) {
+                return $query->where('country_id', $countryId);
             })
-            ->when(request('status'), function($query, $status) {
+            ->when(request('service_type'), function ($query, $serviceType) {
+                return $query->where('service_type', $serviceType);
+            })
+            ->when(request('status'), function ($query, $status) {
                 return $query->where('status', $status);
             })
             ->latest()
             ->paginate(20)
             ->withQueryString();
 
-        $countries = ShippingAgency::distinct()->pluck('country')->filter();
-        $statuses = ['Active', 'Inactive'];
+        // Get filter options
+        $countries = Country::orderBy('name')->get();
 
-        return view('shipping-agencies.index', compact('shippingAgencies', 'countries', 'statuses'));
+        return view('submenu.shipping-agencies.index', compact('agencies', 'countries'));
     }
 
     /**
@@ -41,26 +43,9 @@ class ShippingAgencyController extends Controller
      */
     public function create()
     {
-        // Common countries for shipping agencies
-        $countries = [
-            'United Arab Emirates' => 'United Arab Emirates',
-            'Saudi Arabia' => 'Saudi Arabia',
-            'Egypt' => 'Egypt',
-            'Singapore' => 'Singapore',
-            'China' => 'China',
-            'United States' => 'United States',
-            'United Kingdom' => 'United Kingdom',
-            'Germany' => 'Germany',
-            'Netherlands' => 'Netherlands',
-            'Belgium' => 'Belgium',
-            'India' => 'India',
-            'Malaysia' => 'Malaysia',
-            'Thailand' => 'Thailand',
-            'South Korea' => 'South Korea',
-            'Japan' => 'Japan'
-        ];
+        $countries = Country::orderBy('name')->get();
 
-        return view('shipping-agencies.create', compact('countries'));
+        return view('submenu.shipping-agencies.create', compact('countries'));
     }
 
     /**
@@ -71,11 +56,13 @@ class ShippingAgencyController extends Controller
         $validator = Validator::make($request->all(), [
             'code' => 'required|string|max:20|unique:shipping_agencies,code',
             'name' => 'required|string|max:255',
+            'country_id' => 'required|exists:countries,id',
+            'service_type' => 'required|string|in:Ocean Freight,Air Freight,Land Transport,Full Service',
             'contact_person' => 'nullable|string|max:255',
             'email' => 'nullable|email|max:255',
             'phone' => 'nullable|string|max:50',
-            'country' => 'nullable|string|max:100',
-            'address' => 'nullable|string|max:500',
+            'address' => 'nullable|string',
+            'services_offered' => 'nullable|string',
             'status' => 'required|string|in:Active,Inactive'
         ]);
 
@@ -96,30 +83,18 @@ class ShippingAgencyController extends Controller
      */
     public function show(ShippingAgency $shippingAgency)
     {
-        // Get usage statistics
-        $statistics = [
-            'total_bookings' => $shippingAgency->bookings()->count() ?? 0,
-            'active_bookings' => $shippingAgency->bookings()->where('status', 'Active')->count() ?? 0,
-            'confirmed_bookings' => $shippingAgency->bookings()->where('is_confirmed', true)->count() ?? 0,
-            'this_month_bookings' => $shippingAgency->bookings()->whereMonth('created_at', now()->month)->count() ?? 0,
-            'total_shipments' => $shippingAgency->shipments()->count() ?? 0
-        ];
+        $shippingAgency->load('country');
 
-        // Recent bookings with this agency
-        $recentBookings = $shippingAgency->bookings()
-            ->with(['shipment', 'company'])
-            ->latest()
-            ->take(5)
-            ->get() ?? collect();
+        // Get statistics
+        $statistics = $shippingAgency->getStatistics();
 
-        // Recent shipments
-        $recentShipments = $shippingAgency->shipments()
-            ->with(['company', 'originPort', 'destinationPort'])
-            ->latest()
-            ->take(5)
-            ->get() ?? collect();
+        // Get recent shipments
+        $recentShipments = $shippingAgency->getRecentShipments(5);
 
-        return view('shipping-agencies.show', compact('shippingAgency', 'statistics', 'recentBookings', 'recentShipments'));
+        // Get active shipments count for display
+        $activeShipments = $statistics['active_shipments'];
+
+        return view('submenu.shipping-agencies.show', compact('shippingAgency', 'statistics', 'recentShipments', 'activeShipments'));
     }
 
     /**
@@ -127,26 +102,9 @@ class ShippingAgencyController extends Controller
      */
     public function edit(ShippingAgency $shippingAgency)
     {
-        // Common countries for shipping agencies
-        $countries = [
-            'United Arab Emirates' => 'United Arab Emirates',
-            'Saudi Arabia' => 'Saudi Arabia',
-            'Egypt' => 'Egypt',
-            'Singapore' => 'Singapore',
-            'China' => 'China',
-            'United States' => 'United States',
-            'United Kingdom' => 'United Kingdom',
-            'Germany' => 'Germany',
-            'Netherlands' => 'Netherlands',
-            'Belgium' => 'Belgium',
-            'India' => 'India',
-            'Malaysia' => 'Malaysia',
-            'Thailand' => 'Thailand',
-            'South Korea' => 'South Korea',
-            'Japan' => 'Japan'
-        ];
+        $countries = Country::orderBy('name')->get();
 
-        return view('shipping-agencies.edit', compact('shippingAgency', 'countries'));
+        return view('submenu.shipping-agencies.edit', compact('shippingAgency', 'countries'));
     }
 
     /**
@@ -157,11 +115,13 @@ class ShippingAgencyController extends Controller
         $validator = Validator::make($request->all(), [
             'code' => 'required|string|max:20|unique:shipping_agencies,code,' . $shippingAgency->id,
             'name' => 'required|string|max:255',
+            'country_id' => 'required|exists:countries,id',
+            'service_type' => 'required|string|in:Ocean Freight,Air Freight,Land Transport,Full Service',
             'contact_person' => 'nullable|string|max:255',
             'email' => 'nullable|email|max:255',
             'phone' => 'nullable|string|max:50',
-            'country' => 'nullable|string|max:100',
-            'address' => 'nullable|string|max:500',
+            'address' => 'nullable|string',
+            'services_offered' => 'nullable|string',
             'status' => 'required|string|in:Active,Inactive'
         ]);
 
@@ -173,7 +133,7 @@ class ShippingAgencyController extends Controller
 
         $shippingAgency->update($request->all());
 
-        return redirect()->route('shipping-agencies.index')
+        return redirect()->route('submenu.shipping-agencies.show', $shippingAgency)
             ->with('success', 'Shipping agency updated successfully!');
     }
 
@@ -182,18 +142,15 @@ class ShippingAgencyController extends Controller
      */
     public function destroy(ShippingAgency $shippingAgency)
     {
-        // Check if agency has any bookings or shipments
-        $bookingsCount = $shippingAgency->bookings()->count() ?? 0;
-        $shipmentsCount = $shippingAgency->shipments()->count() ?? 0;
-
-        if ($bookingsCount > 0 || $shipmentsCount > 0) {
-            return redirect()->route('shipping-agencies.index')
-                ->with('error', 'Cannot delete shipping agency. It has associated bookings or shipments.');
+        // Check if agency is being used
+        if ($shippingAgency->isInUse()) {
+            return redirect()->route('submenu.shipping-agencies.index')
+                ->with('error', 'Cannot delete shipping agency. It has associated shipments or bookings.');
         }
 
         $shippingAgency->delete();
 
-        return redirect()->route('shipping-agencies.index')
+        return redirect()->route('submenu.shipping-agencies.index')
             ->with('success', 'Shipping agency deleted successfully!');
     }
 
@@ -202,17 +159,7 @@ class ShippingAgencyController extends Controller
      */
     public function statistics(ShippingAgency $shippingAgency)
     {
-        $statistics = [
-            'total_bookings' => $shippingAgency->bookings()->count() ?? 0,
-            'active_bookings' => $shippingAgency->bookings()->where('status', 'Active')->count() ?? 0,
-            'confirmed_bookings' => $shippingAgency->bookings()->where('is_confirmed', true)->count() ?? 0,
-            'pending_bookings' => $shippingAgency->bookings()->where('is_confirmed', false)->count() ?? 0,
-            'this_month_bookings' => $shippingAgency->bookings()->whereMonth('created_at', now()->month)->count() ?? 0,
-            'last_month_bookings' => $shippingAgency->bookings()->whereMonth('created_at', now()->subMonth()->month)->count() ?? 0,
-            'total_shipments' => $shippingAgency->shipments()->count() ?? 0
-        ];
-
-        return response()->json($statistics);
+        return response()->json($shippingAgency->getStatistics());
     }
 
     /**
@@ -232,26 +179,27 @@ class ShippingAgencyController extends Controller
      */
     public function getActive()
     {
-        $shippingAgencies = ShippingAgency::active()
-            ->select('id', 'code', 'name', 'contact_person', 'country')
+        $agencies = ShippingAgency::active()
+            ->with('country')
+            ->select('id', 'code', 'name', 'contact_person', 'country_id', 'service_type')
             ->orderBy('name')
             ->get();
 
-        return response()->json($shippingAgencies);
+        return response()->json($agencies);
     }
 
     /**
      * Get shipping agencies by country
      */
-    public function getByCountry($country)
+    public function getByCountry($countryId)
     {
-        $shippingAgencies = ShippingAgency::active()
-            ->where('country', $country)
-            ->select('id', 'code', 'name', 'contact_person')
+        $agencies = ShippingAgency::active()
+            ->where('country_id', $countryId)
+            ->select('id', 'code', 'name', 'contact_person', 'service_type')
             ->orderBy('name')
             ->get();
 
-        return response()->json($shippingAgencies);
+        return response()->json($agencies);
     }
 
     /**
@@ -259,27 +207,28 @@ class ShippingAgencyController extends Controller
      */
     public function search(Request $request)
     {
-        $query = ShippingAgency::query();
+        $query = ShippingAgency::with('country');
 
         if ($request->filled('q')) {
-            $search = $request->q;
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('code', 'like', "%{$search}%")
-                    ->orWhere('contact_person', 'like', "%{$search}%");
-            });
+            $query->search($request->q);
         }
 
-        if ($request->filled('country')) {
-            $query->where('country', $request->country);
+        if ($request->filled('country_id')) {
+            $query->where('country_id', $request->country_id);
+        }
+
+        if ($request->filled('service_type')) {
+            $query->where('service_type', $request->service_type);
         }
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
+        $agencies = $query->limit(10)->get();
+
         return response()->json([
-            'shipping_agencies' => $query->limit(10)->get()
+            'shipping_agencies' => $agencies
         ]);
     }
 }

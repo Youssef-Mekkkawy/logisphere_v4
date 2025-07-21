@@ -12,13 +12,16 @@ use App\Http\Controllers\SubmenuController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\PortController;
 use App\Http\Controllers\ShipmentTypeController;
-use App\Http\Controllers\ShippingAgencyController;
+
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\Accounting\AccountController;
 use App\Http\Controllers\Accounting\AccountingDashboardController;
 use App\Http\Controllers\Accounting\JobController;
 use Illuminate\Support\Facades\Artisan;
+use App\Http\Controllers\COOTypeController;
+use App\Http\Controllers\ShippingAgencyController;
+use App\Http\Controllers\BoslaGomrokController;
 
 // ======================================================================================
 // GUEST ROUTES
@@ -134,26 +137,61 @@ Route::middleware('auth')->group(function () {
     // ===== SUBMENU CONFIGURATION =====
     Route::prefix('submenu')->name('submenu.')->group(function () {
         Route::get('/', [SubmenuController::class, 'index'])->name('index');
+        Route::resource('shipping-agencies', ShippingAgencyController::class, [
+            'names' => [
+                'index' => 'shipping-agencies.index',
+                'create' => 'shipping-agencies.create',
+                'store' => 'shipping-agencies.store',
+                'show' => 'shipping-agencies.show',
+                'edit' => 'shipping-agencies.edit',
+                'update' => 'shipping-agencies.update',
+                'destroy' => 'shipping-agencies.destroy'
+            ]
+        ]);
+        Route::resource('bosla-gomrok', BoslaGomrokController::class, [
+            'names' => [
+                'index' => 'bosla-gomrok.index',
+                'create' => 'bosla-gomrok.create',
+                'store' => 'bosla-gomrok.store',
+                'show' => 'bosla-gomrok.show',
+                'edit' => 'bosla-gomrok.edit',
+                'update' => 'bosla-gomrok.update',
+                'destroy' => 'bosla-gomrok.destroy'
+            ]
+        ]);
 
+
+        // COO Types Resource Routes
+        Route::resource('coo-types', COOTypeController::class, [
+            'names' => [
+                'index' => 'coo-types.index',
+                'create' => 'coo-types.create',
+                'store' => 'coo-types.store',
+                'show' => 'coo-types.show',
+                'edit' => 'coo-types.edit',
+                'update' => 'coo-types.update',
+                'destroy' => 'coo-types.destroy'
+            ]
+        ]);
         // Shipment Information Management
-        Route::get('/ports', [SubmenuController::class, 'ports'])->name('ports');
-        Route::get('/shipping-agency', [SubmenuController::class, 'agencies'])->name('agencies');
-        Route::get('/shipment-types', [SubmenuController::class, 'types'])->name('types');
+        // Route::get('/ports', [SubmenuController::class, 'ports'])->name('ports');
+        // Route::get('/shipping-agency', [SubmenuController::class, 'agencies'])->name('agencies');
+        // Route::get('/shipment-types', [SubmenuController::class, 'types'])->name('types');
 
         // Quick submissions
-        Route::post('/ports', [SubmenuController::class, 'storePorts'])->name('ports.store');
-        Route::post('/agencies', [SubmenuController::class, 'storeAgencies'])->name('agencies.store');
-        Route::post('/types', [SubmenuController::class, 'storeTypes'])->name('types.store');
+        // Route::post('/ports', [SubmenuController::class, 'storePorts'])->name('ports.store');
+        // Route::post('/agencies', [SubmenuController::class, 'storeAgencies'])->name('agencies.store');
+        // Route::post('/types', [SubmenuController::class, 'storeTypes'])->name('types.store');
 
         // Other submenu items
-        Route::get('/coo-types', [SubmenuController::class, 'cooTypes'])->name('coo-types');
-        Route::get('/inspection-types', [SubmenuController::class, 'inspectionTypes'])->name('inspection-types');
-        Route::get('/bosla-gomrok', [SubmenuController::class, 'boslaGomrok'])->name('bosla-gomrok');
-        Route::get('/destinations', [SubmenuController::class, 'destinations'])->name('destinations');
-        Route::get('/load-containers', [SubmenuController::class, 'loadContainers'])->name('load-containers');
-        Route::get('/consignee-notify', [SubmenuController::class, 'consigneeNotify'])->name('consignee-notify');
-        Route::get('/quantity-types', [SubmenuController::class, 'quantityTypes'])->name('quantity-types');
-        Route::get('/shippers', [SubmenuController::class, 'shippers'])->name('shippers');
+
+        // Route::get('/inspection-types', [SubmenuController::class, 'inspectionTypes'])->name('inspection-types');
+        // Route::get('/bosla-gomrok', [SubmenuController::class, 'boslaGomrok'])->name('bosla-gomrok');
+        // Route::get('/destinations', [SubmenuController::class, 'destinations'])->name('destinations');
+        // Route::get('/load-containers', [SubmenuController::class, 'loadContainers'])->name('load-containers');
+        // Route::get('/consignee-notify', [SubmenuController::class, 'consigneeNotify'])->name('consignee-notify');
+        // Route::get('/quantity-types', [SubmenuController::class, 'quantityTypes'])->name('quantity-types');
+        // Route::get('/shippers', [SubmenuController::class, 'shippers'])->name('shippers');
     });
 
     // ===== MASTER DATA MANAGEMENT =====
