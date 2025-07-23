@@ -205,7 +205,7 @@
         </div>
 
         <!-- Debug Section -->
-        <div
+        {{-- <div
             style="margin-bottom: 10px; padding: 10px; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 4px;">
             <small style="color: #0369a1;">
                 <strong>Debug:</strong>
@@ -214,7 +214,7 @@
                 <button onclick="testJavaScript()" class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;">Test
                     JS</button>
             </small>
-        </div>
+        </div> --}}
 
         <!-- Permissions Table -->
         <div style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);">

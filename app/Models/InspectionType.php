@@ -15,47 +15,46 @@ class InspectionType extends Model
         'inspection_name',
         'inspection_category',
         'description',
-        'inspection_authority',
-        'certificate_type',
-        'inspection_fee',
-        'inspection_duration_hours',
-        'requires_advance_notice',
-        'notice_period_hours',
         'required_documents',
-        'inspection_criteria',
-        'special_requirements',
-        'is_mandatory',
-        'applicable_cargo_types',
-        'is_active',
-        'sort_order'
+        'estimated_duration',
+        'cost_estimate',
+        'regulatory_authority',
+        'mandatory',
+        'applies_to',
+        'prerequisites',
+        'validity_period',
+        'renewal_required',
+        'compliance_standards',
+        'status'
     ];
 
     protected $casts = [
         'required_documents' => 'array',
-        'inspection_criteria' => 'array',
-        'requires_advance_notice' => 'boolean',
-        'is_mandatory' => 'boolean',
-        'is_active' => 'boolean',
-        'inspection_fee' => 'decimal:2'
+        'applies_to' => 'array',
+        'mandatory' => 'boolean',
+        'renewal_required' => 'boolean',
+        'estimated_duration' => 'decimal:2',
+        'cost_estimate' => 'decimal:2',
+        'validity_period' => 'integer'
     ];
 
     // Relationships
     public function shipments()
     {
         return $this->belongsToMany(Shipment::class, 'shipment_inspections')
-            ->withPivot('inspection_status', 'inspection_date', 'inspector_name', 'certificate_number', 'notes')
+            ->withPivot(['inspection_date', 'completion_date', 'status', 'certificate_number', 'notes'])
             ->withTimestamps();
+    }
+
+    public function inspectionResults()
+    {
+        return $this->hasMany(InspectionResult::class);
     }
 
     // Scopes
     public function scopeActive($query)
     {
-        return $query->where('is_active', true);
-    }
-
-    public function scopeMandatory($query)
-    {
-        return $query->where('is_mandatory', true);
+        return $query->where('status', 'Active');
     }
 
     public function scopeByCategory($query, $category)
@@ -63,88 +62,107 @@ class InspectionType extends Model
         return $query->where('inspection_category', $category);
     }
 
-    public function scopeByAuthority($query, $authority)
+    public function scopeMandatory($query)
     {
-        return $query->where('inspection_authority', $authority);
+        return $query->where('mandatory', true);
     }
 
-    public function scopeOrdered($query)
+    public function scopeOptional($query)
     {
-        return $query->orderBy('sort_order')->orderBy('inspection_name');
+        return $query->where('mandatory', false);
+    }
+
+    public function scopeAppliesTo($query, $shipmentType)
+    {
+        return $query->whereJsonContains('applies_to', $shipmentType);
     }
 
     // Accessors
-    public function getStatusAttribute()
-    {
-        return $this->is_active ? 'Active' : 'Inactive';
-    }
-
     public function getCategoryDisplayAttribute()
     {
         $categories = [
-            'Pre-shipment' => '📋 Pre-shipment',
+            'Customs' => '🛃 Customs Clearance',
             'Quality' => '✅ Quality Control',
-            'Quantity' => '📊 Quantity Verification',
-            'Loading' => '📦 Loading Inspection',
+            'Safety' => '🛡️ Safety Inspection',
+            'Environmental' => '🌿 Environmental',
             'Security' => '🔒 Security Check',
-            'Customs' => '🛃 Customs Inspection',
-            'Safety' => '⚠️ Safety Inspection',
-            'Environmental' => '🌱 Environmental Check'
+            'Health' => '🏥 Health & Sanitary',
+            'Technical' => '🔧 Technical Inspection',
+            'Documentation' => '📋 Documentation Review',
+            'Physical' => '📦 Physical Examination',
+            'Laboratory' => '🧪 Laboratory Testing'
         ];
 
         return $categories[$this->inspection_category] ?? $this->inspection_category;
     }
 
-    public function getDurationDisplayAttribute()
-    {
-        if ($this->inspection_duration_hours < 1) {
-            return ($this->inspection_duration_hours * 60) . ' minutes';
-        } elseif ($this->inspection_duration_hours == 1) {
-            return '1 hour';
-        } else {
-            return $this->inspection_duration_hours . ' hours';
-        }
-    }
-
-    public function getNoticeDisplayAttribute()
-    {
-        if (!$this->requires_advance_notice) {
-            return 'No advance notice required';
-        }
-
-        if ($this->notice_period_hours < 24) {
-            return $this->notice_period_hours . ' hours notice required';
-        } else {
-            $days = $this->notice_period_hours / 24;
-            return $days . ' day' . ($days > 1 ? 's' : '') . ' notice required';
-        }
-    }
-
-    public function getRequiredDocumentsListAttribute()
+    public function getDocumentsListAttribute()
     {
         if (!$this->required_documents || !is_array($this->required_documents)) {
-            return 'No specific documents required';
+            return 'Standard documentation';
         }
 
         return implode(', ', $this->required_documents);
     }
 
-    public function getInspectionCriteriaListAttribute()
+    public function getAppliesToListAttribute()
     {
-        if (!$this->inspection_criteria || !is_array($this->inspection_criteria)) {
-            return 'Standard inspection criteria';
+        if (!$this->applies_to || !is_array($this->applies_to)) {
+            return 'All shipment types';
         }
 
-        return implode(', ', $this->inspection_criteria);
+        return implode(', ', $this->applies_to);
     }
 
-    public function getFeeDisplayAttribute()
+    public function getDurationDisplayAttribute()
     {
-        if (!$this->inspection_fee || $this->inspection_fee == 0) {
-            return 'No fee';
+        if (!$this->estimated_duration) {
+            return 'Not specified';
         }
 
-        return '$' . number_format($this->inspection_fee, 2);
+        $hours = $this->estimated_duration;
+
+        if ($hours < 1) {
+            return ($hours * 60) . ' minutes';
+        } elseif ($hours < 24) {
+            return $hours . ' hour' . ($hours > 1 ? 's' : '');
+        } else {
+            $days = round($hours / 24, 1);
+            return $days . ' day' . ($days > 1 ? 's' : '');
+        }
+    }
+
+    public function getCostDisplayAttribute()
+    {
+        if (!$this->cost_estimate) {
+            return 'Contact for pricing';
+        }
+
+        return '$' . number_format($this->cost_estimate, 2) . ' USD';
+    }
+
+    public function getMandatoryDisplayAttribute()
+    {
+        return $this->mandatory ? 'Mandatory' : 'Optional';
+    }
+
+    public function getValidityDisplayAttribute()
+    {
+        if (!$this->validity_period) {
+            return 'No expiration';
+        }
+
+        $days = $this->validity_period;
+
+        if ($days < 30) {
+            return $days . ' days';
+        } elseif ($days < 365) {
+            $months = round($days / 30);
+            return $months . ' month' . ($months > 1 ? 's' : '');
+        } else {
+            $years = round($days / 365, 1);
+            return $years . ' year' . ($years > 1 ? 's' : '');
+        }
     }
 
     // Methods
@@ -152,31 +170,36 @@ class InspectionType extends Model
     {
         return [
             'total_inspections' => $this->shipments()->count(),
-            'pending_inspections' => $this->shipments()->wherePivot('inspection_status', 'Pending')->count(),
-            'completed_inspections' => $this->shipments()->wherePivot('inspection_status', 'Completed')->count(),
-            'failed_inspections' => $this->shipments()->wherePivot('inspection_status', 'Failed')->count(),
-            'monthly_inspections' => $this->shipments()->whereMonth('shipment_inspections.created_at', now()->month)->count()
+            'pending_inspections' => $this->shipments()->wherePivot('status', 'Pending')->count(),
+            'completed_inspections' => $this->shipments()->wherePivot('status', 'Completed')->count(),
+            'failed_inspections' => $this->shipments()->wherePivot('status', 'Failed')->count(),
+            'monthly_volume' => $this->shipments()->whereMonth('shipment_inspections.created_at', now()->month)->count(),
+            'average_duration' => $this->getAverageDuration()
         ];
     }
 
-    public function isApplicableToCargoType($cargoType)
+    public function getAverageDuration()
     {
-        if (!$this->applicable_cargo_types) return true;
+        $completedInspections = $this->shipments()
+            ->wherePivot('status', 'Completed')
+            ->whereNotNull('shipment_inspections.inspection_date')
+            ->whereNotNull('shipment_inspections.completion_date')
+            ->get();
 
-        $applicableTypes = explode(',', $this->applicable_cargo_types);
-        return in_array($cargoType, array_map('trim', $applicableTypes));
-    }
-
-    public function canBeScheduled($requestedDate = null)
-    {
-        if (!$this->is_active) return false;
-
-        if ($this->requires_advance_notice && $requestedDate) {
-            $minimumTime = now()->addHours($this->notice_period_hours);
-            return $requestedDate >= $minimumTime;
+        if ($completedInspections->isEmpty()) {
+            return 0;
         }
 
-        return true;
+        $totalHours = 0;
+        foreach ($completedInspections as $shipment) {
+            $start = $shipment->pivot->inspection_date;
+            $end = $shipment->pivot->completion_date;
+            if ($start && $end) {
+                $totalHours += \Carbon\Carbon::parse($start)->diffInHours(\Carbon\Carbon::parse($end));
+            }
+        }
+
+        return round($totalHours / $completedInspections->count(), 2);
     }
 
     public function hasDocument($document)
@@ -185,10 +208,45 @@ class InspectionType extends Model
         return in_array($document, $this->required_documents);
     }
 
-    public function hasCriteria($criteria)
+    public function appliesTo($shipmentType)
     {
-        if (!$this->inspection_criteria) return false;
-        return in_array($criteria, $this->inspection_criteria);
+        if (!$this->applies_to) return true; // If no restrictions, applies to all
+        return in_array($shipmentType, $this->applies_to);
+    }
+
+    public function isExpired($completionDate)
+    {
+        if (!$this->validity_period || !$completionDate) {
+            return false;
+        }
+
+        $expiryDate = \Carbon\Carbon::parse($completionDate)->addDays($this->validity_period);
+        return now()->isAfter($expiryDate);
+    }
+
+    public function getExpiryDate($completionDate)
+    {
+        if (!$this->validity_period || !$completionDate) {
+            return null;
+        }
+
+        return \Carbon\Carbon::parse($completionDate)->addDays($this->validity_period);
+    }
+
+    public function calculateCost($shipmentValue = null, $customMultiplier = 1)
+    {
+        $baseCost = $this->cost_estimate ?? 0;
+
+        // Apply custom multiplier (for complex or rush inspections)
+        $cost = $baseCost * $customMultiplier;
+
+        // Some inspection types might have percentage-based pricing
+        if ($shipmentValue && $this->inspection_category === 'Customs') {
+            $percentageCost = $shipmentValue * 0.001; // 0.1% of shipment value
+            $cost = max($cost, $percentageCost);
+        }
+
+        return round($cost, 2);
     }
 
     // Validation rules
@@ -197,21 +255,71 @@ class InspectionType extends Model
         return [
             'inspection_code' => 'required|string|max:20|unique:inspection_types,inspection_code,' . $id,
             'inspection_name' => 'required|string|max:255',
-            'inspection_category' => 'required|string|in:Pre-shipment,Quality,Quantity,Loading,Security,Customs,Safety,Environmental',
+            'inspection_category' => 'required|string|in:Customs,Quality,Safety,Environmental,Security,Health,Technical,Documentation,Physical,Laboratory',
             'description' => 'nullable|string',
-            'inspection_authority' => 'nullable|string|max:255',
-            'certificate_type' => 'nullable|string|max:255',
-            'inspection_fee' => 'nullable|numeric|min:0',
-            'inspection_duration_hours' => 'required|numeric|min:0.5|max:168',
-            'requires_advance_notice' => 'required|boolean',
-            'notice_period_hours' => 'nullable|integer|min:1|max:720',
             'required_documents' => 'nullable|array',
-            'inspection_criteria' => 'nullable|array',
-            'special_requirements' => 'nullable|string',
-            'is_mandatory' => 'required|boolean',
-            'applicable_cargo_types' => 'nullable|string',
-            'is_active' => 'required|boolean',
-            'sort_order' => 'nullable|integer|min:0'
+            'estimated_duration' => 'nullable|numeric|min:0|max:999.99',
+            'cost_estimate' => 'nullable|numeric|min:0|max:999999.99',
+            'regulatory_authority' => 'nullable|string|max:255',
+            'mandatory' => 'required|boolean',
+            'applies_to' => 'nullable|array',
+            'prerequisites' => 'nullable|string',
+            'validity_period' => 'nullable|integer|min:1|max:9999',
+            'renewal_required' => 'required|boolean',
+            'compliance_standards' => 'nullable|string',
+            'status' => 'required|string|in:Active,Inactive'
+        ];
+    }
+
+    public static function getCategories()
+    {
+        return [
+            'Customs' => 'Customs Clearance',
+            'Quality' => 'Quality Control',
+            'Safety' => 'Safety Inspection',
+            'Environmental' => 'Environmental',
+            'Security' => 'Security Check',
+            'Health' => 'Health & Sanitary',
+            'Technical' => 'Technical Inspection',
+            'Documentation' => 'Documentation Review',
+            'Physical' => 'Physical Examination',
+            'Laboratory' => 'Laboratory Testing'
+        ];
+    }
+
+    public static function getDocumentTypes()
+    {
+        return [
+            'Bill of Lading',
+            'Commercial Invoice',
+            'Packing List',
+            'Certificate of Origin',
+            'Import License',
+            'Health Certificate',
+            'Quality Certificate',
+            'Safety Data Sheet',
+            'Insurance Policy',
+            'Customs Declaration',
+            'Technical Specifications',
+            'Test Reports',
+            'Compliance Certificate',
+            'Environmental Permit'
+        ];
+    }
+
+    public static function getShipmentTypes()
+    {
+        return [
+            'FCL' => 'Full Container Load',
+            'LCL' => 'Less Container Load',
+            'Break Bulk' => 'Break Bulk',
+            'Dangerous Goods' => 'Dangerous Goods',
+            'Perishable' => 'Perishable Goods',
+            'Live Animals' => 'Live Animals',
+            'High Value' => 'High Value Cargo',
+            'Project Cargo' => 'Project Cargo',
+            'Pharmaceuticals' => 'Pharmaceuticals',
+            'Food Products' => 'Food Products'
         ];
     }
 }

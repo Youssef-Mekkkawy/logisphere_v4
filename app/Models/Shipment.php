@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Shipment extends Model
 {
     use HasFactory;
-protected $fillable = [
+    protected $fillable = [
         'shipment_id',
         'company_id',
         'employee_id',  // Add this
@@ -35,7 +35,7 @@ protected $fillable = [
         'special_instructions',
         'status'
     ];
-    
+
 
     protected $casts = [
         'shipping_date' => 'date',
@@ -58,7 +58,7 @@ protected $fillable = [
 
     public function originPort()
     {
-        return $this->belongsTo(Port::class, 'origin_port_id');
+        return $this->belongsTo(Port::class, 'origin_port_id', 'id');
     }
 
     public function destinationPort()

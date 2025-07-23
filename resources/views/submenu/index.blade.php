@@ -44,8 +44,8 @@
                         style="width: 100%; justify-content: flex-start;">
                         📜 COO Types
                     </a>
-                    {{-- {{ route('submenu.inspection-types.index') ?? '' }} --}}
-                    <a href="" class="btn btn-outline" style="width: 100%; justify-content: flex-start;">
+                    <a href="{{ route('submenu.inspection-types.index') }}" class="btn btn-outline"
+                        style="width: 100%; justify-content: flex-start;">
                         🔍 Inspection Types
                     </a>
                 </div>

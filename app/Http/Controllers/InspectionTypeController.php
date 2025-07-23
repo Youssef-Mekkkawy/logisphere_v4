@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\InspectionType;
+use App\Models\Country;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
@@ -22,8 +23,8 @@ class InspectionTypeController extends Controller
             $query->where(function ($q) use ($search) {
                 $q->where('inspection_name', 'like', "%{$search}%")
                     ->orWhere('inspection_code', 'like', "%{$search}%")
-                    ->orWhere('inspection_authority', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%");
+                    ->orWhere('inspection_category', 'like', "%{$search}%")
+                    ->orWhere('regulatory_authority', 'like', "%{$search}%");
             });
         }
 
@@ -31,31 +32,24 @@ class InspectionTypeController extends Controller
             $query->where('inspection_category', $request->inspection_category);
         }
 
-        if ($request->filled('inspection_authority')) {
-            $query->where('inspection_authority', $request->inspection_authority);
+        if ($request->filled('mandatory')) {
+            $query->where('mandatory', $request->mandatory);
         }
 
-        if ($request->filled('is_mandatory')) {
-            $query->where('is_mandatory', $request->is_mandatory);
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
         }
 
-        if ($request->filled('is_active')) {
-            $query->where('is_active', $request->is_active);
+        if ($request->filled('regulatory_authority')) {
+            $query->where('regulatory_authority', 'like', "%{$request->regulatory_authority}%");
         }
 
         // Get inspection types with pagination
-        $inspectionTypes = $query->ordered()
+        $inspectionTypes = $query->orderBy('inspection_name')
             ->paginate(15)
             ->withQueryString();
 
-        // Get filter options
-        $authorities = InspectionType::select('inspection_authority')
-            ->distinct()
-            ->whereNotNull('inspection_authority')
-            ->pluck('inspection_authority')
-            ->sort();
-
-        return view('submenu.inspection-types.index', compact('inspectionTypes', 'authorities'));
+        return view('submenu.inspection-types.index', compact('inspectionTypes'));
     }
 
     /**
@@ -63,14 +57,7 @@ class InspectionTypeController extends Controller
      */
     public function create()
     {
-        // Get existing authorities for dropdown
-        $authorities = InspectionType::select('inspection_authority')
-            ->distinct()
-            ->whereNotNull('inspection_authority')
-            ->pluck('inspection_authority')
-            ->sort();
-
-        return view('submenu.inspection-types.create', compact('authorities'));
+        return view('submenu.inspection-types.create');
     }
 
     /**
@@ -91,12 +78,14 @@ class InspectionTypeController extends Controller
 
             $data = $request->all();
 
-            // Handle JSON arrays
-            $arrayFields = ['required_documents', 'inspection_criteria'];
-            foreach ($arrayFields as $field) {
-                if ($request->has($field)) {
-                    $data[$field] = array_filter($request->get($field, []));
-                }
+            // Handle required_documents array
+            if ($request->has('required_documents')) {
+                $data['required_documents'] = array_filter($request->get('required_documents', []));
+            }
+
+            // Handle applies_to array
+            if ($request->has('applies_to')) {
+                $data['applies_to'] = array_filter($request->get('applies_to', []));
             }
 
             InspectionType::create($data);
@@ -121,14 +110,14 @@ class InspectionTypeController extends Controller
         // Get statistics
         $statistics = $inspectionType->getStatistics();
 
-        // Get recent inspections
-        $recentInspections = $inspectionType->shipments()
-            ->with(['company'])
-            ->latest('shipment_inspections.created_at')
+        // Get recent shipments that used this inspection type
+        $recentShipments = $inspectionType->shipments()
+            ->with(['company', 'originPort'])
+            ->latest()
             ->take(5)
             ->get();
 
-        return view('submenu.inspection-types.show', compact('inspectionType', 'statistics', 'recentInspections'));
+        return view('submenu.inspection-types.show', compact('inspectionType', 'statistics', 'recentShipments'));
     }
 
     /**
@@ -136,14 +125,7 @@ class InspectionTypeController extends Controller
      */
     public function edit(InspectionType $inspectionType)
     {
-        // Get existing authorities for dropdown
-        $authorities = InspectionType::select('inspection_authority')
-            ->distinct()
-            ->whereNotNull('inspection_authority')
-            ->pluck('inspection_authority')
-            ->sort();
-
-        return view('submenu.inspection-types.edit', compact('inspectionType', 'authorities'));
+        return view('submenu.inspection-types.edit', compact('inspectionType'));
     }
 
     /**
@@ -164,12 +146,14 @@ class InspectionTypeController extends Controller
 
             $data = $request->all();
 
-            // Handle JSON arrays
-            $arrayFields = ['required_documents', 'inspection_criteria'];
-            foreach ($arrayFields as $field) {
-                if ($request->has($field)) {
-                    $data[$field] = array_filter($request->get($field, []));
-                }
+            // Handle required_documents array
+            if ($request->has('required_documents')) {
+                $data['required_documents'] = array_filter($request->get('required_documents', []));
+            }
+
+            // Handle applies_to array
+            if ($request->has('applies_to')) {
+                $data['applies_to'] = array_filter($request->get('applies_to', []));
             }
 
             $inspectionType->update($data);
@@ -214,28 +198,29 @@ class InspectionTypeController extends Controller
     public function getByCriteria(Request $request)
     {
         $search = $request->get('search', '');
-        $category = $request->get('category');
+        $category = $request->get('inspection_category');
         $mandatory = $request->get('mandatory');
 
-        $query = InspectionType::where('is_active', true);
+        $query = InspectionType::where('status', 'Active');
 
         if ($category) {
             $query->where('inspection_category', $category);
         }
 
         if ($mandatory !== null) {
-            $query->where('is_mandatory', $mandatory);
+            $query->where('mandatory', $mandatory);
         }
 
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('inspection_name', 'like', "%{$search}%")
-                    ->orWhere('inspection_code', 'like', "%{$search}%");
+                    ->orWhere('inspection_code', 'like', "%{$search}%")
+                    ->orWhere('regulatory_authority', 'like', "%{$search}%");
             });
         }
 
-        $inspectionTypes = $query->select('id', 'inspection_code', 'inspection_name', 'inspection_category', 'is_mandatory')
-            ->ordered()
+        $inspectionTypes = $query->select('id', 'inspection_code', 'inspection_name', 'inspection_category', 'regulatory_authority', 'estimated_duration')
+            ->orderBy('inspection_name')
             ->limit(20)
             ->get();
 
@@ -247,83 +232,91 @@ class InspectionTypeController extends Controller
      */
     public function toggleStatus(InspectionType $inspectionType)
     {
-        $newStatus = !$inspectionType->is_active;
+        $newStatus = $inspectionType->status === 'Active' ? 'Inactive' : 'Active';
 
-        $inspectionType->update(['is_active' => $newStatus]);
+        $inspectionType->update(['status' => $newStatus]);
 
-        $statusText = $newStatus ? 'Active' : 'Inactive';
         return redirect()->back()
-            ->with('success', "Inspection type status changed to {$statusText}!");
+            ->with('success', "Inspection Type status changed to {$newStatus}!");
     }
 
     /**
-     * Check inspection availability
+     * Get inspection types by category
      */
-    public function checkAvailability(Request $request, InspectionType $inspectionType)
+    public function getByCategory(Request $request)
     {
-        $requestedDate = $request->get('inspection_date');
-        $cargoType = $request->get('cargo_type');
+        $category = $request->get('category');
 
-        $available = $inspectionType->canBeScheduled($requestedDate);
-        $applicable = $inspectionType->isApplicableToCargoType($cargoType);
+        if (!$category) {
+            return response()->json(['error' => 'Category required'], 400);
+        }
+
+        $inspectionTypes = InspectionType::active()
+            ->where('inspection_category', $category)
+            ->select('id', 'inspection_code', 'inspection_name', 'estimated_duration', 'cost_estimate')
+            ->orderBy('inspection_name')
+            ->get();
+
+        return response()->json($inspectionTypes);
+    }
+
+    /**
+     * Get mandatory inspection types for shipment type
+     */
+    public function getMandatoryForShipment(Request $request)
+    {
+        $shipmentType = $request->get('shipment_type');
+        $shipmentCategory = $request->get('shipment_category');
+
+        $query = InspectionType::active()->where('mandatory', true);
+
+        if ($shipmentType) {
+            $query->whereJsonContains('applies_to', $shipmentType);
+        }
+
+        if ($shipmentCategory) {
+            $query->whereJsonContains('applies_to', $shipmentCategory);
+        }
+
+        $inspectionTypes = $query->select('id', 'inspection_code', 'inspection_name', 'inspection_category', 'estimated_duration')
+            ->orderBy('inspection_category')
+            ->orderBy('inspection_name')
+            ->get();
+
+        return response()->json($inspectionTypes);
+    }
+
+    /**
+     * Calculate total inspection cost and duration
+     */
+    public function calculateCostAndDuration(Request $request)
+    {
+        $inspectionIds = $request->get('inspection_ids', []);
+
+        if (empty($inspectionIds)) {
+            return response()->json([
+                'total_cost' => 0,
+                'total_duration' => 0,
+                'message' => 'No inspections selected'
+            ]);
+        }
+
+        $inspections = InspectionType::whereIn('id', $inspectionIds)->get();
+
+        $totalCost = $inspections->sum('cost_estimate');
+        $totalDuration = $inspections->sum('estimated_duration');
 
         return response()->json([
-            'available' => $available && $applicable,
-            'applicable_to_cargo' => $applicable,
-            'requires_advance_notice' => $inspectionType->requires_advance_notice,
-            'notice_period_hours' => $inspectionType->notice_period_hours,
-            'duration_hours' => $inspectionType->inspection_duration_hours,
-            'fee' => $inspectionType->inspection_fee,
-            'required_documents' => $inspectionType->required_documents,
-            'message' => $available && $applicable
-                ? 'Inspection can be scheduled'
-                : 'Inspection cannot be scheduled for the requested date or cargo type'
+            'total_cost' => $totalCost,
+            'total_duration' => $totalDuration,
+            'breakdown' => $inspections->map(function ($inspection) {
+                return [
+                    'name' => $inspection->inspection_name,
+                    'cost' => $inspection->cost_estimate,
+                    'duration' => $inspection->estimated_duration
+                ];
+            }),
+            'message' => "Total: $totalCost USD, {$totalDuration} hours"
         ]);
-    }
-
-    /**
-     * Get mandatory inspections for cargo type
-     */
-    public function getMandatoryForCargoType(Request $request)
-    {
-        $cargoType = $request->get('cargo_type');
-
-        $mandatoryInspections = InspectionType::active()
-            ->mandatory()
-            ->get()
-            ->filter(function ($inspection) use ($cargoType) {
-                return $inspection->isApplicableToCargoType($cargoType);
-            })
-            ->values();
-
-        return response()->json($mandatoryInspections);
-    }
-
-    /**
-     * Reorder inspection types
-     */
-    public function reorder(Request $request)
-    {
-        $request->validate([
-            'orders' => 'required|array',
-            'orders.*.id' => 'required|exists:inspection_types,id',
-            'orders.*.sort_order' => 'required|integer|min:0'
-        ]);
-
-        try {
-            DB::beginTransaction();
-
-            foreach ($request->orders as $order) {
-                InspectionType::where('id', $order['id'])
-                    ->update(['sort_order' => $order['sort_order']]);
-            }
-
-            DB::commit();
-
-            return response()->json(['success' => true, 'message' => 'Order updated successfully']);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['success' => false, 'message' => 'Failed to update order'], 500);
-        }
     }
 }

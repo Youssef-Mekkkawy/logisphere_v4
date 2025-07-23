@@ -26,6 +26,7 @@ use App\Http\Controllers\ConsigneeNotifyController;
 use App\Http\Controllers\ContainerLoadingController;
 use App\Http\Controllers\DestinationController;
 use App\Http\Controllers\QuantityTypeController;
+use App\Http\Controllers\InspectionTypeController;
 
 // ======================================================================================
 // GUEST ROUTES
@@ -142,6 +143,29 @@ Route::middleware('auth')->group(function () {
     Route::prefix('submenu')->name('submenu.')->group(function () {
         Route::get('/', [SubmenuController::class, 'index'])->name('index');
 
+        Route::resource('ports', PortController::class, [
+            'names' => [
+                'index' => 'ports.index',
+                'create' => 'ports.create',
+                'store' => 'ports.store',
+                'show' => 'ports.show',
+                'edit' => 'ports.edit',
+                'update' => 'ports.update',
+                'destroy' => 'ports.destroy'
+            ]
+        ]);
+
+        Route::resource('inspection-types', InspectionTypeController::class, [
+            'names' => [
+                'index' => 'inspection-types.index',
+                'create' => 'inspection-types.create',
+                'store' => 'inspection-types.store',
+                'show' => 'inspection-types.show',
+                'edit' => 'inspection-types.edit',
+                'update' => 'inspection-types.update',
+                'destroy' => 'inspection-types.destroy'
+            ]
+        ]);
         Route::resource('ports', PortController::class, [
             'names' => [
                 'index' => 'ports.index',

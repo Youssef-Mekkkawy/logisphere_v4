@@ -18,31 +18,25 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            // Phase 1: Lookup/Reference Tables (No Dependencies)
             AllStatusSeeder::class,
             NationalitiesSeeder::class,
-            UserSeeder::class,              // ✅ Add users first
-
-            // Phase 2: Core Infrastructure 
-            PortSeeder::class,              // ✅ Working
-            CountrySeeder::class,           // Must run first
+            UserSeeder::class,
+            CountrySeeder::class,
+            PortSeeder::class, // This already handles all the ports properly
             ShippingAgencySeeder::class,
-            CompanySeeder::class,           // ✅ Created
-
-            // Phase 3: Business Logic
-            ShipmentSeeder::class,          // ✅ Created (needs companies + ports)
-            RouteSeeder::class,             // ✅ Working (now has ports)
-
-            // Phase 4: Dependent Tables
-            BookingSeeder::class,           // ✅ Now has shipments/companies/users
-            ContainerSeeder::class,         // ✅ Working (has bookings/shipments/ports)
+            CompanySeeder::class,
+            ShipmentSeeder::class,
+            RouteSeeder::class,
+            BookingSeeder::class,
+            ContainerSeeder::class,
             PermissionSeeder::class,
             RoleSeeder::class,
             UpdatedUserSeeder::class,
             ConsigneeNotifySeeder::class,
             ContainerLoadingSeeder::class,
+            InspectionTypeSeeder::class,
             DestinationSeeder::class,
-
+            PortOperationSeeder::class, // Add this if you want port operations
         ]);
 
         $this->command->info('🎉 All seeders completed successfully!');
@@ -113,16 +107,16 @@ class DatabaseSeeder extends Seeder
 
         // Create sample ports
         $ports = [
-            ['code' => 'CNSHA', 'name' => 'Shanghai Port', 'country' => 'China', 'city' => 'Shanghai', 'type' => 'Container', 'status' => 'Active'],
-            ['code' => 'USLAX', 'name' => 'Los Angeles Port', 'country' => 'USA', 'city' => 'Los Angeles', 'type' => 'Container', 'status' => 'Active'],
-            ['code' => 'DEHAM', 'name' => 'Hamburg Port', 'country' => 'Germany', 'city' => 'Hamburg', 'type' => 'Container', 'status' => 'Active'],
-            ['code' => 'JPNGO', 'name' => 'Tokyo Port', 'country' => 'Japan', 'city' => 'Tokyo', 'type' => 'Container', 'status' => 'Active'],
-            ['code' => 'NLRTM', 'name' => 'Rotterdam Port', 'country' => 'Netherlands', 'city' => 'Rotterdam', 'type' => 'Container', 'status' => 'Active'],
+            ['port_code' => 'CNSHA', 'port_name' => 'Shanghai Port', 'country' => 'China', 'city' => 'Shanghai', 'port_type' => 'Container', 'status' => 'Active'],
+            ['port_code' => 'USLAX', 'port_name' => 'Los Angeles Port', 'country' => 'USA', 'city' => 'Los Angeles', 'port_type' => 'Container', 'status' => 'Active'],
+            ['port_code' => 'DEHAM', 'port_name' => 'Hamburg Port', 'country' => 'Germany', 'city' => 'Hamburg', 'port_type' => 'Container', 'status' => 'Active'],
+            ['port_code' => 'JPNGO', 'port_name' => 'Tokyo Port', 'country' => 'Japan', 'city' => 'Tokyo', 'port_type' => 'Container', 'status' => 'Active'],
+            ['port_code' => 'NLRTM', 'port_name' => 'Rotterdam Port', 'country' => 'Netherlands', 'city' => 'Rotterdam', 'port_type' => 'Container', 'status' => 'Active'],
         ];
 
         foreach ($ports as $portData) {
             Port::firstOrCreate(
-                ['code' => $portData['code']],
+                ['port_code' => $portData['port_code']],
                 $portData
             );
         }

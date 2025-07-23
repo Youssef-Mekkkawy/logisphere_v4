@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Port;
+use App\Models\Country;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
@@ -23,68 +24,36 @@ class PortController extends Controller
                 $q->where('port_name', 'like', "%{$search}%")
                     ->orWhere('port_code', 'like', "%{$search}%")
                     ->orWhere('city', 'like', "%{$search}%")
-                    ->orWhere('country', 'like', "%{$search}%")
-                    ->orWhere('port_authority', 'like', "%{$search}%");
+                    ->orWhere('contact_person', 'like', "%{$search}%");
             });
-        }
-
-        if ($request->filled('country')) {
-            $query->where('country', $request->country);
         }
 
         if ($request->filled('port_type')) {
             $query->where('port_type', $request->port_type);
         }
 
-        if ($request->filled('operational_status')) {
-            $query->where('operational_status', $request->operational_status);
+        if ($request->filled('country_id')) {
+            $query->where('country_id', $request->country_id);
         }
 
-        if ($request->filled('security_level')) {
-            $query->where('security_level', $request->security_level);
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
         }
 
-        if ($request->filled('is_major_port')) {
-            $query->where('is_major_port', $request->is_major_port);
-        }
-
-        if ($request->filled('is_container_port')) {
-            $query->where('is_container_port', $request->is_container_port);
-        }
-
-        if ($request->filled('is_bulk_port')) {
-            $query->where('is_bulk_port', $request->is_bulk_port);
-        }
-
-        if ($request->filled('is_active')) {
-            $query->where('is_active', $request->is_active);
+        if ($request->filled('major_port')) {
+            $query->where('major_port', $request->major_port);
         }
 
         // Get ports with pagination
-        $ports = $query->ordered()
+        $ports = $query->with('country')
+            ->orderBy('port_name')
             ->paginate(15)
             ->withQueryString();
 
         // Get filter options
-        $countries = Port::select('country')
-            ->distinct()
-            ->whereNotNull('country')
-            ->orderBy('country')
-            ->pluck('country');
+        $countries = Country::active()->orderBy('name')->get();
 
-        $portTypes = Port::select('port_type')
-            ->distinct()
-            ->whereNotNull('port_type')
-            ->orderBy('port_type')
-            ->pluck('port_type');
-
-        $operationalStatuses = Port::select('operational_status')
-            ->distinct()
-            ->whereNotNull('operational_status')
-            ->orderBy('operational_status')
-            ->pluck('operational_status');
-
-        return view('submenu.ports.index', compact('ports', 'countries', 'portTypes', 'operationalStatuses'));
+        return view('submenu.ports.index', compact('ports', 'countries'));
     }
 
     /**
@@ -92,20 +61,9 @@ class PortController extends Controller
      */
     public function create()
     {
-        // Get existing data for dropdowns
-        $countries = Port::select('country')
-            ->distinct()
-            ->whereNotNull('country')
-            ->orderBy('country')
-            ->pluck('country');
+        $countries = Country::active()->orderBy('name')->get();
 
-        $portAuthorities = Port::select('port_authority')
-            ->distinct()
-            ->whereNotNull('port_authority')
-            ->orderBy('port_authority')
-            ->pluck('port_authority');
-
-        return view('submenu.ports.create', compact('countries', 'portAuthorities'));
+        return view('submenu.ports.create', compact('countries'));
     }
 
     /**
@@ -126,28 +84,14 @@ class PortController extends Controller
 
             $data = $request->all();
 
-            // Handle JSON arrays
-            $arrayFields = [
-                'facilities',
-                'services',
-                'terminal_operators',
-                'handling_equipment',
-                'cargo_types_handled',
-                'restrictions',
-                'port_charges',
-                'working_hours',
-                'weather_conditions'
-            ];
-
-            foreach ($arrayFields as $field) {
-                if ($request->has($field)) {
-                    $data[$field] = array_filter($request->get($field, []));
-                }
+            // Handle facilities array
+            if ($request->has('facilities')) {
+                $data['facilities'] = array_filter($request->get('facilities', []));
             }
 
-            // Auto-generate port code if not provided
-            if (empty($data['port_code'])) {
-                $data['port_code'] = $this->generatePortCode($data['city'], $data['country']);
+            // Handle services array
+            if ($request->has('services')) {
+                $data['services'] = array_filter($request->get('services', []));
             }
 
             Port::create($data);
@@ -169,50 +113,19 @@ class PortController extends Controller
      */
     public function show(Port $port)
     {
+        $port->load('country');
+
         // Get statistics
         $statistics = $port->getStatistics();
 
         // Get recent shipments
-        $recentOriginShipments = $port->originShipments()
+        $recentShipments = $port->originShipments()
             ->with(['company', 'destinationPort'])
             ->latest()
             ->take(5)
             ->get();
 
-        $recentDestinationShipments = $port->destinationShipments()
-            ->with(['company', 'originPort'])
-            ->latest()
-            ->take(5)
-            ->get();
-
-        // Get nearby ports (within 500km)
-        $nearbyPorts = collect();
-        if ($port->latitude && $port->longitude) {
-            $nearbyPorts = Port::where('id', '!=', $port->id)
-                ->whereNotNull('latitude')
-                ->whereNotNull('longitude')
-                ->get()
-                ->map(function ($nearbyPort) use ($port) {
-                    $distance = $port->calculateDistance($nearbyPort);
-                    return [
-                        'port' => $nearbyPort,
-                        'distance' => $distance
-                    ];
-                })
-                ->filter(function ($item) {
-                    return $item['distance'] && $item['distance'] <= 500;
-                })
-                ->sortBy('distance')
-                ->take(10);
-        }
-
-        return view('submenu.ports.show', compact(
-            'port',
-            'statistics',
-            'recentOriginShipments',
-            'recentDestinationShipments',
-            'nearbyPorts'
-        ));
+        return view('submenu.ports.show', compact('port', 'statistics', 'recentShipments'));
     }
 
     /**
@@ -220,20 +133,9 @@ class PortController extends Controller
      */
     public function edit(Port $port)
     {
-        // Get existing data for dropdowns
-        $countries = Port::select('country')
-            ->distinct()
-            ->whereNotNull('country')
-            ->orderBy('country')
-            ->pluck('country');
+        $countries = Country::active()->orderBy('name')->get();
 
-        $portAuthorities = Port::select('port_authority')
-            ->distinct()
-            ->whereNotNull('port_authority')
-            ->orderBy('port_authority')
-            ->pluck('port_authority');
-
-        return view('submenu.ports.edit', compact('port', 'countries', 'portAuthorities'));
+        return view('submenu.ports.edit', compact('port', 'countries'));
     }
 
     /**
@@ -254,23 +156,14 @@ class PortController extends Controller
 
             $data = $request->all();
 
-            // Handle JSON arrays
-            $arrayFields = [
-                'facilities',
-                'services',
-                'terminal_operators',
-                'handling_equipment',
-                'cargo_types_handled',
-                'restrictions',
-                'port_charges',
-                'working_hours',
-                'weather_conditions'
-            ];
+            // Handle facilities array
+            if ($request->has('facilities')) {
+                $data['facilities'] = array_filter($request->get('facilities', []));
+            }
 
-            foreach ($arrayFields as $field) {
-                if ($request->has($field)) {
-                    $data[$field] = array_filter($request->get($field, []));
-                }
+            // Handle services array
+            if ($request->has('services')) {
+                $data['services'] = array_filter($request->get('services', []));
             }
 
             $port->update($data);
@@ -317,22 +210,22 @@ class PortController extends Controller
     public function getByCriteria(Request $request)
     {
         $search = $request->get('search', '');
-        $country = $request->get('country');
         $portType = $request->get('port_type');
-        $onlyActive = $request->get('active_only', true);
+        $countryId = $request->get('country_id');
+        $majorOnly = $request->get('major_only', false);
 
-        $query = Port::query();
-
-        if ($onlyActive) {
-            $query->where('is_active', true);
-        }
-
-        if ($country) {
-            $query->where('country', $country);
-        }
+        $query = Port::where('status', 'Active');
 
         if ($portType) {
             $query->where('port_type', $portType);
+        }
+
+        if ($countryId) {
+            $query->where('country_id', $countryId);
+        }
+
+        if ($majorOnly) {
+            $query->where('major_port', true);
         }
 
         if ($search) {
@@ -343,8 +236,8 @@ class PortController extends Controller
             });
         }
 
-        $ports = $query->select('id', 'port_code', 'port_name', 'city', 'country', 'port_type')
-            ->ordered()
+        $ports = $query->select('id', 'port_code', 'port_name', 'port_type', 'city', 'country')
+            ->orderBy('port_name')
             ->limit(20)
             ->get();
 
@@ -356,13 +249,110 @@ class PortController extends Controller
      */
     public function toggleStatus(Port $port)
     {
-        $newStatus = !$port->is_active;
+        $newStatus = $port->status === 'Active' ? 'Inactive' : 'Active';
 
-        $port->update(['is_active' => $newStatus]);
+        $port->update(['status' => $newStatus]);
 
-        $statusText = $newStatus ? 'Active' : 'Inactive';
         return redirect()->back()
-            ->with('success', "Port status changed to {$statusText}!");
+            ->with('success', "Port status changed to {$newStatus}!");
+    }
+
+    /**
+     * Get port statistics
+     */
+    public function getStatistics(Port $port)
+    {
+        $statistics = $port->getStatistics();
+
+        return response()->json($statistics);
+    }
+
+    /**
+     * Get ports by type
+     */
+    public function getByType(Request $request)
+    {
+        $type = $request->get('type');
+
+        if (!$type) {
+            return response()->json(['error' => 'Port type required'], 400);
+        }
+
+        $ports = Port::active()
+            ->where('port_type', $type)
+            ->select('id', 'port_code', 'port_name', 'city', 'country')
+            ->orderBy('port_name')
+            ->get();
+
+        return response()->json($ports);
+    }
+
+    /**
+     * Get major ports
+     */
+    public function getMajorPorts(Request $request)
+    {
+        $countryId = $request->get('country_id');
+
+        $query = Port::active()->where('major_port', true);
+
+        if ($countryId) {
+            $query->where('country_id', $countryId);
+        }
+
+        $ports = $query->select('id', 'port_code', 'port_name', 'port_type', 'city', 'country')
+            ->orderBy('port_name')
+            ->get();
+
+        return response()->json($ports);
+    }
+
+    /**
+     * Get ports near coordinates
+     */
+    public function getNearby(Request $request)
+    {
+        $latitude = $request->get('latitude');
+        $longitude = $request->get('longitude');
+        $radius = $request->get('radius', 100); // Default 100km radius
+
+        if (!$latitude || !$longitude) {
+            return response()->json(['error' => 'Coordinates required'], 400);
+        }
+
+        $ports = Port::active()
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->get()
+            ->filter(function ($port) use ($latitude, $longitude, $radius) {
+                $distance = $port->getDistanceFrom($latitude, $longitude);
+                return $distance !== null && $distance <= $radius;
+            })
+            ->map(function ($port) use ($latitude, $longitude) {
+                $port->distance = $port->getDistanceFrom($latitude, $longitude);
+                return $port;
+            })
+            ->sortBy('distance')
+            ->values();
+
+        return response()->json($ports);
+    }
+
+    /**
+     * Get port capacity information
+     */
+    public function getCapacityInfo(Port $port)
+    {
+        $capacityInfo = [
+            'current_capacity' => $port->getCurrentCapacity(),
+            'max_capacity' => $port->max_capacity,
+            'utilization_rate' => $port->getUtilizationRate(),
+            'available_berths' => $port->getAvailableBerths(),
+            'total_berths' => $port->total_berths,
+            'avg_handling_time' => $port->getAverageHandlingTime()
+        ];
+
+        return response()->json($capacityInfo);
     }
 
     /**
@@ -370,167 +360,67 @@ class PortController extends Controller
      */
     public function checkOperationalStatus(Port $port)
     {
-        $isOperational = $port->isOperational();
-        $weatherStatus = $port->getWeatherStatus();
+        $status = [
+            'operational' => $port->isOperational(),
+            'weather_status' => $port->getWeatherStatus(),
+            'congestion_level' => $port->getCongestionLevel(),
+            'next_available_berth' => $port->getNextAvailableBerthTime(),
+            'operating_hours' => $port->operating_hours,
+            'special_notices' => $port->getSpecialNotices()
+        ];
 
-        return response()->json([
-            'operational' => $isOperational,
-            'status' => $port->operational_status,
-            'weather' => $weatherStatus,
-            'services' => $port->available_services,
-            'last_updated' => $port->updated_at->format('Y-m-d H:i:s')
-        ]);
+        return response()->json($status);
     }
 
     /**
-     * Get port facilities and services
+     * Get ports with specific facilities
      */
-    public function getFacilitiesAndServices(Port $port)
+    public function getPortsWithFacilities(Request $request)
     {
-        return response()->json([
-            'facilities' => $port->facilities ?? [],
-            'services' => $port->services ?? [],
-            'handling_equipment' => $port->handling_equipment ?? [],
-            'cargo_types' => $port->cargo_types_handled ?? [],
-            'connections' => [
-                'rail' => $port->rail_connection,
-                'road' => $port->road_connection,
-                'airport_distance' => $port->airport_distance_km
-            ],
-            'port_services' => [
-                'customs' => $port->customs_available,
-                'quarantine' => $port->quarantine_available,
-                'bunker' => $port->bunker_available,
-                'fresh_water' => $port->fresh_water_available,
-                'pilot' => $port->pilot_required,
-                'tugs' => $port->tugs_available,
-                'anchorage' => $port->anchorage_available
-            ]
-        ]);
-    }
+        $requiredFacilities = $request->get('facilities', []);
 
-    /**
-     * Calculate distance between ports
-     */
-    public function calculateDistance(Request $request)
-    {
-        $request->validate([
-            'origin_port_id' => 'required|exists:ports,id',
-            'destination_port_id' => 'required|exists:ports,id'
-        ]);
+        if (empty($requiredFacilities)) {
+            return response()->json(['error' => 'Facilities required'], 400);
+        }
 
-        $originPort = Port::findOrFail($request->origin_port_id);
-        $destinationPort = Port::findOrFail($request->destination_port_id);
-
-        $distance = $originPort->calculateDistance($destinationPort);
-
-        return response()->json([
-            'origin' => $originPort->full_name,
-            'destination' => $destinationPort->full_name,
-            'distance_km' => $distance,
-            'distance_nm' => $distance ? round($distance * 0.539957, 2) : null
-        ]);
-    }
-
-    /**
-     * Get ports within radius
-     */
-    public function getPortsInRadius(Request $request)
-    {
-        $request->validate([
-            'latitude' => 'required|numeric|between:-90,90',
-            'longitude' => 'required|numeric|between:-180,180',
-            'radius_km' => 'required|numeric|min:1|max:2000'
-        ]);
-
-        $ports = Port::nearLocation(
-            $request->latitude,
-            $request->longitude,
-            $request->radius_km
-        )->active()->get();
+        $ports = Port::active()
+            ->where(function ($query) use ($requiredFacilities) {
+                foreach ($requiredFacilities as $facility) {
+                    $query->whereJsonContains('facilities', $facility);
+                }
+            })
+            ->select('id', 'port_code', 'port_name', 'port_type', 'city', 'country', 'facilities')
+            ->orderBy('port_name')
+            ->get();
 
         return response()->json($ports);
     }
 
     /**
-     * Reorder ports
+     * Generate port performance report
      */
-    public function reorder(Request $request)
+    public function generatePerformanceReport(Port $port, Request $request)
     {
-        $request->validate([
-            'orders' => 'required|array',
-            'orders.*.id' => 'required|exists:ports,id',
-            'orders.*.sort_order' => 'required|integer|min:0'
-        ]);
+        $startDate = $request->get('start_date', now()->subMonth());
+        $endDate = $request->get('end_date', now());
 
-        try {
-            DB::beginTransaction();
+        $report = [
+            'port_info' => [
+                'port_name' => $port->port_name,
+                'port_code' => $port->port_code,
+                'port_type' => $port->port_type
+            ],
+            'period' => [
+                'start_date' => $startDate,
+                'end_date' => $endDate
+            ],
+            'statistics' => $port->getPerformanceStatistics($startDate, $endDate),
+            'capacity_utilization' => $port->getCapacityUtilization($startDate, $endDate),
+            'top_shipping_lines' => $port->getTopShippingLines($startDate, $endDate),
+            'cargo_breakdown' => $port->getCargoBreakdown($startDate, $endDate),
+            'efficiency_metrics' => $port->getEfficiencyMetrics($startDate, $endDate)
+        ];
 
-            foreach ($request->orders as $order) {
-                Port::where('id', $order['id'])
-                    ->update(['sort_order' => $order['sort_order']]);
-            }
-
-            DB::commit();
-
-            return response()->json(['success' => true, 'message' => 'Order updated successfully']);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['success' => false, 'message' => 'Failed to update order'], 500);
-        }
-    }
-
-    /**
-     * Export ports data
-     */
-    public function export(Request $request)
-    {
-        $format = $request->get('format', 'csv');
-        $query = Port::query();
-
-        // Apply same filters as index
-        if ($request->filled('country')) {
-            $query->where('country', $request->country);
-        }
-
-        if ($request->filled('port_type')) {
-            $query->where('port_type', $request->port_type);
-        }
-
-        if ($request->filled('is_active')) {
-            $query->where('is_active', $request->is_active);
-        }
-
-        $ports = $query->ordered()->get();
-
-        // This would integrate with export service in production
-        return response()->json([
-            'message' => 'Export functionality would be implemented here',
-            'count' => $ports->count(),
-            'format' => $format
-        ]);
-    }
-
-    /**
-     * Generate port code
-     */
-    private function generatePortCode($city, $country)
-    {
-        // Create a code based on city and country
-        $cityCode = strtoupper(substr(preg_replace('/[^A-Za-z]/', '', $city), 0, 2));
-        $countryCode = strtoupper(substr(preg_replace('/[^A-Za-z]/', '', $country), 0, 2));
-
-        $baseCode = $cityCode . $countryCode;
-
-        // Ensure uniqueness
-        $counter = 1;
-        $code = $baseCode;
-
-        while (Port::where('port_code', $code)->exists()) {
-            $code = $baseCode . $counter;
-            $counter++;
-        }
-
-        return $code;
+        return response()->json($report);
     }
 }
