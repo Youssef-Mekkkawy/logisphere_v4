@@ -54,7 +54,7 @@
                 <button type="submit" class="btn btn-primary">
                     {{ isset($port) ? 'Update Port' : 'Create Port' }}
                 </button>
-                <a href="{{ route('ports.index') }}" class="btn btn-secondary">Cancel</a>
+                <a href="{{ route('submenu.ports.index') }}" class="btn btn-secondary">Cancel</a>
             </div>
         </form>
     </x-card>

@@ -17,7 +17,7 @@
             </div>
             <div class="card-body">
                 <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                    <a href="{{ route('ports.index') }}" class="btn btn-outline"
+                    <a href="{{ route('submenu.ports.index') }}" class="btn btn-outline"
                         style="width: 100%; justify-content: flex-start;">
                         🚢 Ports Management
                     </a>
@@ -89,7 +89,8 @@
             <div class="card-body">
                 <div style="display: flex; flex-direction: column; gap: 0.75rem;">
                     {{-- {{ route('submenu.quantity-types.index') ?? '' }} --}}
-                    <a href="" class="btn btn-outline" style="width: 100%; justify-content: flex-start;">
+                    <a href="{{ route('submenu.quantity-types.index') ?? '' }}" class="btn btn-outline"
+                        style="width: 100%; justify-content: flex-start;">
                         📊 Quantity Types
                     </a>
                     {{-- {{ route('submenu.shippers.index') ?? '' }} --}}

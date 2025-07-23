@@ -6,36 +6,93 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
         Schema::create('quantity_types', function (Blueprint $table) {
             $table->id();
-            $table->string('type_code')->unique();
-            $table->string('type_name');
-            $table->string('measurement_type'); // 'Weight', 'Volume', 'Count', 'Area', 'Length'
-            $table->string('unit'); // 'kg', 'ton', 'm³', 'pieces', 'm²', 'm'
-            $table->string('unit_symbol', 10); // 'kg', 't', 'm³', 'pcs', 'm²', 'm'
+
+            // Basic Information
+            $table->string('quantity_code', 20)->unique();
+            $table->string('quantity_name');
+            $table->enum('quantity_category', [
+                'Weight',
+                'Volume',
+                'Count',
+                'Dimension',
+                'Container',
+                'Liquid',
+                'Area',
+                'Time',
+                'Custom'
+            ]);
+            $table->string('unit_of_measure', 100);
+            $table->string('unit_symbol', 20)->nullable();
+
+            // Conversion & Calculation
+            $table->string('base_unit', 50)->nullable(); // For unit conversion
+            $table->decimal('conversion_factor', 12, 6)->nullable(); // Multiplier to base unit
+            $table->integer('decimal_places')->default(2); // Display precision
             $table->text('description')->nullable();
-            $table->string('cargo_category'); // 'General', 'Bulk', 'Container', 'Liquid', 'Hazardous'
-            $table->decimal('conversion_factor', 10, 6)->default(1); // Convert to base unit
-            $table->string('base_unit')->nullable(); // Base unit for conversion
-            $table->boolean('allows_decimals')->default(true);
-            $table->decimal('min_value', 15, 6)->nullable();
-            $table->decimal('max_value', 15, 6)->nullable();
-            $table->integer('decimal_places')->default(2);
-            $table->json('applicable_container_types')->nullable(); // Which containers use this
-            $table->string('billing_unit')->nullable(); // How this is billed
-            $table->text('calculation_notes')->nullable();
+            $table->text('calculation_method')->nullable(); // How to calculate this quantity
+
+            // Applicability & Standards
+            $table->json('applicable_cargo_types')->nullable(); // Which cargo types use this
+            $table->json('industry_standards')->nullable(); // ISO, IMDG, etc.
+            $table->json('common_ranges')->nullable(); // Min/max typical values
+            $table->json('validation_rules')->nullable(); // Custom validation rules
+
+            // Display & Reporting
+            $table->string('display_format', 100)->nullable(); // Custom format string
+            $table->string('reporting_category', 100)->nullable(); // For grouping in reports
+            $table->string('customs_code', 50)->nullable(); // Customs/regulatory code
+
+            // Type Indicators
+            $table->boolean('is_weight_based')->default(false);
+            $table->boolean('is_volume_based')->default(false);
+            $table->boolean('is_count_based')->default(false);
+            $table->boolean('is_dimension_based')->default(false);
+
+            // Behavior Flags
+            $table->boolean('allows_fractions')->default(true);
+            $table->boolean('requires_dimensions')->default(false); // Needs L×W×H
+            $table->boolean('auto_calculate')->default(false); // Auto-calc from other fields
+
+            // Billing Configuration
+            $table->boolean('is_billable')->default(true);
+            $table->decimal('billing_multiplier', 8, 4)->nullable(); // Billing rate multiplier
+            $table->decimal('minimum_chargeable', 12, 2)->nullable(); // Minimum charge qty
+            $table->enum('rounding_method', ['up', 'down', 'nearest'])->default('nearest');
+
+            // System Fields
+            $table->boolean('is_standard')->default(false); // Industry standard unit
             $table->boolean('is_active')->default(true);
             $table->integer('sort_order')->default(0);
+            $table->text('notes')->nullable();
+
+            // Tenant isolation
+            // $table->foreignId('tenant_id')->constrained()->onDelete('cascade');
+
             $table->timestamps();
 
-            $table->index(['measurement_type', 'is_active']);
-            $table->index(['cargo_category', 'is_active']);
-            $table->index('type_code');
+            // Indexes for performance
+            $table->index(['quantity_category', 'is_active']);
+            $table->index(['is_standard', 'is_active']);
+            $table->index(['is_billable']);
+            $table->index(['is_weight_based']);
+            $table->index(['is_volume_based']);
+            $table->index(['is_count_based']);
+            $table->index(['base_unit']); // For conversion queries
+            $table->index(['sort_order', 'quantity_name']);
+            // $table->index(['tenant_id', 'is_active']);
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
         Schema::dropIfExists('quantity_types');

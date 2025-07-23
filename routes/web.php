@@ -25,6 +25,7 @@ use App\Http\Controllers\BoslaGomrokController;
 use App\Http\Controllers\ConsigneeNotifyController;
 use App\Http\Controllers\ContainerLoadingController;
 use App\Http\Controllers\DestinationController;
+use App\Http\Controllers\QuantityTypeController;
 
 // ======================================================================================
 // GUEST ROUTES
@@ -141,6 +142,28 @@ Route::middleware('auth')->group(function () {
     Route::prefix('submenu')->name('submenu.')->group(function () {
         Route::get('/', [SubmenuController::class, 'index'])->name('index');
 
+        Route::resource('ports', PortController::class, [
+            'names' => [
+                'index' => 'ports.index',
+                'create' => 'ports.create',
+                'store' => 'ports.store',
+                'show' => 'ports.show',
+                'edit' => 'ports.edit',
+                'update' => 'ports.update',
+                'destroy' => 'ports.destroy'
+            ]
+        ]);
+        Route::resource('quantity-type', QuantityTypeController::class, [
+            'names' => [
+                'index' => 'quantity-types.index',
+                'create' => 'quantity-types.create',
+                'store' => 'quantity-types.store',
+                'show' => 'quantity-types.show',
+                'edit' => 'quantity-types.edit',
+                'update' => 'quantity-types.update',
+                'destroy' => 'quantity-types.destroy'
+            ]
+        ]);
         Route::resource('destinations', DestinationController::class, [
             'names' => [
                 'index' => 'destinations.index',
