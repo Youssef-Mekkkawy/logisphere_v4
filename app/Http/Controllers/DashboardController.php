@@ -11,6 +11,14 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+        $this->middleware('permission:dashboard.view')->only(['index', 'show']);
+        $this->middleware('permission:dashboard.create')->only(['create', 'store']);
+        $this->middleware('permission:dashboard.edit')->only(['edit', 'update']);
+        $this->middleware('permission:dashboard.delete')->only(['destroy']);
+    }
     public function index()
     {
         $stats = [

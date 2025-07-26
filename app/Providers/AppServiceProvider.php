@@ -31,6 +31,7 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+
         Schema::defaultStringLength(191);
         $this->shareViewData();
         $this->configureApplication();
@@ -91,12 +92,12 @@ class AppServiceProvider extends ServiceProvider
         ]);
 
         config([
-            'logistics.default_currency' => 'USD',
-            'logistics.default_weight_unit' => 'kg',
-            'logistics.default_volume_unit' => 'm³',
-            'logistics.shipment_id_prefix' => 'LGF',
-            'logistics.company_code_length' => 7,
-            'logistics.employee_id_prefix' => 'EMP'
+            'logistics default_currency' => 'USD',
+            'logistics default_weight_unit' => 'kg',
+            'logistics default_volume_unit' => 'm³',
+            'logistics shipment_id_prefix' => 'LGF',
+            'logistics company_code_length' => 7,
+            'logistics employee_id_prefix' => 'EMP'
         ]);
 
         config([
@@ -157,30 +158,30 @@ class AppServiceProvider extends ServiceProvider
                 'id' => 'shipments',
                 'title' => 'Shipments',
                 'icon' => '📦',
-                'route' => 'shipments.index',
+                'route' => 'management.shipments.index',
                 'permission' => null,
-                'submenu' => [
-                    ['title' => 'All Shipments', 'route' => 'shipments.index'],
-                    ['title' => 'Create Shipment', 'route' => 'shipments.create', 'shortcut' => 'Ctrl+F1'],
+                'logistics' => [
+                    ['title' => 'All Shipments', 'route' => 'management.shipments.index'],
+                    ['title' => 'Create Shipment', 'route' => 'management.shipments.create', 'shortcut' => 'Ctrl+F1'],
                 ]
             ],
             [
                 'id' => 'companies',
                 'title' => 'Companies',
                 'icon' => '🏢',
-                'route' => 'companies.index',
+                'route' => 'management.companies.index',
                 'permission' => null,
-                'submenu' => [
-                    ['title' => 'All Companies', 'route' => 'companies.index'],
-                    ['title' => 'Clients', 'route' => 'companies.index', 'params' => ['type' => 'Client']],
-                    ['title' => 'Suppliers', 'route' => 'companies.index', 'params' => ['type' => 'Supplier']],
+                'logistics' => [
+                    ['title' => 'All Companies', 'route' => 'management.companies.index'],
+                    ['title' => 'Clients', 'route' => 'management.companies.index', 'params' => ['type' => 'Client']],
+                    ['title' => 'Suppliers', 'route' => 'management.companies.index', 'params' => ['type' => 'Supplier']],
                 ]
             ],
             [
                 'id' => 'employees',
                 'title' => 'Employees',
                 'icon' => '👷',
-                'route' => 'employees.index',
+                'route' => 'management.employees.index',
                 'permission' => 'manage_employees',
                 'shortcut' => 'Ctrl+E'
             ],
@@ -198,7 +199,7 @@ class AppServiceProvider extends ServiceProvider
                 'icon' => '💰',
                 'route' => 'accounting.index',
                 'permission' => 'manage_accounting',
-                'submenu' => [
+                'logistics' => [
                     ['title' => 'Employee Jobs', 'route' => 'accounting.employee-jobs'],
                     ['title' => 'Employee Covenant', 'route' => 'accounting.employee-covenant'],
                     ['title' => 'Advance Types', 'route' => 'accounting.advance-types'],
@@ -207,17 +208,17 @@ class AppServiceProvider extends ServiceProvider
                 ]
             ],
             [
-                'id' => 'submenu',
-                'title' => 'Submenu',
+                'id' => 'logistics',
+                'title' => 'logistics',
                 'icon' => '⚙️',
-                'route' => 'submenu.index',
+                'route' => 'logistics index',
                 'permission' => 'manage_settings',
-                'submenu' => [
-                    ['title' => 'Ports', 'route' => 'submenu.ports'],
-                    ['title' => 'Shipping Agency', 'route' => 'submenu.shipping-agency'],
-                    ['title' => 'Shipment Types', 'route' => 'submenu.shipment-types'],
-                    ['title' => 'COO Types', 'route' => 'submenu.coo-types'],
-                    ['title' => 'Inspection Types', 'route' => 'submenu.inspection-types'],
+                'logistics' => [
+                    ['title' => 'Ports', 'route' => 'logistics ports'],
+                    ['title' => 'Shipping Agency', 'route' => 'logistics shipping-agency'],
+                    ['title' => 'Shipment Types', 'route' => 'logistics shipment-types'],
+                    ['title' => 'COO Types', 'route' => 'logistics coo-types'],
+                    ['title' => 'Inspection Types', 'route' => 'logistics inspection-types'],
                 ]
             ],
             [
@@ -233,7 +234,7 @@ class AppServiceProvider extends ServiceProvider
                 'icon' => '🔧',
                 'route' => 'settings.index',
                 'permission' => null,
-                'submenu' => [
+                'logistics' => [
                     ['title' => 'Change Password', 'route' => 'settings.change-password', 'shortcut' => 'Ctrl+G'],
                     ['title' => 'User Settings', 'route' => 'settings.user-settings'],
                 ]
@@ -286,7 +287,7 @@ class AppServiceProvider extends ServiceProvider
                 'employees' => 'Employees',
                 'users' => 'Users',
                 'accounting' => 'Accounting',
-                'submenu' => 'Settings',
+                'logistics' => 'Settings',
                 'file' => 'File Management',
                 'settings' => 'Settings'
             ];
@@ -314,7 +315,7 @@ class AppServiceProvider extends ServiceProvider
         return [
             [
                 'title' => 'New Shipment',
-                'route' => 'shipments.create',
+                'route' => 'management.shipments.create',
                 'icon' => '➕',
                 'shortcut' => 'Ctrl+F1',
                 'class' => 'btn-primary'

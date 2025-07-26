@@ -253,7 +253,7 @@ body {
     background: #f8fafc;
 }
 
-.submenu {
+.logistics.{
     display: none;
     background: white;
     border-radius: 15px;
@@ -262,17 +262,17 @@ body {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
-.submenu.active {
+.logistics.active {
     display: block;
 }
 
-.submenu-grid {
+.logistics.grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 15px;
 }
 
-.submenu-item {
+.logistics.item {
     padding: 15px;
     background: #f1f5f9;
     border-radius: 10px;
@@ -282,20 +282,20 @@ body {
     border: 2px solid transparent;
 }
 
-.submenu-item:hover {
+.logistics.item:hover {
     background: #e2e8f0;
     border-color: #3b82f6;
     transform: translateY(-2px);
 }
 
-.submenu-title {
+.logistics.title {
     font-size: 18px;
     font-weight: 600;
     margin-bottom: 20px;
     color: #1e40af;
 }
 
-.submenu-detail {
+.logistics.detail {
     background: white;
     border-radius: 15px;
     padding: 25px;
@@ -314,40 +314,109 @@ body {
     border-radius: 10px;
     margin-bottom: 20px;
 }
+/* Add this CSS to debug modal display issues */
+/* Put this in a <style> tag at the end of your index.blade.php */
 
+
+/* DEBUG: Force modal to be visible and on top */
 .modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 1000;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: rgba(0, 0, 0, 0.5) !important;
+    z-index: 99999 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.modal[style*="none"] {
+    display: none !important;
+}
+
+.modal[style*="flex"] {
+    display: flex !important;
 }
 
 .modal-content {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: white;
-    padding: 30px;
-    border-radius: 15px;
-    width: 90%;
-    max-width: 600px;
-    max-height: 80vh;
-    overflow-y: auto;
+    background: white !important;
+    border-radius: 15px !important;
+    width: 90% !important;
+    max-width: 800px !important;
+    max-height: 80vh !important;
+    overflow-y: auto !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3) !important;
+    position: relative !important;
+    z-index: 100000 !important;
 }
 
-.close-modal {
-    position: absolute;
-    top: 15px;
-    right: 20px;
-    font-size: 24px;
-    cursor: pointer;
-    color: #6b7280;
+.modal-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 20px 30px !important;
+    border-bottom: 1px solid #e5e7eb !important;
+    background: #f8fafc !important;
 }
+
+.modal-header h5 {
+    margin: 0 !important;
+    color: #1e40af !important;
+    font-size: 1.25rem !important;
+}
+
+.close {
+    background: none !important;
+    border: none !important;
+    font-size: 24px !important;
+    cursor: pointer !important;
+    color: #6b7280 !important;
+    padding: 0.5rem !important;
+}
+
+.close:hover {
+    color: #dc2626 !important;
+    background: #fee2e2 !important;
+    border-radius: 50% !important;
+}
+
+.modal-body {
+    padding: 30px !important;
+    background: white !important;
+}
+
+/* DEBUG: Highlight modal when visible */
+.modal[style*="flex"] {
+    border: 5px solid red !important;
+}
+
+.modal[style*="flex"] .modal-content {
+    border: 3px solid green !important;
+}
+
+/* Ensure buttons are clickable */
+.btn {
+    position: relative !important;
+    z-index: 1 !important;
+    cursor: pointer !important;
+    pointer-events: auto !important;
+}
+
+/* Debug info styling */
+#debugInfo {
+    font-family: monospace !important;
+    font-size: 0.875rem !important;
+    color: #1e40af !important;
+    background: white !important;
+    padding: 0.5rem !important;
+    border-radius: 0.25rem !important;
+    max-height: 200px !important;
+    overflow-y: auto !important;
+}
+
+
 
 .tabs {
     display: flex;

@@ -2,8 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Models\QuantityType;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\QuantityType;
 
 class QuantityTypeSeeder extends Seeder
 {
@@ -13,7 +14,7 @@ class QuantityTypeSeeder extends Seeder
     public function run(): void
     {
         $quantityTypes = [
-            // Container Units
+            // Container Units - Most Common in Logistics
             [
                 'quantity_code' => 'TEU',
                 'quantity_name' => 'Twenty-foot Equivalent Unit',
@@ -23,9 +24,9 @@ class QuantityTypeSeeder extends Seeder
                 'base_unit' => 'TEU',
                 'conversion_factor' => 1.0,
                 'decimal_places' => 0,
-                'description' => 'Standard 20-foot container equivalent unit measurement',
+                'description' => 'Standard 20-foot container equivalent unit measurement - primary container measurement in shipping',
                 'calculation_method' => 'Count of 20ft container equivalents',
-                'applicable_cargo_types' => ['Containers', 'General Cargo'],
+                'applicable_cargo_types' => ['Containers', 'General Cargo', 'FCL'],
                 'industry_standards' => ['ISO 668', 'CSC Convention'],
                 'common_ranges' => ['min' => 1, 'max' => 50000],
                 'validation_rules' => ['positive_integer'],
@@ -56,9 +57,9 @@ class QuantityTypeSeeder extends Seeder
                 'base_unit' => 'TEU',
                 'conversion_factor' => 2.0,
                 'decimal_places' => 0,
-                'description' => 'Standard 40-foot container unit',
+                'description' => 'Standard 40-foot container unit equals 2 TEU',
                 'calculation_method' => 'Count of 40ft containers',
-                'applicable_cargo_types' => ['Containers', 'General Cargo'],
+                'applicable_cargo_types' => ['Containers', 'General Cargo', 'FCL'],
                 'industry_standards' => ['ISO 668', 'CSC Convention'],
                 'common_ranges' => ['min' => 1, 'max' => 25000],
                 'validation_rules' => ['positive_integer'],
@@ -81,7 +82,7 @@ class QuantityTypeSeeder extends Seeder
                 'notes' => '40-foot container standard measurement'
             ],
 
-            // Weight Measurements
+            // Weight Measurements - Essential for All Cargo
             [
                 'quantity_code' => 'KG',
                 'quantity_name' => 'Kilogram',
@@ -91,9 +92,9 @@ class QuantityTypeSeeder extends Seeder
                 'base_unit' => 'kg',
                 'conversion_factor' => 1.0,
                 'decimal_places' => 3,
-                'description' => 'Metric unit of mass measurement',
-                'calculation_method' => 'Direct weight measurement',
-                'applicable_cargo_types' => ['General Cargo', 'Bulk', 'Containers', 'Break Bulk'],
+                'description' => 'Metric unit of mass measurement - standard weight unit',
+                'calculation_method' => 'Direct weight measurement using scales',
+                'applicable_cargo_types' => ['General Cargo', 'Bulk', 'Containers', 'Break Bulk', 'LCL'],
                 'industry_standards' => ['SI Units', 'ISO 80000-4'],
                 'common_ranges' => ['min' => 0.001, 'max' => 100000000],
                 'validation_rules' => ['positive_number'],
@@ -113,7 +114,7 @@ class QuantityTypeSeeder extends Seeder
                 'is_standard' => true,
                 'is_active' => true,
                 'sort_order' => 3,
-                'notes' => 'Standard metric weight unit'
+                'notes' => 'Standard metric weight unit for all cargo types'
             ],
             [
                 'quantity_code' => 'MT',
@@ -126,7 +127,7 @@ class QuantityTypeSeeder extends Seeder
                 'decimal_places' => 3,
                 'description' => 'Metric ton (1000 kg) for large cargo weights',
                 'calculation_method' => 'Weight in thousands of kilograms',
-                'applicable_cargo_types' => ['Bulk', 'Heavy Cargo', 'Break Bulk'],
+                'applicable_cargo_types' => ['Bulk', 'Heavy Cargo', 'Break Bulk', 'Project Cargo'],
                 'industry_standards' => ['SI Units', 'ISO 80000-4'],
                 'common_ranges' => ['min' => 0.001, 'max' => 100000],
                 'validation_rules' => ['positive_number'],
@@ -149,7 +150,7 @@ class QuantityTypeSeeder extends Seeder
                 'notes' => 'Used for heavy cargo and bulk commodities'
             ],
 
-            // Volume Measurements
+            // Volume Measurements - Critical for Space Planning
             [
                 'quantity_code' => 'CBM',
                 'quantity_name' => 'Cubic Meter',
@@ -384,52 +385,194 @@ class QuantityTypeSeeder extends Seeder
                 'billing_multiplier' => 1.0,
                 'minimum_chargeable' => 0.001,
                 'rounding_method' => 'up',
-                'is_standard' => false,
+                'is_standard' => true,
                 'is_active' => true,
                 'sort_order' => 11,
-                'notes' => 'Used for freight billing - higher of actual weight or volumetric weight'
+                'notes' => 'Higher of weight or volume for billing purposes'
             ],
 
-            // Time-based (for storage, demurrage)
+            // Length Measurements
             [
-                'quantity_code' => 'DAYS',
-                'quantity_name' => 'Days',
-                'quantity_category' => 'Time',
-                'unit_of_measure' => 'Days',
-                'unit_symbol' => 'days',
-                'base_unit' => 'days',
+                'quantity_code' => 'M',
+                'quantity_name' => 'Meters',
+                'quantity_category' => 'Length',
+                'unit_of_measure' => 'Meter',
+                'unit_symbol' => 'm',
+                'base_unit' => 'meters',
                 'conversion_factor' => 1.0,
-                'decimal_places' => 1,
-                'description' => 'Time-based measurement in days',
-                'calculation_method' => 'Duration calculation in days',
-                'applicable_cargo_types' => ['Storage', 'Demurrage', 'Detention'],
-                'industry_standards' => ['Universal'],
-                'common_ranges' => ['min' => 0.1, 'max' => 365],
+                'decimal_places' => 2,
+                'description' => 'Linear measurement in meters',
+                'calculation_method' => 'Direct linear measurement',
+                'applicable_cargo_types' => ['Steel', 'Pipes', 'Lumber', 'Cable'],
+                'industry_standards' => ['SI Units'],
+                'common_ranges' => ['min' => 0.01, 'max' => 10000],
                 'validation_rules' => ['positive_number'],
-                'display_format' => '%.1f days',
-                'reporting_category' => 'Time Duration',
+                'display_format' => '%.2f m',
+                'reporting_category' => 'Length',
+                'is_weight_based' => false,
+                'is_volume_based' => false,
+                'is_count_based' => false,
+                'is_dimension_based' => true,
+                'allows_fractions' => true,
+                'requires_dimensions' => false,
+                'auto_calculate' => false,
+                'is_billable' => true,
+                'billing_multiplier' => 1.0,
+                'minimum_chargeable' => 0.01,
+                'rounding_method' => 'nearest',
+                'is_standard' => true,
+                'is_active' => true,
+                'sort_order' => 12,
+                'notes' => 'Linear measurement for long cargo'
+            ],
+
+            // Imperial Weight (for US/UK markets)
+            [
+                'quantity_code' => 'LB',
+                'quantity_name' => 'Pounds',
+                'quantity_category' => 'Weight',
+                'unit_of_measure' => 'Pound',
+                'unit_symbol' => 'lb',
+                'base_unit' => 'kg',
+                'conversion_factor' => 0.453592,
+                'decimal_places' => 2,
+                'description' => 'Imperial weight measurement in pounds',
+                'calculation_method' => 'Weight measurement in imperial pounds',
+                'applicable_cargo_types' => ['General Cargo', 'Air Cargo'],
+                'industry_standards' => ['Imperial Units'],
+                'common_ranges' => ['min' => 0.1, 'max' => 500000],
+                'validation_rules' => ['positive_number'],
+                'display_format' => '%.2f lb',
+                'reporting_category' => 'Gross Weight',
+                'is_weight_based' => true,
+                'is_volume_based' => false,
+                'is_count_based' => false,
+                'is_dimension_based' => false,
+                'allows_fractions' => true,
+                'requires_dimensions' => false,
+                'auto_calculate' => false,
+                'is_billable' => true,
+                'billing_multiplier' => 1.0,
+                'minimum_chargeable' => 0.1,
+                'rounding_method' => 'nearest',
+                'is_standard' => false,
+                'is_active' => true,
+                'sort_order' => 13,
+                'notes' => 'Imperial weight unit for US and UK markets'
+            ],
+
+            // Time-based measurements (for services)
+            [
+                'quantity_code' => 'HR',
+                'quantity_name' => 'Hours',
+                'quantity_category' => 'Time',
+                'unit_of_measure' => 'Hour',
+                'unit_symbol' => 'hr',
+                'base_unit' => 'hours',
+                'conversion_factor' => 1.0,
+                'decimal_places' => 2,
+                'description' => 'Time measurement in hours for services',
+                'calculation_method' => 'Direct time measurement',
+                'applicable_cargo_types' => ['Services', 'Labor', 'Equipment Rental'],
+                'industry_standards' => ['Universal'],
+                'common_ranges' => ['min' => 0.25, 'max' => 10000],
+                'validation_rules' => ['positive_number'],
+                'display_format' => '%.2f hr',
+                'reporting_category' => 'Service Time',
                 'is_weight_based' => false,
                 'is_volume_based' => false,
                 'is_count_based' => false,
                 'is_dimension_based' => false,
                 'allows_fractions' => true,
                 'requires_dimensions' => false,
-                'auto_calculate' => true,
+                'auto_calculate' => false,
+                'is_billable' => true,
+                'billing_multiplier' => 1.0,
+                'minimum_chargeable' => 0.25,
+                'rounding_method' => 'nearest',
+                'is_standard' => true,
+                'is_active' => true,
+                'sort_order' => 14,
+                'notes' => 'Time-based billing for services and labor'
+            ],
+
+            // Pallets (common in warehousing)
+            [
+                'quantity_code' => 'PLT',
+                'quantity_name' => 'Pallets',
+                'quantity_category' => 'Count',
+                'unit_of_measure' => 'Pallet',
+                'unit_symbol' => 'plt',
+                'base_unit' => 'pieces',
+                'conversion_factor' => 1.0,
+                'decimal_places' => 0,
+                'description' => 'Standard pallet count for warehousing',
+                'calculation_method' => 'Count of standard pallets',
+                'applicable_cargo_types' => ['General Cargo', 'Warehousing', 'Distribution'],
+                'industry_standards' => ['ISO 6780'],
+                'common_ranges' => ['min' => 1, 'max' => 10000],
+                'validation_rules' => ['positive_integer'],
+                'display_format' => '%.0f plt',
+                'reporting_category' => 'Pallet Count',
+                'is_weight_based' => false,
+                'is_volume_based' => false,
+                'is_count_based' => true,
+                'is_dimension_based' => false,
+                'allows_fractions' => false,
+                'requires_dimensions' => false,
+                'auto_calculate' => false,
                 'is_billable' => true,
                 'billing_multiplier' => 1.0,
                 'minimum_chargeable' => 1.0,
                 'rounding_method' => 'up',
                 'is_standard' => true,
                 'is_active' => true,
-                'sort_order' => 12,
-                'notes' => 'Used for storage charges, demurrage, and time-based billing'
+                'sort_order' => 15,
+                'notes' => 'Standard pallet units for warehousing operations'
+            ],
+
+            // Test/Demo quantity type (inactive)
+            [
+                'quantity_code' => 'TEST',
+                'quantity_name' => 'Test Quantity Type',
+                'quantity_category' => 'Count',
+                'unit_of_measure' => 'Test Unit',
+                'unit_symbol' => 'test',
+                'base_unit' => 'pieces',
+                'conversion_factor' => 1.0,
+                'decimal_places' => 0,
+                'description' => 'Test quantity type for development and testing',
+                'calculation_method' => 'Test calculation method',
+                'applicable_cargo_types' => ['Test Cargo'],
+                'industry_standards' => ['Test Standard'],
+                'common_ranges' => ['min' => 1, 'max' => 100],
+                'validation_rules' => ['positive_integer'],
+                'display_format' => '%.0f test',
+                'reporting_category' => 'Test Category',
+                'is_weight_based' => false,
+                'is_volume_based' => false,
+                'is_count_based' => true,
+                'is_dimension_based' => false,
+                'allows_fractions' => false,
+                'requires_dimensions' => false,
+                'auto_calculate' => false,
+                'is_billable' => false,
+                'billing_multiplier' => 0.0,
+                'minimum_chargeable' => 0.0,
+                'rounding_method' => 'nearest',
+                'is_standard' => false,
+                'is_active' => false,
+                'sort_order' => 999,
+                'notes' => 'Inactive test quantity type for development purposes'
             ]
         ];
 
-        foreach ($quantityTypes as $quantityTypeData) {
-            QuantityType::create(array_merge($quantityTypeData, [
-                'tenant_id' => 1 // Default tenant for seeding
-            ]));
+        foreach ($quantityTypes as $quantityType) {
+            QuantityType::create($quantityType);
         }
+
+        $this->command->info('QuantityType seeder completed successfully!');
+        $this->command->info('Created ' . count($quantityTypes) . ' quantity types.');
+        $this->command->info('Including: 15 active standard types and 1 inactive test type.');
     }
 }

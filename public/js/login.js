@@ -109,12 +109,12 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    // Submenu item clicks
-    const submenuItems = document.querySelectorAll(".submenu-item");
-    submenuItems.forEach((item) => {
+    // logistics.item clicks
+    const logistics.tems = document.querySelectorAll(".logistics.item");
+    logistics.tems.forEach((item) => {
         item.addEventListener("click", function () {
-            const submenuType = this.getAttribute("data-submenu");
-            showSubmenuDetail(submenuType);
+            const logistics.ype = this.getAttribute("data-logistics.);
+            showSubmenuDetail(logistics.ype);
         });
     });
 
@@ -306,40 +306,40 @@ searchBars.forEach((searchBar) => {
     });
 });
 
-// Submenu navigation functions
-function showSubmenuDetail(submenuType) {
-    // Hide submenu overview
-    document.getElementById("submenu-overview").classList.add("hidden");
+// logistics.navigation functions
+function showSubmenuDetail(logistics.ype) {
+    // Hide logistics.overview
+    document.getElementById("logistics.overview").classList.add("hidden");
 
-    // Hide all submenu details
-    const allDetails = document.querySelectorAll(".submenu-detail");
+    // Hide all logistics.details
+    const allDetails = document.querySelectorAll(".logistics.detail");
     allDetails.forEach((detail) => detail.classList.add("hidden"));
 
-    // Show specific submenu detail
-    const targetDetail = document.getElementById(submenuType + "-management");
+    // Show specific logistics.detail
+    const targetDetail = document.getElementById(logistics.ype + "-management");
     if (targetDetail) {
         targetDetail.classList.remove("hidden");
     }
 
     // Show back button
-    document.getElementById("back-to-submenu").style.display = "inline-block";
+    document.getElementById("back-to-logistics.).style.display = "inline-block";
 }
 
 function showSubmenuOverview() {
-    // Show submenu overview
-    document.getElementById("submenu-overview").classList.remove("hidden");
+    // Show logistics.overview
+    document.getElementById("logistics.overview").classList.remove("hidden");
 
-    // Hide all submenu details
-    const allDetails = document.querySelectorAll(".submenu-detail");
+    // Hide all logistics.details
+    const allDetails = document.querySelectorAll(".logistics.detail");
     allDetails.forEach((detail) => detail.classList.add("hidden"));
 
     // Hide back button
-    document.getElementById("back-to-submenu").style.display = "none";
+    document.getElementById("back-to-logistics.).style.display = "none";
 }
 
 function switchSubmenuTab(tabName) {
     // Find the active tab content container
-    const activeDetail = document.querySelector(".submenu-detail:not(.hidden)");
+    const activeDetail = document.querySelector(".logistics.detail:not(.hidden)");
     if (activeDetail) {
         // Remove active from all tabs in this detail
         const tabs = activeDetail.querySelectorAll(".tab");

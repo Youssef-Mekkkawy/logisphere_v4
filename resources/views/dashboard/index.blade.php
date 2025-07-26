@@ -50,14 +50,14 @@
             </td>
             <td>{{ $shipment->eta ? $shipment->eta->format('Y-m-d') : 'N/A' }}</td>
             <td>
-                <a href="{{ route('shipments.edit', $shipment) }}" class="btn btn-secondary">Edit</a>
-                <a href="{{ route('shipments.track', $shipment->shipment_id) }}" class="btn btn-primary">Track</a>
+                <a href="{{ route('management.shipments.edit', $shipment) }}" class="btn btn-secondary">Edit</a>
+                <a href="{{ route('shipments.tracking', $shipment->shipment_id) }}" class="btn btn-primary">Track</a>
             </td>
         </tr>
         @empty
         <tr>
             <td colspan="7" style="text-align: center; padding: 40px;">
-                <p style="color: #6b7280;">No shipments found. <a href="{{ route('shipments.create') }}">Create your first shipment</a></p>
+                <p style="color: #6b7280;">No shipments found. <a href="{{ route('management.shipments.create') }}">Create your first shipment</a></p>
             </td>
         </tr>
         @endforelse

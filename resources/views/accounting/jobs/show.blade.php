@@ -21,7 +21,7 @@
                     <strong>Assigned Employee:</strong><br>
                     <span style="color: #64748b;">
                         @if ($job->employee)
-                            <a href="{{ route('employees.show', $job->employee) }}"
+                            <a href="{{ route('management.employees.show', $job->employee) }}"
                                 style="color: var(--primary-color);">{{ $job->employee->name }}</a>
                         @else
                             Unassigned
@@ -144,13 +144,13 @@
 
     <!-- Actions -->
     <div style="margin-top: 2rem; display: flex; gap: 1rem;">
-        <a href="{{ route('accounting.jobs.edit', $job) }}" class="btn btn-primary">Edit Job</a>
+        <a href="{{ route('management.accounting.jobs.edit', $job) }}" class="btn btn-primary">Edit Job</a>
         @if ($job->employee)
-            <a href="{{ route('employees.show', $job->employee) }}" class="btn btn-success">View Employee</a>
+            <a href="{{ route('management.employees.show', $job->employee) }}" class="btn btn-success">View Employee</a>
         @endif
-        <a href="{{ route('accounting.jobs.index') }}" class="btn btn-secondary">Back to Jobs</a>
+        <a href="{{ route('management.accounting.jobs.index') }}" class="btn btn-secondary">Back to Jobs</a>
         @if (auth()->user()->isAdmin())
-            <form action="{{ route('accounting.jobs.destroy', $job) }}" method="POST" style="display: inline;"
+            <form action="{{ route('management.accounting.jobs.destroy', $job) }}" method="POST" style="display: inline;"
                 onsubmit="return confirm('Are you sure you want to delete this job?')">
                 @csrf
                 @method('DELETE')

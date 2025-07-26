@@ -12,7 +12,6 @@ use Database\Seeders\RouteSeeder;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
-
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
@@ -36,40 +35,17 @@ class DatabaseSeeder extends Seeder
             ContainerLoadingSeeder::class,
             InspectionTypeSeeder::class,
             DestinationSeeder::class,
-            PortOperationSeeder::class, // Add this if you want port operations
+            PortOperationSeeder::class,
+            BoslaGomrokSeeder::class,
+            CooTypeSeeder::class,
+            QuantityTypeSeeder::class,
+            ServiceSeeder::class,
+            ShipmentTypeSeeder::class, // 🔥 ADD: Quantity Types Seeder
         ]);
 
         $this->command->info('🎉 All seeders completed successfully!');
-        // $users = [
-        //     [
-        //         'name' => 'System Administrator',
-        //         'username' => 'admin',
-        //         'email' => 'admin@logiflow.com',
-        //         'password' => Hash::make('admin123'),
-        //         'role' => 'admin'
-        //     ],
-        //     [
-        //         'name' => 'Operations Manager',
-        //         'username' => 'manager',
-        //         'email' => 'manager@logiflow.com',
-        //         'password' => Hash::make('manager123'),
-        //         'role' => 'manager'
-        //     ],
-        //     [
-        //         'name' => 'Standard User',
-        //         'username' => 'user',
-        //         'email' => 'user@logiflow.com',
-        //         'password' => Hash::make('user123'),
-        //         'role' => 'user'
-        //     ]
-        // ];
 
-        // foreach ($users as $userData) {
-        //     User::firstOrCreate(
-        //         ['username' => $userData['username']],
-        //         $userData
-        //     );
-        // }
+        // Create default users
         $users = [
             [
                 'name' => 'System Administrator',
@@ -102,8 +78,6 @@ class DatabaseSeeder extends Seeder
             );
             $results[] = "✅ {$userData['name']} ({$userData['username']}) - " . ($user->wasRecentlyCreated ? 'Created' : 'Updated');
         }
-
-
 
         // Create sample ports
         $ports = [
@@ -234,17 +208,17 @@ class DatabaseSeeder extends Seeder
         // Create sample shipment types
         $types = [
             [
-                'code' => 'FCL',
-                'name' => 'Full Container Load',
-                'sub_type' => 'Standard FCL',
+                'type_code' => 'FCL',
+                'type_name' => 'Full Container Load',
+                'subcategory' => 'Standard FCL',
                 'description' => 'Complete container for single consignee',
                 'category' => 'Container',
                 'status' => 'Active'
             ],
             [
-                'code' => 'LCL',
-                'name' => 'Less Container Load',
-                'sub_type' => 'Consolidated LCL',
+                'type_code' => 'LCL',
+                'type_name' => 'Less Container Load',
+                'subcategory' => 'Consolidated LCL',
                 'description' => 'Shared container space',
                 'category' => 'Container',
                 'status' => 'Active'
@@ -253,9 +227,15 @@ class DatabaseSeeder extends Seeder
 
         foreach ($types as $typeData) {
             ShipmentType::firstOrCreate(
-                ['code' => $typeData['code']],
+                ['type_code' => $typeData['type_code']],
                 $typeData
             );
         }
+
+        $this->command->info('🎯 Sample data created successfully!');
+        $this->command->info('📦 Quantity Types: 16 professional measurement units created');
+        $this->command->info('🏢 Companies: ' . count($companies) . ' sample companies created');
+        $this->command->info('👥 Users: ' . count($users) . ' default users created');
+        $this->command->info('🚢 Ports: ' . count($ports) . ' major ports created');
     }
 }

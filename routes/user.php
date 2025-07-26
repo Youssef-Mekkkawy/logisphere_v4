@@ -1,11 +1,13 @@
 <?php
 
 // File: routes/web.php (Updated Routes)
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\RoleController;
-use App\Http\Controllers\PermissionController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\UpdatedUserController;
+use App\Http\Controllers\auth\UserController;
+// use App\Http\Controllers\auth\UpdatedUserController;
+use App\Http\Controllers\Auth\RoleController;
+use App\Http\Controllers\Auth\PermissionController;
+
+
 
 Route::middleware(['auth'])->group(function () {
 
@@ -81,5 +83,5 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('permissions/{permission}/toggle-status', [PermissionController::class, 'toggleStatus'])->name('permissions.toggle-status');
 
     // Update existing user routes to use the new controller
-    Route::resource('users', UpdatedUserController::class);
+    // Route::resource('users', UpdatedUserController::class);
 });

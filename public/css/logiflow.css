@@ -624,14 +624,14 @@ body {
     color: #059669;
 }
 
-.submenu-grid {
+.logistics.grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 15px;
     margin-bottom: 30px;
 }
 
-.submenu-item {
+.logistics.item {
     padding: 15px;
     background: #f1f5f9;
     border-radius: 10px;
@@ -643,7 +643,7 @@ body {
     color: inherit;
 }
 
-.submenu-item:hover {
+.logistics.item:hover {
     background: #e2e8f0;
     border-color: #3b82f6;
     transform: translateY(-2px);
@@ -651,7 +651,7 @@ body {
     color: inherit;
 }
 
-.submenu-title {
+.logistics.title {
     font-size: 18px;
     font-weight: 600;
     margin-bottom: 20px;

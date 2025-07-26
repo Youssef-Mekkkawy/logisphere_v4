@@ -1,0 +1,349 @@
+<?php
+
+namespace App\Http\Controllers\Management;
+
+use App\Http\Controllers\Controller;
+
+use App\Models\Employee;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+
+class EmployeeController extends Controller
+{
+    public function __construct()
+    {
+        $this->middleware('auth');
+        $this->middleware('permission:employees.view')->only(['index', 'show']);
+        $this->middleware('permission:employees.create')->only(['create', 'store']);
+        $this->middleware('permission:employees.edit')->only(['edit', 'update']);
+        $this->middleware('permission:employees.delete')->only(['destroy']);
+    }
+
+    /**
+     * Display employees with department filtering
+     */
+    public function index(Request $request)
+    {
+        $query = Employee::query();
+
+        if ($request->filled('department')) {
+            $query->where('department', $request->department);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('employee_id', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        $employees = $query->orderBy('name')->paginate(20);
+        $departments = Employee::distinct()->pluck('department');
+
+        return view('management.employees.index', compact('employees', 'departments'));
+    }
+
+    /**
+     * Show the form for creating a new employee.
+     */
+    public function create()
+    {
+        $departments = [
+            'Operations' => 'Operations',
+            'Customer Service' => 'Customer Service',
+            'Sales' => 'Sales',
+            'Finance & Accounting' => 'Finance & Accounting',
+            'Human Resources' => 'Human Resources',
+            'IT & Technology' => 'IT & Technology',
+            'Customs Clearance' => 'Customs Clearance',
+            'Warehousing' => 'Warehousing',
+            'Transportation' => 'Transportation',
+            'Management' => 'Management',
+            'Administration' => 'Administration'
+        ];
+
+        $positions = [
+            'Manager' => 'Manager',
+            'Senior Officer' => 'Senior Officer',
+            'Officer' => 'Officer',
+            'Assistant' => 'Assistant',
+            'Coordinator' => 'Coordinator',
+            'Specialist' => 'Specialist',
+            'Supervisor' => 'Supervisor',
+            'Executive' => 'Executive',
+            'Driver' => 'Driver',
+            'Warehouse Worker' => 'Warehouse Worker',
+            'Customs Officer' => 'Customs Officer',
+            'Documentation Officer' => 'Documentation Officer'
+        ];
+
+        return view('management.employees.create', compact('departments', 'positions'));
+    }
+
+    /**
+     * Store a newly created employee in storage.
+     */
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'employee_id' => 'nullable|string|unique:employees,employee_id|max:50',
+            'department' => 'required|string|max:100',
+            'position' => 'required|string|max:100',
+            'email' => 'nullable|email|unique:employees,email',
+            'phone' => 'nullable|string|max:50',
+            'hire_date' => 'nullable|date|before_or_equal:today',
+            'salary' => 'nullable|numeric|min:0|max:9999999999.99', // Max 10 billion
+            'emergency_contact' => 'nullable|string|max:255',
+            'address' => 'nullable|string|max:500',
+            'status' => 'required|in:Active,Inactive',
+            'nationality' => 'nullable|string|max:100',
+            'date_of_birth' => 'nullable|date|before:today',
+            'passport_number' => 'nullable|string|max:50',
+            'visa_status' => 'nullable|string|max:100',
+            'bank_account' => 'nullable|string|max:100',
+            'notes' => 'nullable|string|max:1000'
+        ], [
+            'salary.max' => 'Salary cannot exceed 9,999,999,999.99',
+            'salary.numeric' => 'Salary must be a valid number',
+            'email.unique' => 'This email address is already in use by another employee',
+            'employee_id.unique' => 'This Employee ID is already in use',
+            'hire_date.before_or_equal' => 'Hire date cannot be in the future',
+            'date_of_birth.before' => 'Date of birth must be in the past',
+            'name.required' => 'Employee name is required',
+            'department.required' => 'Department is required',
+            'position.required' => 'Position is required',
+            'status.required' => 'Status is required'
+        ]);
+
+        try {
+            // The employee_id will be auto-generated by the model if not provided
+            $employee = Employee::create($validated);
+
+            return redirect()->route('management.employees.show', $employee)
+                ->with('success', 'Employee created successfully!');
+        } catch (\Exception $e) {
+            Log::error('Employee Creation Error:', [
+                'error' => $e->getMessage(),
+                'data' => $validated
+            ]);
+
+            return back()->withInput()
+                ->with('error', 'Failed to create employee. Please check your input and try again.');
+        }
+    }
+
+    /**
+     * Display the specified employee.
+     */
+    public function show(Employee $employee)
+    {
+        try {
+            // Load relationships safely
+            $employee->load([
+                'shipments' => function ($query) {
+                    $query->latest()->take(5);
+                }
+            ]);
+
+            // Get employee statistics with safe defaults
+            $statistics = [
+                'total_shipments' => $employee->shipments()->count() ?? 0,
+                'active_shipments' => $employee->shipments()->whereNotIn('status', ['Delivered', 'Cancelled'])->count() ?? 0,
+                'completed_shipments' => $employee->shipments()->where('status', 'Delivered')->count() ?? 0,
+                'total_job_assignments' => 0, // Placeholder
+                'completed_jobs' => 0, // Placeholder
+                'total_advances' => 0, // Placeholder
+                'pending_advances' => 0, // Placeholder
+                'this_month_shipments' => $employee->shipments()->whereMonth('created_at', now()->month)->count() ?? 0,
+                'this_year_shipments' => $employee->shipments()->whereYear('created_at', now()->year)->count() ?? 0
+            ];
+
+            // Monthly performance for the last 6 months
+            $monthlyPerformance = $employee->shipments()
+                ->selectRaw('MONTH(created_at) as month, YEAR(created_at) as year, COUNT(*) as shipments')
+                ->where('created_at', '>=', now()->subMonths(6))
+                ->groupByRaw('YEAR(created_at), MONTH(created_at)')
+                ->orderByRaw('YEAR(created_at) DESC, MONTH(created_at) DESC')
+                ->get();
+
+            return view('management.employees.show', compact('employee', 'statistics', 'monthlyPerformance'));
+        } catch (\Exception $e) {
+            return redirect()->route('management.employees.index')
+                ->with('error', 'Error loading employee details: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Show the form for editing the specified employee.
+     */
+    public function edit(Employee $employee)
+    {
+        $departments = [
+            'Operations' => 'Operations',
+            'Customer Service' => 'Customer Service',
+            'Sales' => 'Sales',
+            'Finance & Accounting' => 'Finance & Accounting',
+            'Human Resources' => 'Human Resources',
+            'IT & Technology' => 'IT & Technology',
+            'Customs Clearance' => 'Customs Clearance',
+            'Warehousing' => 'Warehousing',
+            'Transportation' => 'Transportation',
+            'Management' => 'Management',
+            'Administration' => 'Administration'
+        ];
+
+        $positions = [
+            'Manager' => 'Manager',
+            'Senior Officer' => 'Senior Officer',
+            'Officer' => 'Officer',
+            'Assistant' => 'Assistant',
+            'Coordinator' => 'Coordinator',
+            'Specialist' => 'Specialist',
+            'Supervisor' => 'Supervisor',
+            'Executive' => 'Executive',
+            'Driver' => 'Driver',
+            'Warehouse Worker' => 'Warehouse Worker',
+            'Customs Officer' => 'Customs Officer',
+            'Documentation Officer' => 'Documentation Officer'
+        ];
+
+        return view('management.employees.edit', compact('employee', 'departments', 'positions'));
+    }
+
+    /**
+     * Update the specified employee in storage.
+     */
+    public function update(Request $request, Employee $employee)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'department' => 'required|string|max:100',
+            'position' => 'required|string|max:100',
+            'email' => 'nullable|email|unique:employees,email,' . $employee->id,
+            'phone' => 'nullable|string|max:50',
+            'hire_date' => 'nullable|date|before_or_equal:today',
+            'salary' => 'nullable|numeric|min:0|max:9999999999.99', // Max 10 billion
+            'status' => 'required|in:Active,Inactive',
+            'emergency_contact' => 'nullable|string|max:255',
+            'address' => 'nullable|string|max:500',
+            'nationality' => 'nullable|string|max:100',
+            'date_of_birth' => 'nullable|date|before:today',
+            'passport_number' => 'nullable|string|max:50',
+            'visa_status' => 'nullable|string|max:100',
+            'bank_account' => 'nullable|string|max:100',
+            'notes' => 'nullable|string|max:1000'
+        ], [
+            'salary.max' => 'Salary cannot exceed 9,999,999,999.99',
+            'salary.numeric' => 'Salary must be a valid number',
+            'email.unique' => 'This email address is already in use by another employee',
+            'hire_date.before_or_equal' => 'Hire date cannot be in the future',
+            'date_of_birth.before' => 'Date of birth must be in the past'
+        ]);
+
+        try {
+            $employee->update($validated);
+
+            return redirect()->route('management.employees.show', $employee)
+                ->with('success', 'Employee updated successfully!');
+        } catch (\Exception $e) {
+            Log::error('Employee Update Error:', [
+                'error' => $e->getMessage(),
+                'employee_id' => $employee->id,
+                'data' => $validated
+            ]);
+
+            return back()->withInput()
+                ->with('error', 'Failed to update employee. Please check your input and try again.');
+        }
+    }
+
+    /**
+     * Remove the specified employee from storage.
+     */
+    public function destroy(Employee $employee)
+    {
+        // Check if employee has any related records
+        $shipmentsCount = $employee->shipments()->count();
+        $jobAssignmentsCount = method_exists($employee, 'jobAssignments') ? $employee->jobAssignments()->count() : 0;
+        $advancesCount = method_exists($employee, 'advances') ? $employee->advances()->count() : 0;
+
+        if ($shipmentsCount > 0 || $jobAssignmentsCount > 0 || $advancesCount > 0) {
+            return redirect()->route('management.employees.index')
+                ->with('error', 'Cannot delete employee. They have associated shipments, job assignments, or advances.');
+        }
+
+        try {
+            $employee->delete();
+
+            return redirect()->route('management.employees.index')
+                ->with('success', 'Employee deleted successfully!');
+        } catch (\Exception $e) {
+            Log::error('Employee Deletion Error:', [
+                'error' => $e->getMessage(),
+                'employee_id' => $employee->id
+            ]);
+
+            return redirect()->route('management.employees.index')
+                ->with('error', 'Failed to delete employee. Please try again.');
+        }
+    }
+
+    /**
+     * Search employees (AJAX)
+     */
+    public function search(Request $request)
+    {
+        $query = Employee::query();
+
+        if ($request->filled('q')) {
+            $search = $request->q;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('employee_id', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('department')) {
+            $query->where('department', $request->department);
+        }
+
+        return response()->json([
+            'employees' => $query->limit(10)->get()
+        ]);
+    }
+
+    /**
+     * Get employees by department (AJAX)
+     */
+    public function getByDepartment($department)
+    {
+        $employees = Employee::where('status', 'Active')
+            ->where('department', $department)
+            ->select('id', 'employee_id', 'name', 'position')
+            ->orderBy('name')
+            ->get();
+
+        return response()->json($employees);
+    }
+
+    /**
+     * Toggle employee status
+     */
+    public function toggleStatus(Employee $employee)
+    {
+        $currentStatus = $employee->status;
+        $newStatus = $currentStatus === 'Active' ? 'Inactive' : 'Active';
+
+        $employee->update(['status' => $newStatus]);
+
+        return redirect()->back()
+            ->with('success', "Employee status changed from {$currentStatus} to {$newStatus}!");
+    }
+}

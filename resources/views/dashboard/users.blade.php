@@ -12,7 +12,7 @@
 
 <div id="all-users-tab" class="tab-content active">
     <input type="text" class="search-bar" placeholder="Search users...">
-    <a href="{{ route('users.create') }}" class="btn btn-primary">Add New User</a>
+    <a href="{{ route('auth.users.create') }}" class="btn btn-primary">Add New User</a>
     
     <table class="data-table">
         <thead>
@@ -39,8 +39,8 @@
                 <td>{{ $user->last_login ? $user->last_login->format('Y-m-d H:i') : 'Never' }}</td>
                 <td>
                     @if($user->id !== auth()->id())
-                        <a href="{{ route('users.edit', $user) }}" class="btn btn-secondary">Edit</a>
-                        <form method="POST" action="{{ route('users.destroy', $user) }}" style="display: inline;">
+                        <a href="{{ route('auth.users.edit', $user) }}" class="btn btn-secondary">Edit</a>
+                        <form method="POST" action="{{ route('auth.users.destroy', $user) }}" style="display: inline;">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="btn btn-secondary" 
@@ -70,7 +70,7 @@
 
 <div id="add-user-tab" class="tab-content">
     <h3>Add New User</h3>
-    <form method="POST" action="{{ route('users.store') }}">
+    <form method="POST" action="{{ route('auth.users.store') }}">
         @csrf
         <div class="form-grid">
             <div class="form-group">

@@ -27,7 +27,6 @@ class QuantityType extends Model
         'validation_rules',
         'display_format',
         'reporting_category',
-        'customs_code',
         'is_weight_based',
         'is_volume_based',
         'is_count_based',
@@ -52,7 +51,7 @@ class QuantityType extends Model
         'validation_rules' => 'array',
         'conversion_factor' => 'decimal:6',
         'billing_multiplier' => 'decimal:4',
-        'minimum_chargeable' => 'decimal:2',
+        'minimum_chargeable' => 'decimal:6',
         'is_weight_based' => 'boolean',
         'is_volume_based' => 'boolean',
         'is_count_based' => 'boolean',
@@ -71,9 +70,9 @@ class QuantityType extends Model
         return $this->hasMany(Shipment::class, 'quantity_type_id');
     }
 
-    public function invoiceDetails()
+    public function shipmentItems()
     {
-        return $this->hasMany(InvoiceDetail::class, 'quantity_type_id');
+        return $this->hasMany(Shipment::class, 'quantity_type_id');
     }
 
     // Scopes
@@ -112,276 +111,293 @@ class QuantityType extends Model
         return $query->where('is_count_based', true);
     }
 
+    public function scopeDimensionBased($query)
+    {
+        return $query->where('is_dimension_based', true);
+    }
+
     public function scopeOrdered($query)
     {
         return $query->orderBy('sort_order')->orderBy('quantity_name');
     }
 
     // Accessors
-    public function getStatusAttribute()
-    {
-        return $this->is_active ? 'Active' : 'Inactive';
-    }
-
-    public function getFullNameAttribute()
-    {
-        return "{$this->quantity_name} ({$this->unit_symbol})";
-    }
-
     public function getCategoryDisplayAttribute()
     {
         $categories = [
-            'Weight' => '⚖️ Weight Measurements',
-            'Volume' => '📦 Volume Measurements',
-            'Count' => '🔢 Count/Pieces',
-            'Dimension' => '📏 Dimensional',
-            'Container' => '🚛 Container Units',
-            'Liquid' => '💧 Liquid Measurements',
-            'Area' => '📐 Area Measurements',
-            'Time' => '⏰ Time Based',
-            'Custom' => '⚙️ Custom Units'
+            'Container' => '📦 Container',
+            'Weight' => '⚖️ Weight',
+            'Volume' => '📏 Volume',
+            'Count' => '🔢 Count',
+            'Area' => '📐 Area',
+            'Liquid' => '🫗 Liquid',
+            'Length' => '📏 Length',
+            'Time' => '⏰ Time'
         ];
 
         return $categories[$this->quantity_category] ?? $this->quantity_category;
     }
 
-    public function getUnitDisplayAttribute()
-    {
-        return $this->unit_symbol ? "{$this->unit_of_measure} ({$this->unit_symbol})" : $this->unit_of_measure;
-    }
-
     public function getTypeIndicatorsAttribute()
     {
         $indicators = [];
-        if ($this->is_weight_based) $indicators[] = '⚖️ Weight';
-        if ($this->is_volume_based) $indicators[] = '📦 Volume';
-        if ($this->is_count_based) $indicators[] = '🔢 Count';
-        if ($this->is_dimension_based) $indicators[] = '📏 Dimension';
 
-        return $indicators ? implode(', ', $indicators) : 'Standard';
+        if ($this->is_weight_based) $indicators[] = 'Weight';
+        if ($this->is_volume_based) $indicators[] = 'Volume';
+        if ($this->is_count_based) $indicators[] = 'Count';
+        if ($this->is_dimension_based) $indicators[] = 'Dimension';
+
+        return $indicators;
     }
 
-    public function getBillingDisplayAttribute()
+    public function getFormattedRangeAttribute()
     {
-        if (!$this->is_billable) {
-            return 'Non-billable';
-        }
+        if (!$this->common_ranges) return 'No range specified';
 
-        $display = 'Billable';
-        if ($this->billing_multiplier && $this->billing_multiplier != 1) {
-            $display .= " (x{$this->billing_multiplier})";
-        }
-        if ($this->minimum_chargeable && $this->minimum_chargeable > 0) {
-            $display .= " (Min: {$this->minimum_chargeable})";
-        }
+        $min = $this->common_ranges['min'] ?? 0;
+        $max = $this->common_ranges['max'] ?? 'unlimited';
 
-        return $display;
+        return "Min: {$min}, Max: {$max}";
     }
 
-    public function getConversionDisplayAttribute()
+    public function getUsageCountAttribute()
     {
-        if (!$this->base_unit || !$this->conversion_factor) {
-            return 'Base unit';
-        }
-
-        return "1 {$this->unit_symbol} = {$this->conversion_factor} {$this->base_unit}";
+        return $this->shipments()->count() + $this->shipmentItems()->count();
     }
 
-    public function getApplicableCargoListAttribute()
+    public function getStatusBadgeAttribute()
     {
-        if (!$this->applicable_cargo_types || !is_array($this->applicable_cargo_types)) {
-            return 'All cargo types';
-        }
-
-        return implode(', ', $this->applicable_cargo_types);
+        if (!$this->is_active) return 'status-inactive';
+        if ($this->is_standard) return 'status-standard';
+        return 'status-custom';
     }
 
-    public function getIndustryStandardsListAttribute()
+    public function getRoundingDisplayAttribute()
     {
-        if (!$this->industry_standards || !is_array($this->industry_standards)) {
-            return 'No specific standards';
-        }
+        $methods = [
+            'up' => '⬆️ Round Up',
+            'down' => '⬇️ Round Down',
+            'nearest' => '🎯 Round Nearest'
+        ];
 
-        return implode(', ', $this->industry_standards);
+        return $methods[$this->rounding_method] ?? $this->rounding_method;
     }
 
     // Methods
-    public function convertTo($value, $targetQuantityType)
+    public function formatValue($value)
     {
-        if (!$this->base_unit || !$targetQuantityType->base_unit) {
-            return null; // Cannot convert without base units
+        if (!$this->display_format) {
+            return number_format($value, $this->decimal_places) . ' ' . $this->unit_symbol;
         }
 
-        if ($this->base_unit !== $targetQuantityType->base_unit) {
-            return null; // Cannot convert between different base units
-        }
-
-        // Convert to base unit first, then to target unit
-        $baseValue = $value * $this->conversion_factor;
-        $targetValue = $baseValue / $targetQuantityType->conversion_factor;
-
-        return round($targetValue, $targetQuantityType->decimal_places ?? 2);
+        return sprintf($this->display_format, $value);
     }
 
-    public function formatValue($value, $showSymbol = true)
+    public function roundValue($value)
     {
-        $decimalPlaces = $this->decimal_places ?? 2;
+        $factor = pow(10, $this->decimal_places);
 
-        if (!$this->allows_fractions) {
-            $decimalPlaces = 0;
+        switch ($this->rounding_method) {
+            case 'up':
+                return ceil($value * $factor) / $factor;
+            case 'down':
+                return floor($value * $factor) / $factor;
+            case 'nearest':
+            default:
+                return round($value, $this->decimal_places);
         }
+    }
 
-        $formatted = number_format($value, $decimalPlaces);
+    public function convertToBaseUnit($value)
+    {
+        return $value * $this->conversion_factor;
+    }
 
-        if ($this->display_format) {
-            // Custom formatting logic could be implemented here
-            $formatted = sprintf($this->display_format, $value);
-        }
-
-        if ($showSymbol && $this->unit_symbol) {
-            $formatted .= ' ' . $this->unit_symbol;
-        }
-
-        return $formatted;
+    public function convertFromBaseUnit($value)
+    {
+        return $value / $this->conversion_factor;
     }
 
     public function validateValue($value)
     {
         $errors = [];
 
-        // Check if fractions are allowed
-        if (!$this->allows_fractions && $value != intval($value)) {
-            $errors[] = 'Fractional values not allowed for this quantity type';
+        // Check if value is positive
+        if (in_array('positive_number', $this->validation_rules ?? []) && $value <= 0) {
+            $errors[] = 'Value must be positive';
         }
 
-        // Check common ranges
-        if ($this->common_ranges && is_array($this->common_ranges)) {
-            if (isset($this->common_ranges['min']) && $value < $this->common_ranges['min']) {
-                $errors[] = "Value below minimum range ({$this->common_ranges['min']})";
+        if (in_array('positive_integer', $this->validation_rules ?? []) && (!is_int($value) || $value <= 0)) {
+            $errors[] = 'Value must be a positive integer';
+        }
+
+        // Check fractions
+        if (!$this->allows_fractions && $value != floor($value)) {
+            $errors[] = 'Fractional values are not allowed';
+        }
+
+        // Check range
+        if ($this->common_ranges) {
+            $min = $this->common_ranges['min'] ?? null;
+            $max = $this->common_ranges['max'] ?? null;
+
+            if ($min !== null && $value < $min) {
+                $errors[] = "Value must be at least {$min}";
             }
-            if (isset($this->common_ranges['max']) && $value > $this->common_ranges['max']) {
-                $errors[] = "Value above maximum range ({$this->common_ranges['max']})";
+
+            if ($max !== null && $value > $max) {
+                $errors[] = "Value must not exceed {$max}";
             }
         }
 
-        // Apply custom validation rules
-        if ($this->validation_rules && is_array($this->validation_rules)) {
-            foreach ($this->validation_rules as $rule) {
-                // Custom validation logic would be implemented here
-                // This could include regex patterns, custom functions, etc.
-            }
+        // Check minimum chargeable
+        if ($this->is_billable && $value < $this->minimum_chargeable) {
+            $errors[] = "Minimum chargeable amount is {$this->minimum_chargeable}";
         }
 
-        return empty($errors) ? true : $errors;
+        return $errors;
     }
 
-    public function calculateBillableQuantity($actualQuantity)
+    public function calculateBillableAmount($quantity)
     {
-        if (!$this->is_billable) {
-            return 0;
-        }
+        if (!$this->is_billable) return 0;
 
-        $billableQuantity = $actualQuantity;
+        $amount = max($quantity, $this->minimum_chargeable);
+        $amount = $this->roundValue($amount * $this->billing_multiplier);
 
-        // Apply billing multiplier
-        if ($this->billing_multiplier) {
-            $billableQuantity *= $this->billing_multiplier;
-        }
-
-        // Apply minimum chargeable
-        if ($this->minimum_chargeable && $billableQuantity < $this->minimum_chargeable) {
-            $billableQuantity = $this->minimum_chargeable;
-        }
-
-        // Apply rounding method
-        switch ($this->rounding_method) {
-            case 'up':
-                $billableQuantity = ceil($billableQuantity);
-                break;
-            case 'down':
-                $billableQuantity = floor($billableQuantity);
-                break;
-            case 'nearest':
-            default:
-                $billableQuantity = round($billableQuantity, $this->decimal_places ?? 2);
-                break;
-        }
-
-        return $billableQuantity;
+        return $amount;
     }
 
-    public function isApplicableToCargoType($cargoType)
+    public function isCompatibleWith($cargoType)
     {
-        if (!$this->applicable_cargo_types || empty($this->applicable_cargo_types)) {
-            return true; // If no restrictions, applicable to all
-        }
+        if (!$this->applicable_cargo_types) return true;
 
         return in_array($cargoType, $this->applicable_cargo_types);
     }
 
-    public function getStatistics()
+    public function getCalculationInstructions()
+    {
+        $instructions = [];
+
+        if ($this->requires_dimensions) {
+            $instructions[] = 'Requires dimensional measurements';
+        }
+
+        if ($this->auto_calculate) {
+            $instructions[] = 'Value is automatically calculated';
+        }
+
+        if (!$this->allows_fractions) {
+            $instructions[] = 'Only whole numbers allowed';
+        }
+
+        if ($this->calculation_method) {
+            $instructions[] = $this->calculation_method;
+        }
+
+        return $instructions;
+    }
+
+    public function getStandardsDisplay()
+    {
+        if (!$this->industry_standards) return 'No specific standards';
+
+        return implode(', ', $this->industry_standards);
+    }
+
+    public function getApplicableCargoDisplay()
+    {
+        if (!$this->applicable_cargo_types) return 'All cargo types';
+
+        return implode(', ', $this->applicable_cargo_types);
+    }
+
+    // Statistics
+    public function getUsageStatistics()
     {
         return [
             'total_shipments' => $this->shipments()->count(),
-            'total_invoice_lines' => $this->invoiceDetails()->count(),
+            'active_shipments' => $this->shipments()->whereIn('status', ['Pending', 'In Transit', 'At Port'])->count(),
             'monthly_usage' => $this->shipments()->whereMonth('created_at', now()->month)->count(),
-            'average_quantity' => $this->shipments()
-                ->whereNotNull('quantity')
-                ->avg('quantity'),
-            'total_quantity_handled' => $this->shipments()
-                ->whereNotNull('quantity')
-                ->sum('quantity')
+            'total_quantity' => $this->shipments()->sum('total_quantity'),
+            'average_quantity' => $this->shipments()->avg('total_quantity')
         ];
-    }
-
-    public function getCompatibleUnits()
-    {
-        if (!$this->base_unit) {
-            return collect();
-        }
-
-        return static::where('base_unit', $this->base_unit)
-            ->where('id', '!=', $this->id)
-            ->where('is_active', true)
-            ->get();
     }
 
     // Validation rules
     public static function validationRules($id = null)
     {
         return [
-            'quantity_code' => 'required|string|max:20|unique:quantity_types,quantity_code,' . $id,
+            'quantity_code' => 'required|string|max:10|unique:quantity_types,quantity_code,' . $id,
             'quantity_name' => 'required|string|max:255',
-            'quantity_category' => 'required|string|in:Weight,Volume,Count,Dimension,Container,Liquid,Area,Time,Custom',
-            'unit_of_measure' => 'required|string|max:100',
-            'unit_symbol' => 'nullable|string|max:20',
+            'quantity_category' => 'required|string|in:Container,Weight,Volume,Count,Area,Liquid,Length,Time',
+            'unit_of_measure' => 'required|string|max:255',
+            'unit_symbol' => 'required|string|max:10',
             'base_unit' => 'nullable|string|max:50',
-            'conversion_factor' => 'nullable|numeric|min:0',
-            'decimal_places' => 'nullable|integer|min:0|max:10',
+            'conversion_factor' => 'required|numeric|min:0.000001|max:999999.999999',
+            'decimal_places' => 'required|integer|min:0|max:6',
             'description' => 'nullable|string',
             'calculation_method' => 'nullable|string',
-            'applicable_cargo_types' => 'nullable|array',
-            'industry_standards' => 'nullable|array',
-            'common_ranges' => 'nullable|array',
-            'validation_rules' => 'nullable|array',
-            'display_format' => 'nullable|string|max:100',
+            'display_format' => 'nullable|string|max:50',
             'reporting_category' => 'nullable|string|max:100',
-            'customs_code' => 'nullable|string|max:50',
-            'is_weight_based' => 'required|boolean',
-            'is_volume_based' => 'required|boolean',
-            'is_count_based' => 'required|boolean',
-            'is_dimension_based' => 'required|boolean',
-            'allows_fractions' => 'required|boolean',
-            'requires_dimensions' => 'required|boolean',
-            'auto_calculate' => 'required|boolean',
-            'is_billable' => 'required|boolean',
-            'billing_multiplier' => 'nullable|numeric|min:0',
-            'minimum_chargeable' => 'nullable|numeric|min:0',
-            'rounding_method' => 'nullable|string|in:up,down,nearest',
-            'is_standard' => 'required|boolean',
-            'is_active' => 'required|boolean',
-            'sort_order' => 'nullable|integer|min:0',
+            'billing_multiplier' => 'required|numeric|min:0.0001|max:9999.9999',
+            'minimum_chargeable' => 'required|numeric|min:0.000001|max:999999.999999',
+            'rounding_method' => 'required|string|in:up,down,nearest',
+            'sort_order' => 'required|integer|min:1|max:9999',
             'notes' => 'nullable|string'
+        ];
+    }
+
+    public static function getCategories()
+    {
+        return [
+            'Container' => 'Container Units (TEU, FEU)',
+            'Weight' => 'Weight Measurements (KG, MT, LB)',
+            'Volume' => 'Volume Measurements (CBM, CFT)',
+            'Count' => 'Count/Pieces (PCS, PKG)',
+            'Area' => 'Area Measurements (SQM, SQFT)',
+            'Liquid' => 'Liquid Measurements (LTR, GAL)',
+            'Length' => 'Linear Measurements (M, FT)',
+            'Time' => 'Time-based Units (HR, DAY)'
+        ];
+    }
+
+    public static function getRoundingMethods()
+    {
+        return [
+            'up' => 'Round Up (Ceiling)',
+            'down' => 'Round Down (Floor)',
+            'nearest' => 'Round to Nearest'
+        ];
+    }
+
+    public static function getDefaultValidationRules()
+    {
+        return [
+            'positive_number' => 'Must be positive number',
+            'positive_integer' => 'Must be positive integer',
+            'required' => 'Value is required',
+            'min_value' => 'Must meet minimum value',
+            'max_value' => 'Must not exceed maximum'
+        ];
+    }
+
+    public static function getCargoTypes()
+    {
+        return [
+            'General Cargo',
+            'Containers',
+            'Bulk Cargo',
+            'Break Bulk',
+            'Liquid Bulk',
+            'Project Cargo',
+            'Heavy Cargo',
+            'Hazardous Cargo',
+            'Refrigerated Cargo',
+            'Air Cargo',
+            'LCL (Less Container Load)',
+            'FCL (Full Container Load)',
+            'Ro-Ro Cargo'
         ];
     }
 }

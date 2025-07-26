@@ -12,7 +12,7 @@
 
 <div id="export-tab" class="tab-content active">
     <h3>Export Data</h3>
-    <form method="POST" action="{{ route('file.export') }}">
+    <form method="POST" action="{{ route('tools.file.export') }}">
         @csrf
         <div class="form-grid">
             <div class="form-group">
@@ -55,7 +55,7 @@
 
 <div id="import-tab" class="tab-content">
     <h3>Import Data</h3>
-    <form method="POST" action="{{ route('file.import') }}" enctype="multipart/form-data">
+    <form method="POST" action="{{ route('tools.file.import') }}" enctype="multipart/form-data">
         @csrf
         <div class="form-group">
             <label class="form-label">Select File</label>
