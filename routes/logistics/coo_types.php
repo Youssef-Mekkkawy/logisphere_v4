@@ -17,3 +17,9 @@ Route::resource('coo-types', COOTypeController::class, [
         'destroy' => 'coo-types.destroy'
     ]
 ]);
+// Additional COO Types API routes (optional)
+Route::prefix('coo-types')->name('coo-types.')->group(function () {
+    Route::get('/{cooType}/statistics', [COOTypeController::class, 'statistics'])->name('statistics');
+    Route::post('/{cooType}/toggle-status', [COOTypeController::class, 'toggleStatus'])->name('toggle-status');
+    Route::get('/active', [COOTypeController::class, 'getActive'])->name('active');
+});

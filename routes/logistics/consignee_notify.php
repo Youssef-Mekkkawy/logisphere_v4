@@ -15,3 +15,6 @@ Route::resource('consignee-notify', ConsigneeNotifyController::class, [
         'destroy' => 'consignee-notify.destroy'
     ]
 ]);
+
+Route::get('consignee-notify/api/by-type', [ConsigneeNotifyController::class, 'getByType'])->name('consignee-notify.by-type');
+Route::patch('consignee-notify/{consigneeNotify}/toggle-status', [ConsigneeNotifyController::class, 'toggleStatus'])->name('consignee-notify.toggle-status');

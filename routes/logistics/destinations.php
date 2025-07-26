@@ -15,3 +15,8 @@ Route::resource('destinations', DestinationController::class, [
         'destroy' => 'destinations.destroy'
     ]
 ]);
+
+Route::get('destinations/api/by-criteria', [DestinationController::class, 'getByCriteria'])->name('destinations.by-criteria');
+Route::get('destinations/api/nearby', [DestinationController::class, 'getNearby'])->name('destinations.nearby');
+Route::patch('destinations/{destination}/toggle-status', [DestinationController::class, 'toggleStatus'])->name('destinations.toggle-status');
+Route::get('destinations/{destination}/availability', [DestinationController::class, 'checkAvailability'])->name('destinations.availability');

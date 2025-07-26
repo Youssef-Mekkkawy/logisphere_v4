@@ -19,3 +19,11 @@ Route::resource('shipping-agencies', ShippingAgencyController::class, [
 Route::get('/shipping-agencies/active', [ShippingAgencyController::class, 'getActive'])->name('shipping-agencies.active');
 Route::get('/shipping-agencies/country/{country}', [ShippingAgencyController::class, 'getByCountry'])->name('shipping-agencies.by-country');
 Route::get('/shipping-agencies/search', [ShippingAgencyController::class, 'search'])->name('shipping-agencies.search');
+// Additional Shipping Agencies API routes (optional)
+Route::prefix('shipping-agencies')->name('shipping-agencies.')->group(function () {
+    Route::get('/{shippingAgency}/statistics', [ShippingAgencyController::class, 'statistics'])->name('statistics');
+    Route::post('/{shippingAgency}/toggle-status', [ShippingAgencyController::class, 'toggleStatus'])->name('toggle-status');
+    Route::get('/active', [ShippingAgencyController::class, 'getActive'])->name('active');
+    Route::get('/by-country/{country}', [ShippingAgencyController::class, 'getByCountry'])->name('by-country');
+    Route::get('/search', [ShippingAgencyController::class, 'search'])->name('search');
+});
