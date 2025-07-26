@@ -1,4 +1,4 @@
-{{-- File: resources/views/users/index.blade.php (Compatible with Your Layout) --}}
+{{-- File: resources/views/auth/users/index.blade.php (Compatible with Your Layout) --}}
 @extends('layouts.app')
 
 @section('title', 'User Management - LogiFlow')
@@ -466,7 +466,7 @@
         // ===== PERMISSION ACTIONS =====
         window.deletePermission = function(id) {
             if (confirm('Are you sure you want to delete this permission?')) {
-                fetch(`/users/permissions/${id}`, {
+                fetch(`/auth/users/permissions/${id}`, {
                         method: 'DELETE',
                         headers: {
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
@@ -511,7 +511,7 @@
                 submitBtn.textContent = 'Creating...';
                 submitBtn.disabled = true;
 
-                fetch('/users/permissions', {
+                fetch('/auth/users/permissions', {
                         method: 'POST',
                         body: formData,
                         headers: {

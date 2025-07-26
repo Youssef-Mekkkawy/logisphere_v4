@@ -10,7 +10,7 @@
             <h2>🔍 Track Your Shipment</h2>
             <p>Enter your shipment ID to get real-time updates</p>
 
-            <form method="GET" action="{{ route('shipments.tracking', 'search') }}" class="search-form">
+            <form method="GET" action="{{ route('management.api.shipments.tracking', 'search') }}" class="search-form">
                 <div class="search-input-group">
                     <input type="text" name="id" placeholder="Enter Shipment ID (e.g., SHP-2024-001)"
                         value="{{ request('id') }}" class="tracking-input" required>
@@ -214,7 +214,7 @@
                         <li>You have access to this shipment</li>
                     </ul>
                 </div>
-                <a href="{{ route('shipments.tracking', 'search') }}" class="btn btn-primary">Try Again</a>
+                <a href="{{ route('management.api.shipments.tracking', 'search') }}" class="btn btn-primary">Try Again</a>
             </div>
         @endif
 

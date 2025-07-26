@@ -98,6 +98,7 @@ Route::middleware(['auth'])->group(function () {
         require __DIR__ . '/logistics/shipping_agencies.php';
         require __DIR__ . '/logistics/shipment_types.php';
         require __DIR__ . '/logistics/services.php';
+        require __DIR__ . '/logistics/shippers.php';
     });
 
     // ========================================================================

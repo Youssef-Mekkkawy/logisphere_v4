@@ -6,9 +6,9 @@
 
 @section('content')
     <div style="margin-bottom: 20px;">
-        <a href="{{ route('permissions.index') }}" class="btn btn-secondary">← Back to Permissions</a>
-        @can('roles.manage-permissions')
-            <a href="{{ route('permissions.edit', $permission) }}" class="btn btn-primary">Edit Permission</a>
+        <a href="{{ route('auth.permissions.index') }}" class="btn btn-secondary">← Back to Permissions</a>
+        @can('auth.roles.manage-permissions')
+            <a href="{{ route('auth.permissions.edit', $permission) }}" class="btn btn-primary">Edit Permission</a>
         @endcan
     </div>
 
@@ -86,14 +86,14 @@
                 <h4 style="color: #1e40af; margin-bottom: 15px;">Quick Actions</h4>
 
                 <div style="display: flex; flex-direction: column; gap: 10px;">
-                    @can('roles.manage-permissions')
-                        <a href="{{ route('permissions.edit', $permission) }}" class="btn btn-primary"
+                    @can('auth.roles.manage-permissions')
+                        <a href="{{ route('auth.permissions.edit', $permission) }}" class="btn btn-primary"
                             style="text-align: center;">
                             Edit Permission
                         </a>
 
                         @if ($permission->roles->count() === 0)
-                            <form method="POST" action="{{ route('permissions.destroy', $permission) }}">
+                            <form method="POST" action="{{ route('auth.permissions.destroy', $permission) }}">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn" style="background: #dc2626; color: white; width: 100%;"

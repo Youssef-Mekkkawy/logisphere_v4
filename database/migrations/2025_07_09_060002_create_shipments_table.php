@@ -14,6 +14,10 @@ return new class extends Migration
         Schema::create('shipments', function (Blueprint $table) {
             $table->id();
 
+            // Shipper & Consignee Information (placed early in table structure)
+            $table->foreignId('shipper_id')->nullable()->constrained('shippers')->onDelete('set null');
+            $table->foreignId('consignee_id')->nullable()->constrained('shippers')->onDelete('set null');
+
             // Basic Shipment Information
             $table->string('shipment_id')->unique();
             $table->foreignId('company_id')->constrained('companies')->onDelete('cascade');
@@ -35,7 +39,7 @@ return new class extends Migration
             $table->decimal('weight', 10, 2)->nullable();
             $table->decimal('volume', 10, 2)->nullable();
 
-            // Quantity Information (NEW)
+            // Quantity Information
             $table->foreignId('quantity_type_id')->nullable()->constrained('quantity_types')->nullOnDelete();
             $table->decimal('total_quantity', 15, 6)->nullable();
 
@@ -51,6 +55,8 @@ return new class extends Migration
             $table->index(['company_id', 'status']);
             $table->index(['origin_port_id', 'destination_port_id']);
             $table->index('shipment_id');
+            $table->index('shipper_id');
+            $table->index('consignee_id');
         });
     }
 

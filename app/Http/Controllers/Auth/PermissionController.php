@@ -2,6 +2,7 @@
 
 // File: app/Http/Controllers/PermissionController.php
 namespace App\Http\Controllers\Auth;
+
 use App\Http\Controllers\Controller;
 use App\Models\Permission;
 use Illuminate\Http\Request;
@@ -79,7 +80,7 @@ class PermissionController extends Controller
 
         Permission::create($validated);
 
-        return redirect()->route('permissions.index')
+        return redirect()->route('auth.permissions.index')
             ->with('success', 'Permission created successfully!');
     }
 
@@ -125,7 +126,7 @@ class PermissionController extends Controller
 
         $permission->update($validated);
 
-        return redirect()->route('permissions.show', $permission)
+        return redirect()->route('auth.permissions.show', $permission)
             ->with('success', 'Permission updated successfully!');
     }
 
@@ -136,13 +137,13 @@ class PermissionController extends Controller
     {
         // Check if permission is used by any roles
         if ($permission->roles()->count() > 0) {
-            return redirect()->route('permissions.index')
+            return redirect()->route('auth.permissions.index')
                 ->with('error', 'Cannot delete permission that is assigned to roles.');
         }
 
         $permission->delete();
 
-        return redirect()->route('permissions.index')
+        return redirect()->route('auth.permissions.index')
             ->with('success', 'Permission deleted successfully!');
     }
 

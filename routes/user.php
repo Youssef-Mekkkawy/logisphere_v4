@@ -7,7 +7,7 @@ use App\Http\Controllers\auth\UserController;
 use App\Http\Controllers\Auth\RoleController;
 use App\Http\Controllers\Auth\PermissionController;
 
-
+sdffsdfsdfsd
 
 Route::middleware(['auth'])->group(function () {
 

@@ -6,11 +6,11 @@
 
 @section('content')
     <div style="margin-bottom: 20px;">
-        <a href="{{ route('permissions.index') }}" class="btn btn-secondary">← Back to Permissions</a>
-        <a href="{{ route('permissions.show', $permission) }}" class="btn btn-primary">View Permission</a>
+        <a href="{{ route('auth.permissions.index') }}" class="btn btn-secondary">← Back to Permissions</a>
+        <a href="{{ route('auth.permissions.show', $permission) }}" class="btn btn-primary">View Permission</a>
     </div>
 
-    <form method="POST" action="{{ route('permissions.update', $permission) }}">
+    <form method="POST" action="{{ route('auth.permissions.update', $permission) }}">
         @csrf
         @method('PUT')
 
@@ -77,10 +77,10 @@
 
         <div style="margin-top: 30px;">
             <button type="submit" class="btn btn-primary">Update Permission</button>
-            <a href="{{ route('permissions.show', $permission) }}" class="btn btn-secondary">Cancel</a>
+            <a href="{{ route('auth.permissions.show', $permission) }}" class="btn btn-secondary">Cancel</a>
 
             @if ($permission->roles->count() === 0)
-                <form method="POST" action="{{ route('permissions.destroy', $permission) }}"
+                <form method="POST" action="{{ route('auth.permissions.destroy', $permission) }}"
                     style="display: inline; margin-left: 10px;">
                     @csrf
                     @method('DELETE')

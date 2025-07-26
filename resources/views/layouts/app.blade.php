@@ -403,7 +403,7 @@
         // ===== USER ACTIONS =====
         window.deleteUser = function(id) {
             if (confirm('Are you sure you want to delete this user?')) {
-                fetch(`/users/${id}`, {
+                fetch(`/auth/users/${id}`, {
                         method: 'DELETE',
                         headers: {
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
@@ -430,7 +430,7 @@
         // ===== ROLE ACTIONS =====
         window.deleteRole = function(id) {
             if (confirm('Are you sure you want to delete this role?')) {
-                fetch(`/users/roles/${id}`, {
+                fetch(`/auth/users/roles/${id}`, {
                         method: 'DELETE',
                         headers: {
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
@@ -461,7 +461,7 @@
         // ===== PERMISSION ACTIONS =====
         window.deletePermission = function(id) {
             if (confirm('Are you sure you want to delete this permission?')) {
-                fetch(`/users/permissions/${id}`, {
+                fetch(`/auth/users/permissions/${id}`, {
                         method: 'DELETE',
                         headers: {
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
@@ -531,7 +531,7 @@
             if (userForm) {
                 userForm.addEventListener('submit', function(e) {
                     e.preventDefault();
-                    submitForm(this, '/users', 'User created successfully!');
+                    submitForm(this, '/auth/users', 'User created successfully!');
                 });
             }
 
@@ -539,7 +539,7 @@
             if (roleForm) {
                 roleForm.addEventListener('submit', function(e) {
                     e.preventDefault();
-                    submitForm(this, '/users/roles', 'Role created successfully!');
+                    submitForm(this, '/auth/users/roles', 'Role created successfully!');
                 });
             }
 
@@ -561,7 +561,7 @@
                     submitBtn.textContent = 'Creating...';
                     submitBtn.disabled = true;
 
-                    fetch('/users/permissions', {
+                    fetch('/auth/users/permissions', {
                             method: 'POST',
                             body: formData,
                             headers: {

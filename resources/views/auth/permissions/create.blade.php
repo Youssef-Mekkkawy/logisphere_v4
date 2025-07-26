@@ -6,10 +6,10 @@
 
 @section('content')
     <div style="margin-bottom: 20px;">
-        <a href="{{ route('permissions.index') }}" class="btn btn-secondary">← Back to Permissions</a>
+        <a href="{{ route('auth.permissions.index') }}" class="btn btn-secondary">← Back to Permissions</a>
     </div>
 
-    <form method="POST" action="{{ route('permissions.store') }}">
+    <form method="POST" action="{{ route('auth.permissions.store') }}">
         @csrf
 
         <div style="background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);">
@@ -64,7 +64,7 @@
 
         <div style="margin-top: 30px;">
             <button type="submit" class="btn btn-primary">Create Permission</button>
-            <a href="{{ route('permissions.index') }}" class="btn btn-secondary">Cancel</a>
+            <a href="{{ route('auth.permissions.index') }}" class="btn btn-secondary">Cancel</a>
         </div>
     </form>
 @endsection

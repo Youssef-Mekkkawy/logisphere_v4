@@ -40,7 +40,8 @@ class DatabaseSeeder extends Seeder
             CooTypeSeeder::class,
             QuantityTypeSeeder::class,
             ServiceSeeder::class,
-            ShipmentTypeSeeder::class, // 🔥 ADD: Quantity Types Seeder
+            ShipmentTypeSeeder::class, 
+            ShipperSeeder::class,
         ]);
 
         $this->command->info('🎉 All seeders completed successfully!');

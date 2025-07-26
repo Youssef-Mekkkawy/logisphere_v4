@@ -6,10 +6,10 @@
 
 @section('content')
     <div style="margin-bottom: 20px;">
-        <a href="{{ route('roles.index') }}" class="btn btn-secondary">← Back to Roles</a>
+        <a href="{{ route('auth.roles.index') }}" class="btn btn-secondary">← Back to Roles</a>
     </div>
 
-    <form method="POST" action="{{ route('roles.store') }}">
+    <form method="POST" action="{{ route('auth.users.roles.store') }}">
         @csrf
 
         <div
@@ -74,7 +74,7 @@
 
         <div style="margin-top: 30px;">
             <button type="submit" class="btn btn-primary">Create Role</button>
-            <a href="{{ route('roles.index') }}" class="btn btn-secondary">Cancel</a>
+            <a href="{{ route('auth.roles.index') }}" class="btn btn-secondary">Cancel</a>
         </div>
     </form>
 @endsection

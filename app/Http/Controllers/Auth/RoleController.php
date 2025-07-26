@@ -80,7 +80,7 @@ class RoleController extends Controller
             $role->permissions()->sync($validated['permissions']);
         }
 
-        return redirect()->route('roles.index')
+        return redirect()->route('auth.roles.index')
             ->with('success', 'Role created successfully!');
     }
 
@@ -135,7 +135,7 @@ class RoleController extends Controller
         // Sync permissions
         $role->permissions()->sync($validated['permissions'] ?? []);
 
-        return redirect()->route('roles.show', $role)
+        return redirect()->route('auth.roles.show', $role)
             ->with('success', 'Role updated successfully!');
     }
 
@@ -146,19 +146,19 @@ class RoleController extends Controller
     {
         // Prevent deletion of system roles
         if ($role->is_system) {
-            return redirect()->route('roles.index')
+            return redirect()->route('auth.roles.index')
                 ->with('error', 'System roles cannot be deleted.');
         }
 
         // Check if role has users
         if ($role->users()->count() > 0) {
-            return redirect()->route('roles.index')
+            return redirect()->route('auth.roles.index')
                 ->with('error', 'Cannot delete role that has users assigned to it.');
         }
 
         $role->delete();
 
-        return redirect()->route('roles.index')
+        return redirect()->route('auth.roles.index')
             ->with('success', 'Role deleted successfully!');
     }
 

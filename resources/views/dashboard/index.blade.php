@@ -51,7 +51,7 @@
             <td>{{ $shipment->eta ? $shipment->eta->format('Y-m-d') : 'N/A' }}</td>
             <td>
                 <a href="{{ route('management.shipments.edit', $shipment) }}" class="btn btn-secondary">Edit</a>
-                <a href="{{ route('shipments.tracking', $shipment->shipment_id) }}" class="btn btn-primary">Track</a>
+                <a href="{{ route('management.api.shipments.tracking', $shipment->shipment_id) }}" class="btn btn-primary">Track</a>
             </td>
         </tr>
         @empty

@@ -6,11 +6,11 @@
 
 @section('content')
     <div style="margin-bottom: 20px;">
-        <a href="{{ route('roles.index') }}" class="btn btn-secondary">← Back to Roles</a>
-        <a href="{{ route('roles.show', $role) }}" class="btn btn-primary">View Role</a>
+        <a href="{{ route('auth.roles.index') }}" class="btn btn-secondary">← Back to Roles</a>
+        <a href="{{ route('auth.roles.show', $role) }}" class="btn btn-primary">View Role</a>
     </div>
 
-    <form method="POST" action="{{ route('roles.update', $role) }}">
+    <form method="POST" action="{{ route('auth.roles.update', $role) }}">
         @csrf
         @method('PUT')
 
@@ -78,10 +78,10 @@
 
         <div style="margin-top: 30px;">
             <button type="submit" class="btn btn-primary">Update Role</button>
-            <a href="{{ route('roles.show', $role) }}" class="btn btn-secondary">Cancel</a>
+            <a href="{{ route('auth.roles.show', $role) }}" class="btn btn-secondary">Cancel</a>
 
             @if (!$role->is_system && $role->users->count() === 0)
-                <form method="POST" action="{{ route('roles.destroy', $role) }}"
+                <form method="POST" action="{{ route('auth.users.roles.destroy', $role) }}"
                     style="display: inline; margin-left: 10px;">
                     @csrf
                     @method('DELETE')

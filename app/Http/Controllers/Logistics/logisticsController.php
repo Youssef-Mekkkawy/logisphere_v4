@@ -18,10 +18,10 @@ class logisticsController extends Controller
     {
         $this->middleware('auth');
         // 🔥 TEMPORARILY DISABLED FOR TESTING - Re-enable after fixing
-        // $this->middleware('permission:logistics.view')->only(['index', 'show']);
-        // $this->middleware('permission:logistics.create')->only(['create', 'store']);
-        // $this->middleware('permission:logistics.edit')->only(['edit', 'update']);
-        // $this->middleware('permission:logistics.delete')->only(['destroy']);
+        $this->middleware('permission:logistics.view')->only(['index', 'show']);
+        $this->middleware('permission:logistics.create')->only(['create', 'store']);
+        $this->middleware('permission:logistics.edit')->only(['edit', 'update']);
+        $this->middleware('permission:logistics.delete')->only(['destroy']);
 
     }
     //

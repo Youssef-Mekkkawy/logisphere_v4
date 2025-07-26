@@ -6,9 +6,9 @@
 
 @section('content')
     <div style="margin-bottom: 20px;">
-        <a href="{{ route('roles.index') }}" class="btn btn-secondary">← Back to Roles</a>
-        @can('roles.edit')
-            <a href="{{ route('roles.edit', $role) }}" class="btn btn-primary">Edit Role</a>
+        <a href="{{ route('auth.roles.index') }}" class="btn btn-secondary">← Back to Roles</a>
+        @can('auth.roles.edit')
+            <a href="{{ route('auth.roles.edit', $role) }}" class="btn btn-primary">Edit Role</a>
         @endcan
     </div>
 
@@ -140,15 +140,15 @@
                 <h4 style="color: #1e40af; margin-bottom: 15px;">Quick Actions</h4>
 
                 <div style="display: flex; flex-direction: column; gap: 10px;">
-                    @can('roles.edit')
-                        <a href="{{ route('roles.edit', $role) }}" class="btn btn-primary" style="text-align: center;">
+                    @can('auth.roles.edit')
+                        <a href="{{ route('auth.roles.edit', $role) }}" class="btn btn-primary" style="text-align: center;">
                             Edit Role
                         </a>
                     @endcan
 
-                    @can('roles.delete')
+                    @can('auth.roles.delete')
                         @if (!$role->is_system && $role->users->count() === 0)
-                            <form method="POST" action="{{ route('roles.destroy', $role) }}">
+                            <form method="POST" action="{{ route('auth.users.roles.destroy', $role) }}">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn" style="background: #dc2626; color: white; width: 100%;"

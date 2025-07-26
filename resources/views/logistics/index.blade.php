@@ -90,9 +90,8 @@
                         style="width: 100%; justify-content: flex-start;">
                         📊 Quantity Types
                     </a>
-                    <a href="" class="btn btn-outline" style="width: 100%; justify-content: flex-start;">
-                        🏢 Shipper Management
-                    </a>
+                    <a href="{{ route('logistics.shippers.index') }}" class="btn btn-outline"
+                        style="width: 100%; justify-content: flex-start;">🏢 Shippers</a>
                 </div>
             </div>
         </div>

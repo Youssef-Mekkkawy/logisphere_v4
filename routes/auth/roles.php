@@ -6,8 +6,8 @@ use App\Http\Controllers\Auth\{
     PermissionController
 };
 // ===== STANDALONE ROUTES (OPTIONAL) =====
-Route::resource('roles', RoleController::class);
-Route::resource('permissions', PermissionController::class);
+// Route::resource('roles', RoleController::class);
+// Route::resource('permissions', PermissionController::class);
 
 // ===== STANDALONE ROLE & PERMISSION MANAGEMENT (Optional - Direct Access) =====
 Route::middleware('permission:roles.view')->group(function () {

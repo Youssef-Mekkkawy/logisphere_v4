@@ -12,7 +12,7 @@
                 style="margin-left: 10px;">Edit Shipment</a>
         @endif
 
-        <a href="{{ route('shipments.tracking', $shipment->shipment_id) }}" class="btn btn-primary"
+        <a href="{{ route('management.api.shipments.tracking', $shipment->shipment_id) }}" class="btn btn-primary"
             style="margin-left: 10px;">Track Shipment</a>
     </div>
 
@@ -169,7 +169,7 @@
                 <h4 style="color: #1e40af; margin-bottom: 15px;">Quick Actions</h4>
 
                 <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <a href="{{ route('shipments.tracking', $shipment->shipment_id) }}" class="btn btn-primary"
+                    <a href="{{ route('management.api.shipments.tracking', $shipment->shipment_id) }}" class="btn btn-primary"
                         style="justify-content: center;">
                         📍 Track Shipment
                     </a>

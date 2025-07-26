@@ -10,8 +10,8 @@
             <h2 style="font-size: 1.5rem; font-weight: 600; color: #1e293b;">🔐 Roles Management</h2>
             <p style="color: #64748b;">Manage user roles and permissions</p>
         </div>
-        @can('roles.create')
-            <a href="{{ route('roles.create') }}" class="btn btn-primary">+ Add New Role</a>
+        @can('auth.roles.create')
+            <a href="{{ route('auth.roles.create') }}" class="btn btn-primary">+ Add New Role</a>
         @endcan
     </div>
 
@@ -35,7 +35,7 @@
             </div>
             <div>
                 <button type="submit" class="btn btn-primary">Filter</button>
-                <a href="{{ route('roles.index') }}" class="btn btn-secondary" style="margin-left: 0.5rem;">Clear</a>
+                <a href="{{ route('auth.roles.index') }}" class="btn btn-secondary" style="margin-left: 0.5rem;">Clear</a>
             </div>
         </form>
     </div>
@@ -84,17 +84,17 @@
                             @endif
                         </td>
                         <td style="display: flex; gap: 0.5rem;">
-                            <a href="{{ route('roles.show', $role) }}" class="btn btn-secondary"
+                            <a href="{{ route('auth.roles.show', $role) }}" class="btn btn-secondary"
                                 style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">View</a>
 
-                            @can('roles.edit')
-                                <a href="{{ route('roles.edit', $role) }}" class="btn btn-primary"
+                            @can('auth.roles.edit')
+                                <a href="{{ route('auth.roles.edit', $role) }}" class="btn btn-primary"
                                     style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Edit</a>
                             @endcan
 
-                            @can('roles.delete')
+                            @can('auth.roles.delete')
                                 @if (!$role->is_system)
-                                    <form action="{{ route('roles.destroy', $role) }}" method="POST" style="display: inline;">
+                                    <form action="{{ route('auth.users.roles.destroy', $role) }}" method="POST" style="display: inline;">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-danger"
@@ -109,8 +109,8 @@
                     <tr>
                         <td colspan="6" style="text-align: center; padding: 2rem; color: #64748b;">
                             No roles found.
-                            @can('roles.create')
-                                <a href="{{ route('roles.create') }}" style="color: var(--primary-color);">Create your first
+                            @can('auth.roles.create')
+                                <a href="{{ route('auth.roles.create') }}" style="color: var(--primary-color);">Create your first
                                     role</a>
                             @endcan
                         </td>

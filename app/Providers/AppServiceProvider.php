@@ -315,7 +315,7 @@ class AppServiceProvider extends ServiceProvider
         return [
             [
                 'title' => 'New Shipment',
-                'route' => 'management.shipments.create',
+                'route' => 'shipments.create',
                 'icon' => '➕',
                 'shortcut' => 'Ctrl+F1',
                 'class' => 'btn-primary'

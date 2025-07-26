@@ -15,7 +15,15 @@ use App\Imports\ShipmentsImport;
 class FileController extends Controller
 {
     //
-
+    public function __construct()
+    {
+        $this->middleware('auth');
+        // 🔥 TEMPORARILY DISABLED FOR TESTING - Re-enable after fixing
+        $this->middleware('permission:file.view')->only(['index', 'show']);
+        $this->middleware('permission:file.create')->only(['create', 'store']);
+        $this->middleware('permission:file.edit')->only(['edit', 'update']);
+        $this->middleware('permission:file.delete')->only(['destroy']);
+    }
     public function index()
     {
         return view('dashboard.file');
