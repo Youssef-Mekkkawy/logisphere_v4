@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
 
 class LoginController extends Controller
 {
@@ -103,7 +105,7 @@ class LoginController extends Controller
 
         // Check if the input is an email or username
         $field = filter_var($username) ? 'username' : 'username';
-        
+
         return [
             'username' => $username,
             'password' => $request->input('password'),
@@ -146,15 +148,7 @@ class LoginController extends Controller
     /**
      * Log the user out of the application.
      */
-    public function logout(Request $request)
-    {
-        Auth::logout();
 
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return redirect('/login')->with('success', 'You have been logged out successfully.');
-    }
 
     /**
      * Determine if the user has too many failed login attempts.
@@ -214,5 +208,97 @@ class LoginController extends Controller
     protected function throttleKey(Request $request)
     {
         return strtolower($request->input('username')) . '|' . $request->ip();
+    }
+
+    /**
+     * Enhanced logout with better error handling
+     */
+    public function logout(Request $request)
+    {
+        try {
+            // Log the logout attempt
+            Log::info('Logout attempt for user: ' . (auth()->user()->id ?? 'guest'));
+
+            // Get user before logout for logging
+            $user = auth()->user();
+
+            // Update last_login if you're tracking it
+            if ($user) {
+                $user->update(['last_login' => now()]);
+            }
+
+            // Perform logout
+            Auth::logout();
+
+            // Invalidate session
+            $request->session()->invalidate();
+
+            // Regenerate CSRF token
+            $request->session()->regenerateToken();
+
+            // Clear any additional session data
+            Session::flush();
+
+            // Log successful logout
+            Log::info('User logged out successfully: ' . ($user->id ?? 'unknown'));
+
+            // Check if it's an AJAX request
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'You have been logged out successfully.',
+                    'redirect' => route('login')
+                ]);
+            }
+
+            // Regular redirect
+            return redirect('/login')->with('success', 'You have been logged out successfully.');
+        } catch (\Exception $e) {
+            // Log the error
+            Log::error('Logout error: ' . $e->getMessage());
+
+            // Force logout even if there's an error
+            Auth::logout();
+
+            // Clear everything
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Logged out.',
+                    'redirect' => route('login')
+                ]);
+            }
+
+            return redirect('/login');
+        }
+    }
+
+    /**
+     * Alternative logout method that bypasses CSRF
+     */
+    public function forceLogout(Request $request)
+    {
+        // This method can be used as a GET route if CSRF is problematic
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect('/login')->with('info', 'Session expired. Please log in again.');
+    }
+
+    /**
+     * Refresh CSRF token (AJAX endpoint)
+     */
+    public function refreshToken(Request $request)
+    {
+        $request->session()->regenerateToken();
+
+        return response()->json([
+            'success' => true,
+            'token' => csrf_token()
+        ]);
     }
 }

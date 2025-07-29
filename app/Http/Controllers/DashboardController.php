@@ -6,7 +6,9 @@ use App\Models\cr;
 use App\Models\Shipment;
 use App\Models\Company;
 use App\Models\Employee;
+use Illuminate\Foundation\Auth\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
@@ -59,8 +61,9 @@ class DashboardController extends Controller
             ->orderBy('year', 'desc')
             ->orderBy('month', 'desc')
             ->get();
+        $user = Auth::user();
 
-        return view('dashboard.index', compact('metrics', 'recentShipments', 'shipmentsByStatus', 'monthlyTrends', 'stats'));
+        return view('dashboard.index', compact('user', 'metrics', 'recentShipments', 'shipmentsByStatus', 'monthlyTrends', 'stats'));
     }
     public function getMetrics()
     {

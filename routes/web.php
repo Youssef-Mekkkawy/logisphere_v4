@@ -51,7 +51,14 @@ Route::middleware(['auth'])->group(function () {
     // require __DIR__ . '/dashboard.php';
     // ===== DASHBOARD & LOGOUT =====
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    // Standard logout route (with CSRF protection)
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+    // Alternative GET logout route (for when CSRF fails)
+    Route::get('/force-logout', [LoginController::class, 'forceLogout'])->name('force.logout');
+
+    // CSRF token refresh endpoint
+    Route::get('/refresh-token', [LoginController::class, 'refreshToken'])->name('refresh.token');
 
 
     // ========================================================================
@@ -139,5 +146,12 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('api')->name('api.')->group(function () {
         // Dashboard
         Route::get('/dashboard-metrics', [DashboardController::class, 'getMetrics'])->name('dashboard.metrics');
+    });
+
+
+    Route::middleware(['auth'])->group(function () {
+        Route::get('/profile', function () {
+            return view('shared.profile.show');
+        })->name('profile.show');
     });
 });

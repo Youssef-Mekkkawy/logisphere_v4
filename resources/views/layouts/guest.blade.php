@@ -7,7 +7,7 @@
     <title>@yield('title', 'Login - LogiFlow')</title>
     
     <!-- Use public directory CSS -->
-    <link href="{{ asset('css/logiflow.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 </head>
 <body>
     @yield('content')

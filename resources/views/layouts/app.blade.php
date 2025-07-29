@@ -8,274 +8,18 @@
     <title>@yield('title', 'LogiFlow - Logistics Management System')</title>
 
     <!-- Use public directory CSS instead of Vite -->
-    <link href="{{ asset('css/logiflow.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 
     <!-- 🔥 ADD: Additional Modal & Form Styles for User Management -->
-    <style>
-        /* Modal Styles for User Management */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: 15px;
-            width: 90%;
-            max-width: 600px;
-            max-height: 80vh;
-            overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 30px;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        .modal-header h4 {
-            margin: 0;
-            color: #1e40af;
-        }
-
-        .close {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #6b7280;
-        }
-
-        .close:hover {
-            color: #dc2626;
-        }
-
-        .modal-body {
-            padding: 30px;
-        }
-
-        .modal-footer {
-            display: flex;
-            gap: 15px;
-            justify-content: flex-end;
-            padding: 20px 30px;
-            border-top: 1px solid #e5e7eb;
-        }
-
-        /* Tab Styles */
-        .tabs {
-            display: flex;
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            margin-bottom: 20px;
-        }
-
-        .tab {
-            padding: 15px 30px;
-            cursor: pointer;
-            background: #f8fafc;
-            border-right: 1px solid #e2e8f0;
-            transition: all 0.3s ease;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .tab:hover {
-            background: #f1f5f9;
-        }
-
-        .tab.active {
-            background: var(--primary-color, #3b82f6);
-            color: white;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        /* Form Styles */
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            color: var(--text-color, #1f2937);
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            border: 2px solid var(--border-color, #e5e7eb);
-            border-radius: 10px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            background: white;
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: var(--primary-color, #3b82f6);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-
-        .error-message {
-            color: var(--danger-color, #ef4444);
-            font-size: 0.875rem;
-            margin-top: 0.25rem;
-            display: block;
-        }
-
-        /* Button Styles - Ensure compatibility */
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border-radius: 10px;
-            font-weight: 600;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            cursor: pointer;
-            border: none;
-            transition: all 0.3s ease;
-            font-size: 1rem;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary-color, #3b82f6), var(--primary-dark, #1e40af));
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
-            color: white;
-        }
-
-        .btn-secondary {
-            background: var(--secondary-color, #64748b);
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: #475569;
-            color: white;
-        }
-
-        .btn-danger {
-            background: var(--danger-color, #ef4444);
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #dc2626;
-            color: white;
-        }
-
-        /* Status Badge */
-        .status-badge {
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            display: inline-block;
-        }
-
-        .status-active {
-            background: #d1fae5;
-            color: #065f46;
-        }
-
-        .status-inactive {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-
-        /* Data Table */
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .data-table th {
-            background: var(--background-color, #f8fafc);
-            padding: 1rem;
-            text-align: left;
-            font-weight: 600;
-            color: var(--text-color, #1f2937);
-            border-bottom: 2px solid var(--border-color, #e5e7eb);
-        }
-
-        .data-table td {
-            padding: 1rem;
-            border-bottom: 1px solid var(--border-color, #e5e7eb);
-            vertical-align: middle;
-        }
-
-        .data-table tr:hover {
-            background: #f8fafc;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .tabs {
-                flex-direction: column;
-            }
-
-            .tab {
-                border-right: none;
-                border-bottom: 1px solid #e2e8f0;
-            }
-
-            .modal-content {
-                width: 95%;
-                margin: 20px;
-            }
-
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
-
     @stack('styles')
 </head>
 
 <body>
     <div class="container">
-        @include('components.sidebar')
+        @include('shared.sidebar')
 
         <main class="main-content">
-            @include('components.header')
+            @include('shared.header')
 
             <div class="content-area">
                 @if (session('success'))
@@ -640,6 +384,51 @@
     </script>
 
     @stack('scripts')
+    <script>
+        // Preview selected user in forms
+        document.addEventListener('DOMContentLoaded', function() {
+            const userSelect = document.querySelector('select[name="assigned_to"]');
+            const preview = document.getElementById('selected-user-preview');
+            const previewAvatar = document.getElementById('preview-avatar');
+            const previewName = document.getElementById('preview-name');
+            const previewRole = document.getElementById('preview-role');
+
+            if (userSelect) {
+                userSelect.addEventListener('change', function() {
+                    const selectedOption = this.options[this.selectedIndex];
+
+                    if (this.value) {
+                        const avatarUrl = selectedOption.dataset.avatar;
+                        const text = selectedOption.text;
+                        const [name, position] = text.split(' - ');
+
+                        if (avatarUrl) {
+                            previewAvatar.innerHTML =
+                                `<img src="${avatarUrl}" alt="${name}" class="rounded-full" style="width: 32px; height: 32px;">`;
+                        } else {
+                            previewAvatar.innerHTML =
+                                `<div class="rounded-full bg-gray-300" style="width: 32px; height: 32px;"></div>`;
+                        }
+
+                        previewName.textContent = name;
+                        previewRole.textContent = position;
+                        preview.style.display = 'block';
+                    } else {
+                        preview.style.display = 'none';
+                    }
+                });
+            }
+        });
+
+        // Avatar click handlers
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.avatar-clickable')) {
+                const avatarContainer = e.target.closest('.avatar-clickable');
+                // Add custom click logic here if needed
+                console.log('Avatar clicked:', avatarContainer);
+            }
+        });
+    </script>
 </body>
 
 </html>

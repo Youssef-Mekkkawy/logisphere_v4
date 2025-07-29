@@ -313,7 +313,7 @@ body {
     margin-left: auto;
 }
 
-.user-avatar {
+/* .user-avatar {
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -323,7 +323,7 @@ body {
     justify-content: center;
     color: white;
     font-weight: bold;
-}
+} */
 
 .content-area {
     background: white;

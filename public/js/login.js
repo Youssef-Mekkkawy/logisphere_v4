@@ -403,25 +403,25 @@ function handleLogin() {
     }
 }
 
-function logout() {
-    if (confirm("Are you sure you want to logout?")) {
-        currentUser = null;
-        showLoginPage();
+// function logout() {
+//     if (confirm("Are you sure you want to logout?")) {
+//         currentUser = null;
+//         showLoginPage();
 
-        // Reset form and clear any data
-        document.getElementById("login-form").reset();
+//         // Reset form and clear any data
+//         document.getElementById("login-form").reset();
 
-        // Reset to dashboard
-        const dashboardLink = document.querySelector(
-            '[data-section="dashboard"]'
-        );
-        if (dashboardLink) {
-            setTimeout(() => {
-                dashboardLink.click();
-            }, 100);
-        }
-    }
-}
+//         // Reset to dashboard
+//         const dashboardLink = document.querySelector(
+//             '[data-section="dashboard"]'
+//         );
+//         if (dashboardLink) {
+//             setTimeout(() => {
+//                 dashboardLink.click();
+//             }, 100);
+//         }
+//     }
+// }
 
 // Auto-fill demo credentials (for testing)
 function fillDemoCredentials(username, password) {
