@@ -27,6 +27,10 @@ class AppServiceProvider extends ServiceProvider
             $app->make(EmployeeService::class)
         ));
         $this->app->singleton(PDFService::class, fn($app) => new PDFService());
+
+        if (file_exists(app_path('Helpers/helpers.php'))) {
+            require_once app_path('Helpers/helpers.php');
+        }
     }
 
     public function boot(): void
@@ -309,6 +313,7 @@ class AppServiceProvider extends ServiceProvider
 
         return $breadcrumbs;
     }
+
 
     private function getQuickActions(): array
     {
