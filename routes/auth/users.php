@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\UserController;
-
+// routes/auth/user
 Route::prefix('users')->name('users.')->group(function () {
     // Main user CRUD
     Route::get('/', [UserController::class, 'index'])->name('index');
