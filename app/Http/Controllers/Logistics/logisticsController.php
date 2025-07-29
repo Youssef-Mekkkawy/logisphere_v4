@@ -22,7 +22,6 @@ class logisticsController extends Controller
         $this->middleware('permission:logistics.create')->only(['create', 'store']);
         $this->middleware('permission:logistics.edit')->only(['edit', 'update']);
         $this->middleware('permission:logistics.delete')->only(['destroy']);
-
     }
     //
     function index()

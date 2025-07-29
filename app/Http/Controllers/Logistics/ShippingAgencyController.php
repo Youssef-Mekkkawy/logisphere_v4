@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\logistics;
+
 use App\Http\Controllers\Controller;
 
 use App\Models\ShippingAgency;
@@ -13,6 +14,14 @@ class ShippingAgencyController extends Controller
     /**
      * Display a listing of the resource.
      */
+    public function __construct()
+    {
+        $this->middleware('auth');
+        $this->middleware('permission:shipping-agencies.view')->only(['index', 'show']);
+        $this->middleware('permission:shipping-agencies.create')->only(['create', 'store']);
+        $this->middleware('permission:shipping-agencies.edit')->only(['edit', 'update']);
+        $this->middleware('permission:shipping-agencies.delete')->only(['destroy']);
+    }
     public function index()
     {
         $agencies = ShippingAgency::with('country')

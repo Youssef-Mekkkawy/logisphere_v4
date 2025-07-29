@@ -14,6 +14,14 @@ class ShipmentTypeController extends Controller
     /**
      * Display a listing of the resource.
      */
+    public function __construct()
+    {
+        $this->middleware('auth');
+        $this->middleware('permission:shipment-types.view')->only(['index', 'show']);
+        $this->middleware('permission:shipment-types.create')->only(['create', 'store']);
+        $this->middleware('permission:shipment-types.edit')->only(['edit', 'update']);
+        $this->middleware('permission:shipment-types.delete')->only(['destroy']);
+    }
     public function index(Request $request)
     {
         $query = ShipmentType::query();

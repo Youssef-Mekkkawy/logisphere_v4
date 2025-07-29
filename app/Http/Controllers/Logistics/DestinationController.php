@@ -15,6 +15,14 @@ class DestinationController extends Controller
     /**
      * Display a listing of the resource.
      */
+    public function __construct()
+    {
+        $this->middleware('auth');
+        $this->middleware('permission:destination.view')->only(['index', 'show']);
+        $this->middleware('permission:destination.create')->only(['create', 'store']);
+        $this->middleware('permission:destination.edit')->only(['edit', 'update']);
+        $this->middleware('permission:destination.delete')->only(['destroy']);
+    }
     public function index(Request $request)
     {
         $query = Destination::query();

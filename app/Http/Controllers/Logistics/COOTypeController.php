@@ -15,10 +15,10 @@ class COOTypeController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
-        $this->middleware('permission:bosla-gomrok.view')->only(['index', 'show']);
-        $this->middleware('permission:bosla-gomrok.create')->only(['create', 'store']);
-        $this->middleware('permission:bosla-gomrok.edit')->only(['edit', 'update']);
-        $this->middleware('permission:bosla-gomrok.delete')->only(['destroy']);
+        $this->middleware('permission:coo-types.view')->only(['index', 'show']);
+        $this->middleware('permission:coo-types.create')->only(['create', 'store']);
+        $this->middleware('permission:coo-types.edit')->only(['edit', 'update']);
+        $this->middleware('permission:coo-types.delete')->only(['destroy']);
     }
     /**
      * Display a listing of the resource.

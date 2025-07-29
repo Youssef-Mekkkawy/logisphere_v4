@@ -15,10 +15,10 @@ class ShipperController extends Controller
     {
         $this->middleware('auth');
         // 🔥 TEMPORARILY DISABLED FOR TESTING - Re-enable after fixing
-        // $this->middleware('permission:logistics.shippers.view')->only(['index', 'show']);
-        // $this->middleware('permission:logistics.shippers.create')->only(['create', 'store']);
-        // $this->middleware('permission:logistics.shippers.edit')->only(['edit', 'update']);
-        // $this->middleware('permission:logistics.shippers.delete')->only(['destroy']);
+        $this->middleware('permission:shippers.view')->only(['index', 'show']);
+        $this->middleware('permission:shippers.create')->only(['create', 'store']);
+        $this->middleware('permission:shippers.edit')->only(['edit', 'update']);
+        $this->middleware('permission:shippers.delete')->only(['destroy']);
     }
 
     public function index(Request $request)

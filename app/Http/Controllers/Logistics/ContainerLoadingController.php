@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\logistics;
 
 use App\Http\Controllers\Controller;
@@ -13,6 +14,15 @@ class ContainerLoadingController extends Controller
     /**
      * Display a listing of the resource.
      */
+
+    public function __construct()
+    {
+        $this->middleware('auth');
+        $this->middleware('permission:container-loading.view')->only(['index', 'show']);
+        $this->middleware('permission:container-loading.create')->only(['create', 'store']);
+        $this->middleware('permission:container-loading.edit')->only(['edit', 'update']);
+        $this->middleware('permission:container-loading.delete')->only(['destroy']);
+    }
     public function index(Request $request)
     {
         $query = ContainerLoading::query();
