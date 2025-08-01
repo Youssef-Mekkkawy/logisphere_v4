@@ -30,7 +30,7 @@ class DatabaseSeeder extends Seeder
             ContainerSeeder::class,
             PermissionSeeder::class,
             RoleSeeder::class,
-            UpdatedUserSeeder::class,
+ 
             ConsigneeNotifySeeder::class,
             ContainerLoadingSeeder::class,
             InspectionTypeSeeder::class,

@@ -35,7 +35,7 @@ class Employee extends Model
         'contract_end',
         'manager_id',
         'skills',
-        'notes'
+        'notes',
     ];
 
     protected $casts = [
@@ -50,7 +50,10 @@ class Employee extends Model
     ];
 
     // ===== RELATIONSHIPS =====
-
+    public function user()
+    {
+        return $this->hasOne(User::class);
+    }
     public function shipments()
     {
         return $this->hasMany(Shipment::class);

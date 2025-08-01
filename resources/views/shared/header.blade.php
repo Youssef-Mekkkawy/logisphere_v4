@@ -11,12 +11,12 @@
                     tooltip="Click to view profile" class="user-main-avatar" />
             </div>
 
-            <div class="user-details">
+            {{-- <div class="user-details">
 
                 @if (auth()->user()->gender)
                     <span class="user-gender">{{ ucfirst(auth()->user()->gender) }}</span>
                 @endif
-            </div>
+            </div> --}}
 
             {{-- Logout Button --}}
             <button type="button" class="btn btn-secondary logout-btn"

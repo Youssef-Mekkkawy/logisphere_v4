@@ -136,7 +136,7 @@ return new class extends Migration
             $table->date('effective_from')->nullable()->comment('Effective start date');
             $table->date('effective_to')->nullable()->comment('Effective end date');
             $table->text('notes')->nullable()->comment('Additional notes');
-
+                
             $table->timestamps();
 
             // Indexes for performance

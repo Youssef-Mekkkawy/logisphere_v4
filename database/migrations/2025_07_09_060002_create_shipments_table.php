@@ -46,7 +46,8 @@ return new class extends Migration
             // Additional Information
             $table->text('special_instructions')->nullable();
             $table->enum('status', ['Pending', 'In Transit', 'At Port', 'Delivered', 'Cancelled'])->default('Pending');
-
+            $table->date('departure_date')->nullable();
+            $table->date('arrival_date')->nullable();
             $table->timestamps();
 
             // Indexes for better performance

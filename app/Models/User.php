@@ -35,6 +35,11 @@ class User extends Authenticatable
     /**
      * User can have multiple roles
      */
+
+    public function employee()
+    {
+        return $this->belongsTo(Employee::class);
+    }
     public function roles()
     {
         return $this->belongsToMany(Role::class, 'user_roles');

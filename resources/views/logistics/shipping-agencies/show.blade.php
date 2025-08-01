@@ -181,11 +181,11 @@
 
     <!-- Actions -->
     <div style="margin-top: 2rem; display: flex; gap: 1rem;">
-        <a href="{{ route('shipping-agencies.edit' ?? '', $shippingAgency) }}" class="btn btn-primary">Edit
+        <a href="{{ route('logistics.shipping-agencies.edit' ?? '', $shippingAgency) }}" class="btn btn-primary">Edit
             Agency</a>
         <a href="{{ route('logistics.shipping-agencies.index') ?? '' }}" class="btn btn-secondary">Back to Agencies</a>
         @if (auth()->user() && method_exists(auth()->user(), 'isAdmin') && auth()->user()->isAdmin())
-            <form action="{{ route('shipping-agencies.destroy' ?? '', $shippingAgency) }}" method="POST"
+            <form action="{{ route('logistics.shipping-agencies.destroy' ?? '', $shippingAgency) }}" method="POST"
                 style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this agency?')">
                 @csrf
                 @method('DELETE')

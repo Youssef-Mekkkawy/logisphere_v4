@@ -11,6 +11,7 @@ class ContainerLoading extends Model
     use HasFactory, Notifiable;
 
     protected $fillable = [
+        'loading_point_id',
         'loading_point_code',
         'loading_point_name',
         'facility_type',
@@ -188,7 +189,9 @@ class ContainerLoading extends Model
     public static function validationRules($id = null)
     {
         return [
-            'loading_point_code' => 'required|string|max:20|unique:container_loadings,loading_point_code,' . $id,
+            
+            'loading_point_id' => 'required|string|max:20|unique:container_loadings,loading_point_code,loading_point_id,',
+            'loading_point_code' => 'required|string|max:20|unique:container_loadings,loading_point_code,loading_point_id,' . $id,
             'loading_point_name' => 'required|string|max:255',
             'facility_type' => 'required|string|in:CFS,Warehouse,Factory,Port Terminal,Depot,Container Yard,Inland Terminal',
             'operator_name' => 'required|string|max:255',

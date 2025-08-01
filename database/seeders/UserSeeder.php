@@ -21,6 +21,7 @@ class UserSeeder extends Seeder
                 'email' => 'admin@logisphere.com',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
+                'gender' => 'male',
                 'role_slug' => 'admin'  // Will be used to assign role
             ],
             [
@@ -29,6 +30,7 @@ class UserSeeder extends Seeder
                 'email' => 'operations@logisphere.com',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
+                'gender' => 'female',
                 'role_slug' => 'manager'
             ],
             [
@@ -37,6 +39,7 @@ class UserSeeder extends Seeder
                 'email' => 'cs@logisphere.com',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
+                'gender' => 'male',
                 'role_slug' => 'user'
             ],
             [
@@ -45,6 +48,7 @@ class UserSeeder extends Seeder
                 'email' => 'shipping@logisphere.com',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
+                'gender' => 'female',
                 'role_slug' => 'user'  // Changed from 'coordinator' to 'user'
             ],
             [
@@ -53,6 +57,7 @@ class UserSeeder extends Seeder
                 'email' => 'finance@logisphere.com',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
+                'gender' => 'female',
                 'role_slug' => 'finance'
             ],
         ];
@@ -98,6 +103,8 @@ class UserSeeder extends Seeder
                 'slug' => 'admin',
                 'description' => 'Full system access',
                 'color' => '#dc2626',
+
+
                 'is_system' => true
             ],
             [
@@ -105,6 +112,7 @@ class UserSeeder extends Seeder
                 'slug' => 'manager',
                 'description' => 'Department management access',
                 'color' => '#ea580c',
+
                 'is_system' => true
             ],
             [
@@ -112,6 +120,8 @@ class UserSeeder extends Seeder
                 'slug' => 'user',
                 'description' => 'Basic user access',
                 'color' => '#6b7280',
+
+
                 'is_system' => true
             ],
             [
@@ -119,6 +129,8 @@ class UserSeeder extends Seeder
                 'slug' => 'finance',
                 'description' => 'Financial operations access',
                 'color' => '#16a34a',
+
+
                 'is_system' => false
             ],
         ];
