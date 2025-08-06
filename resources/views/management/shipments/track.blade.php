@@ -18,12 +18,14 @@
                         <div class="row mb-4">
                             <div class="col-md-3">
                                 <h6>Origin</h6>
-                                <p class="mb-0">{{ $shipment->originPort->name ?? 'N/A' }}</p>
+
+                                <p class="mb-0">{{ $shipment->originPort->port_name ?? 'N/A' }}</p>
                                 <small class="text-muted">{{ $shipment->originPort->country ?? '' }}</small>
                             </div>
                             <div class="col-md-3">
                                 <h6>Destination</h6>
-                                <p class="mb-0">{{ $shipment->destinationPort->name ?? 'N/A' }}</p>
+
+                                <p class="mb-0">{{ $shipment->destinationPort->port_name ?? 'N/A' }}</p>
                                 <small class="text-muted">{{ $shipment->destinationPort->country ?? '' }}</small>
                             </div>
                             <div class="col-md-3">
@@ -48,6 +50,9 @@
                                 </div>
                                 <div class="col-md-6">
                                     <h6>Reference Number</h6>
+                                    {{-- @php
+                                        dd($shipment);
+                                    @endphp --}}
                                     <p class="mb-0">{{ $shipment->reference_number ?? 'N/A' }}</p>
                                 </div>
                             </div>

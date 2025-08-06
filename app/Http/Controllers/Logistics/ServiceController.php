@@ -174,12 +174,12 @@ class ServiceController extends Controller
     public function update(Request $request, Service $service)
     {
         $validator = Validator::make($request->all(), Service::validationRules($service->id));
-
-        if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
-        }
+        // dd($request->all());
+        // if ($validator->fails()) {
+        //     return redirect()->back()
+        //         ->withErrors($validator)
+        //         ->withInput();
+        // }
 
         try {
             DB::beginTransaction();

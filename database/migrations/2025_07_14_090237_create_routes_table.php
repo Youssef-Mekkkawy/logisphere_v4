@@ -13,6 +13,13 @@ return new class extends Migration
     {
         Schema::create('routes', function (Blueprint $table) {
             $table->id();
+            // Common missing foreign keys in shipments
+            $table->foreignId('destination_id')->nullable()->constrained('destinations')->nullOnDelete();
+            $table->foreignId('consignee_notify_id')->nullable()->constrained('consignee_notifies')->nullOnDelete();
+            $table->foreignId('coo_type_id')->nullable()->constrained('coo_types')->nullOnDelete();
+            $table->foreignId('inspection_type_id')->nullable()->constrained('inspection_types')->nullOnDelete();
+            $table->foreignId('service_id')->nullable()->constrained('services')->nullOnDelete();
+            $table->foreignId('container_load_id')->nullable()->constrained('container_loadings')->nullOnDelete();
             $table->string('route_code')->unique();
             $table->string('route_name');
             $table->foreignId('origin_port_id')->constrained('ports');
@@ -38,6 +45,11 @@ return new class extends Migration
 
             $table->index(['origin_port_id', 'destination_port_id']);
             $table->index(['service_type', 'status']);
+            $table->index('destination_id');
+            $table->index('coo_type_id');
+            $table->index('inspection_type_id');
+            $table->index('service_id');
+            $table->index('container_load_id');
             $table->index('route_code');
         });
     }

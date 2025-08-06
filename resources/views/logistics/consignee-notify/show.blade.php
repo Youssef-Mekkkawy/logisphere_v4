@@ -157,8 +157,11 @@
                 </div>
                 <div>
                     @if ($consigneeNotify->country)
+                        {{-- @php
+                            dd($consigneeNotify->country);
+                        @endphp --}}
                         <strong>Country:</strong><br>
-                        <span style="color: #64748b;">{{ $consigneeNotify->country->name }}</span>
+                        <span style="color: #64748b;">{{ $consigneeNotify->country }}</span>
                     @endif
                 </div>
             </div>
@@ -272,7 +275,8 @@
                                     </td>
                                     <td>{{ $shipment->created_at->format('M j, Y') }}</td>
                                     <td>
-                                        <a href="{{ route('management.shipments.show', $shipment) }}" class="btn btn-outline"
+                                        <a href="{{ route('management.shipments.show', $shipment) }}"
+                                            class="btn btn-outline"
                                             style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">View</a>
                                     </td>
                                 </tr>

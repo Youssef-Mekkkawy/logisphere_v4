@@ -14,7 +14,7 @@
         </li>
 
         {{-- File - Check permission --}}
-        @if (canAccess('tools.file.view'))
+        {{-- @if (canAccess('tools.file.view'))
             <li class="nav-item">
                 <a href="{{ route('tools.file.index') }}"
                     class="nav-link {{ request()->routeIs('tools.file.*') ? 'active' : '' }}">
@@ -22,7 +22,7 @@
                     File
                 </a>
             </li>
-        @endif
+        @endif --}}
 
         {{-- Logistics - Check permission --}}
         @if (canAccess('logistics.view'))

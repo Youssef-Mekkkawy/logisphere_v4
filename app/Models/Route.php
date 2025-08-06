@@ -28,6 +28,14 @@ class Route extends Model
         'status',
         'effective_from',
         'effective_to',
+        'destination_id',
+        'coo_type_id',
+        'container_load_id',
+        'bosla_gomrok_id',
+        'destination_id',
+        'coo_type_id',
+        'inspection_type_id',
+        'service_id',
     ];
 
     protected $casts = [
@@ -42,6 +50,37 @@ class Route extends Model
     ];
 
     // Relationships
+    public function destination()
+    {
+        return $this->belongsTo(Destination::class);
+    }
+
+    public function cooType()
+    {
+        return $this->belongsTo(CooType::class);
+    }
+
+    public function inspectionType()
+    {
+        return $this->belongsTo(InspectionType::class);
+    }
+
+    public function service()
+    {
+        return $this->belongsTo(Service::class);
+    }
+    public function boslaGomrok()
+    {
+        return $this->belongsTo(BoslaGomrok::class);
+    }
+
+    /**
+     * Get customs clearances for this shipment
+     */
+    public function customsClearances()
+    {
+        return $this->hasMany(CustomsClearance::class);
+    }
     public function originPort()
     {
         return $this->belongsTo(Port::class, 'origin_port_id');

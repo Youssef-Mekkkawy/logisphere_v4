@@ -248,6 +248,7 @@ class ShipmentController extends Controller
     }
     public function getTracking(Shipment $shipment)
     {
+        dd('test');
         $tracking = $shipment->trackingEvents()
             ->orderBy('event_date', 'desc')
             ->get();

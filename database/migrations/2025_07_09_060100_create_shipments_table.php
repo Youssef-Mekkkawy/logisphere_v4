@@ -17,6 +17,14 @@ return new class extends Migration
             // Shipper & Consignee Information (placed early in table structure)
             $table->foreignId('shipper_id')->nullable()->constrained('shippers')->onDelete('set null');
             $table->foreignId('consignee_id')->nullable()->constrained('shippers')->onDelete('set null');
+            // Common missing foreign keys in shipments
+            $table->foreignId('destination_id')->nullable()->constrained('destinations')->nullOnDelete();
+            $table->foreignId('consignee_notify_id')->nullable()->constrained('consignee_notifies')->nullOnDelete();
+            $table->foreignId('coo_type_id')->nullable()->constrained('coo_types')->nullOnDelete();
+            $table->foreignId('inspection_type_id')->nullable()->constrained('inspection_types')->nullOnDelete();
+            $table->foreignId('service_id')->nullable()->constrained('services')->nullOnDelete();
+            $table->foreignId('container_load_id')->nullable()->constrained('container_loadings')->nullOnDelete();
+            $table->foreignId('loading_point_id')->nullable()->constrained('container_loadings')->nullOnDelete();
 
             // Basic Shipment Information
             $table->string('shipment_id')->unique();
@@ -58,6 +66,12 @@ return new class extends Migration
             $table->index('shipment_id');
             $table->index('shipper_id');
             $table->index('consignee_id');
+            $table->index('destination_id');
+            $table->index('coo_type_id');
+            $table->index('inspection_type_id');
+            $table->index('service_id');
+            $table->index('container_load_id');
+            $table->index(['loading_point_id', 'status']);
         });
     }
 

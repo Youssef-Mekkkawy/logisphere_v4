@@ -33,6 +33,12 @@ class Shipment extends Model
         'consignee_address',  // Add this
         'notify_party',       // Add this
         'special_instructions',
+        'bosla_gomrok_id',
+        'destination_id',
+        'coo_type_id',
+        'inspection_type_id',
+        'service_id',
+        'container_load_id',
         'status'
     ];
 
@@ -48,7 +54,45 @@ class Shipment extends Model
     ];
 
     // ===== RELATIONSHIPS =====
+    /**
+     * Get the bosla gomrok for this shipment
+     */
+    public function loadingPoint()
+    {
+        return $this->belongsTo(ContainerLoading::class, 'loading_point_id');
+    }
 
+    public function destination()
+    {
+        return $this->belongsTo(Destination::class);
+    }
+
+    public function cooType()
+    {
+        return $this->belongsTo(CooType::class);
+    }
+
+    public function inspectionType()
+    {
+        return $this->belongsTo(InspectionType::class);
+    }
+
+    public function service()
+    {
+        return $this->belongsTo(Service::class);
+    }
+    public function boslaGomrok()
+    {
+        return $this->belongsTo(BoslaGomrok::class);
+    }
+
+    /**
+     * Get customs clearances for this shipment
+     */
+    public function customsClearances()
+    {
+        return $this->hasMany(CustomsClearance::class);
+    }
     public function company()
     {
         return $this->belongsTo(Company::class);

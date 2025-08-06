@@ -30,5 +30,5 @@ Route::prefix('shipments')->name('shipments.')->group(function () {
 Route::prefix('api')->name('api.')->group(function () {
     // Shipments
     Route::get('/shipments/search', [ShipmentController::class, 'search'])->name('shipments.search');
-    Route::get('/shipments/{shipment}/tracking', [ShipmentController::class, 'getTracking'])->name('shipments.tracking');
+    Route::get('/shipments/{shipment}/tracking', [ShipmentController::class, 'track'])->name('shipments.tracking');
 });

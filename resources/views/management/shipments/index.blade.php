@@ -43,14 +43,15 @@
                         <td>{{ $shipment->eta ? $shipment->eta->format('Y-m-d') : 'N/A' }}</td>
                         <td>
                             <a href="{{ route('management.shipments.edit', $shipment) }}" class="btn btn-secondary">Edit</a>
-                            <button onclick="trackShipment('{{ $shipment->shipment_id }}')"
-                                class="btn btn-primary">Track</button>
+                            <a href="{{ route('management.api.shipments.tracking', $shipment->shipment_id) }}"
+                                class="btn btn-primary" style="margin-left: 10px;">Track Shipment</a>
                         </td>
                     </tr>
                 @empty
                     <tr>
                         <td colspan="8" style="text-align: center; padding: 40px;">
-                            <p style="color: #6b7280;">No shipments found. <a href="{{ route('management.shipments.create') }}">Create
+                            <p style="color: #6b7280;">No shipments found. <a
+                                    href="{{ route('management.shipments.create') }}">Create
                                     your first shipment</a></p>
                         </td>
                     </tr>
@@ -181,7 +182,8 @@
         <div class="form-group">
             <label class="form-label">Enter Shipment ID or Tracking Number</label>
             <input type="text" class="form-input" placeholder="SH-2025-001" id="tracking-input">
-            <button class="btn btn-primary" style="margin-top: 10px;" onclick="trackShipment()">Track Shipment</button>
+            <a href="{{ route('management.api.shipments.tracking', $shipment->shipment_id) }}" class="btn btn-primary"
+                style="margin-left: 10px;">Track Shipment</a>
         </div>
 
         <div id="tracking-results"
@@ -204,14 +206,14 @@
                     <h4>Tracking Results: ${data.shipment_id}</h4>
                     <div style="margin-top: 15px;">
                         ${data.tracking_events.map(event => `
-                                <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                                    <div style="width: 20px; height: 20px; background: ${event.color}; border-radius: 50%; margin-right: 15px;"></div>
-                                    <div>
-                                        <strong>${event.status}</strong><br>
-                                        <small>${event.location} - ${event.timestamp}</small>
-                                    </div>
-                                </div>
-                            `).join('')}
+                                        <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                                            <div style="width: 20px; height: 20px; background: ${event.color}; border-radius: 50%; margin-right: 15px;"></div>
+                                            <div>
+                                                <strong>${event.status}</strong><br>
+                                                <small>${event.location} - ${event.timestamp}</small>
+                                            </div>
+                                        </div>
+                                    `).join('')}
                     </div>
                 `;
                         resultsDiv.style.display = 'block';
@@ -230,4 +232,3 @@
         }
     </script>
 @endpush
-
