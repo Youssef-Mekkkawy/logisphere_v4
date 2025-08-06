@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Issue Advance - LogiFlow')
+@section('title', 'Issue Advance - logisphere')
 @section('page-title', 'Issue Employee Advance')
 
 @section('content')

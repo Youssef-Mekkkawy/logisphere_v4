@@ -1,13 +1,13 @@
 @extends('layouts.guest')
 
-@section('title', 'Login - LogiFlow')
+@section('title', 'Login - logisphere')
 
 @section('content')
 <div class="login-container">
     <div class="login-box">
         <div class="login-header">
             <div class="login-logo">
-                <h1>🚢 LogiFlow</h1>
+                <h1>🚢 logisphere</h1>
                 <p>Logistics Management System</p>
             </div>
         </div>
@@ -65,7 +65,7 @@
     </div>
     
     <div class="login-info">
-        <h2>Welcome to LogiFlow</h2>
+        <h2>Welcome to logisphere</h2>
         <p>Your comprehensive logistics management solution for managing shipments, employees, companies, and accounting processes.</p>
         
         <div class="feature-list">

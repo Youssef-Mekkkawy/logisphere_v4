@@ -296,7 +296,7 @@ function showSubmenuDetail(logistics.ype) {
     }
 
     // Show back button
-    document.getElementById("back-to-logistics.).style.display = "inline-block";
+    document.getElementById("back-to-logistics.).style.display = 'inline-block'");
 }
 
 function showSubmenuOverview() {
@@ -308,7 +308,7 @@ function showSubmenuOverview() {
     allDetails.forEach((detail) => detail.classList.add("hidden"));
 
     // Hide back button
-    document.getElementById("back-to-logistics.).style.display = "none";
+    document.getElementById("back-to-logistics.).style.display = 'none'");
 }
 
 function switchSubmenuTab(tabName) {
@@ -330,6 +330,211 @@ function switchSubmenuTab(tabName) {
         if (targetContent) targetContent.classList.add("active");
     }
 }
+class UserStatusMonitor {
+    constructor() {
+        this.checkInterval = 30000; // Check every 30 seconds
+        this.intervalId = null;
+        this.isChecking = false;
+        
+        this.init();
+    }
+
+    init() {
+        // Only run if user is authenticated
+        if (this.isAuthenticated()) {
+            this.startMonitoring();
+            
+            // Check immediately on page load
+            this.checkUserStatus();
+            
+            // Check when page becomes visible again
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden) {
+                    this.checkUserStatus();
+                }
+            });
+        }
+    }
+
+    isAuthenticated() {
+        // Check if there's a CSRF token (indicates authenticated session)
+        return document.querySelector('meta[name="csrf-token"]') !== null;
+    }
+
+    startMonitoring() {
+        if (this.intervalId) {
+            clearInterval(this.intervalId);
+        }
+        
+        this.intervalId = setInterval(() => {
+            this.checkUserStatus();
+        }, this.checkInterval);
+    }
+
+    stopMonitoring() {
+        if (this.intervalId) {
+            clearInterval(this.intervalId);
+            this.intervalId = null;
+        }
+    }
+
+    async checkUserStatus() {
+        if (this.isChecking) return;
+        
+        this.isChecking = true;
+        
+        try {
+            const response = await fetch('/check-user-status', {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                }
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                this.handleStatusError(data, response.status);
+                return;
+            }
+
+            // Check if user must change password
+            if (data.user && data.user.must_change_password) {
+                this.redirectToPasswordChange();
+                return;
+            }
+
+            // User is still active and good
+            console.log('User status check: OK');
+
+        } catch (error) {
+            console.warn('User status check failed:', error);
+            // Don't do anything drastic on network errors
+        } finally {
+            this.isChecking = false;
+        }
+    }
+
+    handleStatusError(data, status) {
+        if (status === 401) {
+            // Not authenticated - redirect to login
+            this.redirectToLogin('Your session has expired. Please log in again.');
+        } else if (status === 403) {
+            // Account blocked
+            this.stopMonitoring();
+            this.showBlockedAccountMessage(data.message);
+            setTimeout(() => {
+                this.redirectToLogin('Your account has been blocked. Please contact your administrator.');
+            }, 3000);
+        }
+    }
+
+    redirectToLogin(message = null) {
+        this.stopMonitoring();
+        
+        if (message) {
+            // Store message in session storage to show after redirect
+            sessionStorage.setItem('login_message', message);
+        }
+        
+        window.location.href = '/login';
+    }
+
+    redirectToPasswordChange() {
+        this.stopMonitoring();
+        window.location.href = '/change-password';
+    }
+
+    showBlockedAccountMessage(message) {
+        // Create and show a prominent notification
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #dc2626;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+            z-index: 9999;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        `;
+        notification.innerHTML = `
+            <div>🚫 ${message}</div>
+            <div style="font-size: 14px; margin-top: 5px;">You will be redirected to the login page...</div>
+        `;
+        
+        document.body.prepend(notification);
+    }
+}
+
+// Auto-initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    window.userStatusMonitor = new UserStatusMonitor();
+    
+    // Show any stored login messages
+    const loginMessage = sessionStorage.getItem('login_message');
+    if (loginMessage) {
+        sessionStorage.removeItem('login_message');
+        
+        // Show the message (you can customize this based on your notification system)
+        const messageDiv = document.createElement('div');
+        messageDiv.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #f59e0b;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            z-index: 1000;
+            max-width: 400px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        `;
+        messageDiv.textContent = loginMessage;
+        document.body.appendChild(messageDiv);
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            messageDiv.remove();
+        }, 5000);
+    }
+});
+
+// Enhanced logout function with better error handling
+window.logout = function() {
+    if (window.userStatusMonitor) {
+        window.userStatusMonitor.stopMonitoring();
+    }
+    
+    fetch('/logout', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.href = data.redirect || '/login';
+        } else {
+            // Fallback redirect
+            window.location.href = '/login';
+        }
+    })
+    .catch(error => {
+        console.error('Logout error:', error);
+        // Force redirect even if logout request fails
+        window.location.href = '/login';
+    });
+};
+
+// Export for use in other scripts
+window.UserStatusMonitor = UserStatusMonitor;
 
 console.log("Logistics Management System initialized");
 console.log("Available keyboard shortcuts:");

@@ -1,6 +1,6 @@
 <div class="profit-loss-report">
     <div class="report-header">
-        <h2>LogiFlow Logistics</h2>
+        <h2>logisphere Logistics</h2>
         <h3>Profit & Loss Statement</h3>
         <p class="report-period">For the period: {{ ucfirst(str_replace('_', ' ', $data['period'])) }}</p>
         <p class="report-date">Generated on: {{ now()->format('F d, Y') }}</p>

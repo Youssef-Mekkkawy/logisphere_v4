@@ -6,12 +6,30 @@ use Illuminate\Support\Facades\Route;
 
 Route::resource('employees', EmployeeController::class);
 // ===== EMPLOYEE EXTENDED ACTIONS =====
+// Route::prefix('employees')->name('employees.')->group(function () {
+//     Route::get('/{employee}/performance', [EmployeeController::class, 'performance'])->name('performance');
+//     Route::get('/{employee}/shipments', [EmployeeController::class, 'shipments'])->name('shipments');
+//     Route::patch('/{employee}/toggle-status', [EmployeeController::class, 'toggleStatus'])->name('toggle-status');
+//     Route::post('/{employee}/covenant', [EmployeeController::class, 'createCovenant'])->name('create-covenant');
+// });
+
+
+// Employee CRUD
+Route::resource('employees', EmployeeController::class);
+
+// Employee User Account Management
 Route::prefix('employees')->name('employees.')->group(function () {
+    Route::patch('/{employee}/toggle-user-status', [EmployeeController::class, 'toggleUserStatus'])
+        ->name('toggle-user-status');
+    Route::post('/{employee}/create-user-account', [EmployeeController::class, 'createUserAccountForEmployee'])
+        ->name('create-user-account');
     Route::get('/{employee}/performance', [EmployeeController::class, 'performance'])->name('performance');
     Route::get('/{employee}/shipments', [EmployeeController::class, 'shipments'])->name('shipments');
     Route::patch('/{employee}/toggle-status', [EmployeeController::class, 'toggleStatus'])->name('toggle-status');
-    Route::post('/{employee}/covenant', [EmployeeController::class, 'createCovenant'])->name('create-covenant');
 });
+
+
+
 // ===== API ENDPOINTS =====
 Route::prefix('api')->name('api.')->group(function () {
     // Employees

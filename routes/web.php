@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\PasswordChangeController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\logistics\logisticsController;
 use App\Http\Controllers\Management\ShipmentController;
@@ -21,9 +22,15 @@ use Illuminate\Support\Facades\Route;
 // ============================================================================
 Route::get('/', fn() => redirect()->route('login'));
 
+// Enhanced Authentication Routes
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [LoginController::class, 'login']);
+
+    // 🔥 NEW: Blocked account page
+    Route::get('/blocked', function () {
+        return view('auth.blocked-account');
+    })->name('account.blocked');
 });
 
 // Public shipment tracking (no auth required)
@@ -55,12 +62,25 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
     // Alternative GET logout route (for when CSRF fails)
-    Route::get('/force-logout', [LoginController::class, 'forceLogout'])->name('force.logout');
+    Route::get('/force-logout', [LoginController::class, 'forceLogout'])->name('force-logout'); // For session expiry
 
+    // 🔥 NEW: User status check endpoint
+    Route::get('/check-user-status', [LoginController::class, 'checkUserStatus'])->name('check-user-status');
     // CSRF token refresh endpoint
-    Route::get('/refresh-token', [LoginController::class, 'refreshToken'])->name('refresh.token');
+    Route::get('/refresh-token', [LoginController::class, 'refreshToken'])->name('refresh-token');
 
+    // Password Change Routes (Enhanced)
+    Route::middleware(['auth', 'force.password.change'])->group(function () {
+        Route::get('/change-password', [PasswordChangeController::class, 'showChangeForm'])->name('password.change.form');
+        Route::post('/change-password', [PasswordChangeController::class, 'changePassword'])->name('password.update');
+    });
 
+    // Dashboard Route (Protected)
+    Route::middleware(['auth', 'force.password.change'])->group(function () {
+        Route::get('/dashboard', function () {
+            return view('dashboard');
+        })->name('dashboard');
+    });
     // ========================================================================
     // 👤 SHARED USER FEATURES
     // ========================================================================
@@ -84,9 +104,13 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('management')->name('management.')->group(function () {
         require __DIR__ . '/management/accounting.php';
         require __DIR__ . '/management/companies.php';
-        require __DIR__ . '/management/employees.php';
+
         require __DIR__ . '/management/shipments.php';
     });
+    Route::prefix('management')->name('management.')->middleware(['auth', 'force.password.change'])->group(function () {
+        require __DIR__ . '/management/employees.php';
+    });
+
 
     // ========================================================================
     // 🚢 LOGISTICS ROUTES
@@ -130,7 +154,7 @@ Route::middleware(['auth'])->group(function () {
     // ========================================================================
     // 🔐 ADMIN ROUTES - Role & Permission Management
     // ========================================================================
-    Route::prefix('auth')->name('auth.')->group(function () {
+    Route::prefix('auth/')->name('auth.')->middleware(['auth', 'force.password.change'])->group(function () {
         require __DIR__ . '/auth/roles.php'; // Role & Permissions
         // require __DIR__ . '/auth/permissions.php';
         require __DIR__ . '/auth/users.php';

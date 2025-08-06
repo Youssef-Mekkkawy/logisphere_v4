@@ -22,7 +22,7 @@ class LoginController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('guest')->except('logout');
+        $this->middleware('guest')->except(['logout', 'forceLogout', 'refreshToken']);
     }
 
     /**
@@ -40,30 +40,88 @@ class LoginController extends Controller
     {
         // Validate the login request
         $this->validateLogin($request);
-        $credentials = $request->only('username', 'password');
 
-        // dd($credentials);
         // Check if too many login attempts
         if ($this->hasTooManyLoginAttempts($request)) {
             $this->fireLockoutEvent($request);
             return $this->sendLockoutResponse($request);
         }
-        // dd($request);
+
+        // 🔥 NEW: Check user status BEFORE attempting login
+        $loginField = $request->input('username');
+        $user = $this->findUserByLoginField($loginField);
+
+        if ($user && !$user->isActive()) {
+            Log::warning('Blocked user attempted login', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'username' => $user->username,
+                'ip' => $request->ip(),
+                'user_agent' => $request->userAgent()
+            ]);
+
+            $this->incrementLoginAttempts($request);
+
+            return redirect()->back()
+                ->withInput($request->except('password'))
+                ->withErrors(['username' => 'Your account has been blocked. Please contact your administrator.']);
+        }
+
         // Attempt to log the user in
         if ($this->attemptLogin($request)) {
             $request->session()->regenerate();
             $this->clearLoginAttempts($request);
-            // dd('test');
-            // Update last login time
-            Auth::user()->update(['last_login' => now()]);
+
+            $authenticatedUser = Auth::user();
+
+            // 🔥 NEW: Update last login time using our enhanced method
+            $authenticatedUser->updateLastLogin();
+
+            // 🔥 NEW: Log successful login
+            Log::info('User logged in successfully', [
+                'user_id' => $authenticatedUser->id,
+                'email' => $authenticatedUser->email,
+                'username' => $authenticatedUser->username,
+                'ip' => $request->ip(),
+                'user_agent' => $request->userAgent()
+            ]);
+
+            // 🔥 NEW: Check if user must change password
+            if ($authenticatedUser->mustChangePassword()) {
+                return redirect()->route('password.change.form')
+                    ->with('warning', 'You must change your password before continuing.');
+            }
 
             return $this->sendLoginResponse($request);
         }
 
         // If login was unsuccessful, increment login attempts
         $this->incrementLoginAttempts($request);
-        // dd('final');
+
+        // 🔥 NEW: Log failed login attempt
+        Log::warning('Failed login attempt', [
+            'username_field' => $loginField,
+            'ip' => $request->ip(),
+            'user_agent' => $request->userAgent()
+        ]);
+
         return $this->sendFailedLoginResponse($request);
+    }
+
+    /**
+     * 🔥 NEW: Find user by username or email
+     */
+    protected function findUserByLoginField($loginField)
+    {
+        // First try by username
+        $user = User::where('username', $loginField)->first();
+
+        // If not found and looks like email, try email field
+        if (!$user && filter_var($loginField, FILTER_VALIDATE_EMAIL)) {
+            $user = User::where('email', $loginField)->first();
+        }
+
+        return $user;
     }
 
     /**
@@ -74,6 +132,9 @@ class LoginController extends Controller
         $validator = Validator::make($request->all(), [
             'username' => 'required|string',
             'password' => 'required|string',
+        ], [
+            'username.required' => 'Username or email is required.',
+            'password.required' => 'Password is required.',
         ]);
 
         if ($validator->fails()) {
@@ -89,27 +150,32 @@ class LoginController extends Controller
     protected function attemptLogin(Request $request)
     {
         $credentials = $this->credentials($request);
-        // dd($credentials);
         $remember = $request->boolean('remember');
-        // dd($remember);
-        // dd(Auth::attempt($credentials, $remember));
+
         return Auth::attempt($credentials, $remember);
     }
 
     /**
-     * Get the needed authorization credentials from the request.
+     * 🔥 FIXED: Get the needed authorization credentials from the request.
      */
     protected function credentials(Request $request)
     {
-        $username = $request->input('username');
+        $loginField = $request->input('username');
 
         // Check if the input is an email or username
-        $field = filter_var($username) ? 'username' : 'username';
-
-        return [
-            'username' => $username,
-            'password' => $request->input('password'),
-        ];
+        if (filter_var($loginField, FILTER_VALIDATE_EMAIL)) {
+            // Login with email
+            return [
+                'email' => $loginField,
+                'password' => $request->input('password'),
+            ];
+        } else {
+            // Login with username
+            return [
+                'username' => $loginField,
+                'password' => $request->input('password'),
+            ];
+        }
     }
 
     /**
@@ -119,8 +185,15 @@ class LoginController extends Controller
     {
         $user = Auth::user();
 
+        // 🔥 NEW: Better welcome message with account info
+        $welcomeMessage = "Welcome back, {$user->name}!";
+
+        if ($user->employee) {
+            $welcomeMessage .= " ({$user->employee->employee_id})";
+        }
+
         return redirect()->intended($this->redirectPath())
-            ->with('success', "Welcome back, {$user->name}!");
+            ->with('success', $welcomeMessage);
     }
 
     /**
@@ -144,11 +217,6 @@ class LoginController extends Controller
 
         return property_exists($this, 'redirectTo') ? $this->redirectTo : '/dashboard';
     }
-
-    /**
-     * Log the user out of the application.
-     */
-
 
     /**
      * Determine if the user has too many failed login attempts.
@@ -188,6 +256,11 @@ class LoginController extends Controller
     protected function fireLockoutEvent(Request $request)
     {
         // You can fire events here if needed
+        Log::warning('User lockout triggered', [
+            'username' => $request->input('username'),
+            'ip' => $request->ip(),
+            'attempts' => cache()->get($this->throttleKey($request), 0)
+        ]);
     }
 
     /**
@@ -211,20 +284,22 @@ class LoginController extends Controller
     }
 
     /**
-     * Enhanced logout with better error handling
+     * 🔥 ENHANCED: Logout with better error handling and logging
      */
     public function logout(Request $request)
     {
         try {
-            // Log the logout attempt
-            Log::info('Logout attempt for user: ' . (auth()->user()->id ?? 'guest'));
-
             // Get user before logout for logging
             $user = auth()->user();
 
-            // Update last_login if you're tracking it
+            // Log the logout attempt
             if ($user) {
-                $user->update(['last_login' => now()]);
+                Log::info('Logout attempt', [
+                    'user_id' => $user->id,
+                    'email' => $user->email,
+                    'username' => $user->username,
+                    'ip' => $request->ip()
+                ]);
             }
 
             // Perform logout
@@ -240,7 +315,12 @@ class LoginController extends Controller
             Session::flush();
 
             // Log successful logout
-            Log::info('User logged out successfully: ' . ($user->id ?? 'unknown'));
+            if ($user) {
+                Log::info('User logged out successfully', [
+                    'user_id' => $user->id,
+                    'email' => $user->email
+                ]);
+            }
 
             // Check if it's an AJAX request
             if ($request->expectsJson() || $request->ajax()) {
@@ -255,7 +335,11 @@ class LoginController extends Controller
             return redirect('/login')->with('success', 'You have been logged out successfully.');
         } catch (\Exception $e) {
             // Log the error
-            Log::error('Logout error: ' . $e->getMessage());
+            Log::error('Logout error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'user_id' => auth()->id()
+            ]);
 
             // Force logout even if there's an error
             Auth::logout();
@@ -272,7 +356,7 @@ class LoginController extends Controller
                 ]);
             }
 
-            return redirect('/login');
+            return redirect('/login')->with('info', 'Session ended.');
         }
     }
 
@@ -282,6 +366,15 @@ class LoginController extends Controller
     public function forceLogout(Request $request)
     {
         // This method can be used as a GET route if CSRF is problematic
+        $user = auth()->user();
+
+        if ($user) {
+            Log::info('Force logout triggered', [
+                'user_id' => $user->id,
+                'ip' => $request->ip()
+            ]);
+        }
+
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
@@ -299,6 +392,44 @@ class LoginController extends Controller
         return response()->json([
             'success' => true,
             'token' => csrf_token()
+        ]);
+    }
+
+    /**
+     * 🔥 NEW: Check user account status (AJAX endpoint)
+     */
+    public function checkUserStatus(Request $request)
+    {
+        if (!auth()->check()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Not authenticated'
+            ], 401);
+        }
+
+        $user = auth()->user();
+
+        // Check if user account is still active
+        if (!$user->isActive()) {
+            // Force logout blocked user
+            Auth::logout();
+            $request->session()->invalidate();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Account has been blocked',
+                'action' => 'logout'
+            ], 403);
+        }
+
+        return response()->json([
+            'success' => true,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'is_active' => $user->isActive(),
+                'must_change_password' => $user->mustChangePassword()
+            ]
         ]);
     }
 }

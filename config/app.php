@@ -94,7 +94,10 @@ return [
     | are secure. You should do this prior to deploying the application.
     |
     */
-
+    'employee_email_domain' => env('EMPLOYEE_EMAIL_DOMAIN', 'logistas.com'),
+    'default_employee_role' => env('DEFAULT_EMPLOYEE_ROLE', 'user'),
+    'auto_generate_employee_email' => env('AUTO_GENERATE_EMPLOYEE_EMAIL', true),
+    'force_password_change_on_creation' => env('FORCE_PASSWORD_CHANGE_ON_CREATION', true),
     'cipher' => 'AES-256-CBC',
 
     'key' => env('APP_KEY'),

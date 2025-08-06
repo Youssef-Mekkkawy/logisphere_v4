@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Company - LogiFlow')
+@section('title', 'Edit Company - logisphere')
 @section('page-title', 'Edit Company: ' . $company->name)
 
 @section('content')

@@ -123,3 +123,87 @@ if (!function_exists('showMenuItem')) {
         return canAccess($permissions, $user);
     }
 }
+if (!function_exists('canAccess')) {
+    /**
+     * Check if current user can access a permission
+     */
+    function canAccess(string $permission): bool
+    {
+        if (!auth()->check()) {
+            return false;
+        }
+
+        $user = auth()->user();
+
+        // Check if user account is active
+        if (!$user->isActive()) {
+            return false;
+        }
+
+        // Admin can access everything
+        if ($user->isAdmin()) {
+            return true;
+        }
+
+        // Check specific permission
+        return $user->hasPermission($permission);
+    }
+}
+
+if (!function_exists('hasRole')) {
+    /**
+     * Check if current user has a specific role
+     */
+    function hasRole(string $role): bool
+    {
+        if (!auth()->check()) {
+            return false;
+        }
+
+        return auth()->user()->hasRole($role);
+    }
+}
+
+if (!function_exists('isAdmin')) {
+    /**
+     * Check if current user is admin
+     */
+    function isAdmin(): bool
+    {
+        if (!auth()->check()) {
+            return false;
+        }
+
+        return auth()->user()->isAdmin();
+    }
+}
+
+if (!function_exists('generateEmployeeEmail')) {
+    /**
+     * Generate employee email based on name
+     */
+    function generateEmployeeEmail(string $name, string $domain = null): string
+    {
+        $domain = $domain ?: config('employee.email_domain', 'logistas.com');
+
+        // Clean name and create email
+        $emailName = strtolower(str_replace(' ', '.', trim($name)));
+        $emailName = preg_replace('/[^a-z0-9.]/', '', $emailName);
+
+        $baseEmail = $emailName . '@' . $domain;
+
+        // Check if email already exists and add number if needed
+        $counter = 1;
+        $finalEmail = $baseEmail;
+
+        while (
+            \App\Models\Employee::where('email', $finalEmail)->exists() ||
+            \App\Models\User::where('email', $finalEmail)->exists()
+        ) {
+            $finalEmail = $emailName . $counter . '@' . $domain;
+            $counter++;
+        }
+
+        return $finalEmail;
+    }
+}

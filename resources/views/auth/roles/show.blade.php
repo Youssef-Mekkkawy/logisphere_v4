@@ -1,7 +1,7 @@
 {{-- File: resources/views/roles/show.blade.php --}}
 @extends('layouts.app')
 
-@section('title', $role->name . ' - LogiFlow')
+@section('title', $role->name . ' - logisphere')
 @section('page-title', 'Role Details')
 
 @section('content')

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Create Employee - LogiFlow')
+@section('title', 'Create Employee - logisphere')
 @section('page-title', 'Create New Employee')
 
 @section('content')
@@ -44,6 +44,18 @@
                 </div>
 
                 <div class="form-group">
+                    <label class="form-label">Gender *</label>
+                    <select name="gender" class="form-input" required>
+                        <option value="">Select Gender</option>
+                        <option value="male" {{ old('gender', 'male') == 'male' ? 'selected' : '' }}>Male</option>
+                        <option value="female" {{ old('gender') == 'female' ? 'selected' : '' }}>Female</option>
+                    </select>
+                    @error('gender')
+                        <span class="error-message">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <div class="form-group">
                     <label class="form-label">Status *</label>
                     <select name="status" class="form-input" required>
                         <option value="Active" {{ old('status', 'Active') == 'Active' ? 'selected' : '' }}>Active</option>
@@ -62,7 +74,7 @@
             <div class="form-grid">
                 <div class="form-group">
                     <label class="form-label">Department *</label>
-                    <select name="department" class="form-input" required>
+                    <select name="department" id="department" class="form-input" required>
                         <option value="">Select Department</option>
                         <option value="Operations" {{ old('department') == 'Operations' ? 'selected' : '' }}>Operations
                         </option>
@@ -142,16 +154,91 @@
             </div>
         </div>
 
+        <!-- 🔥 NEW: User Account Creation Section -->
+        @if (auth()->user()->isAdmin() || auth()->user()->hasPermission('employees.create'))
+            <div style="margin-bottom: 30px;">
+                <h4 style="color: #1e40af; margin-bottom: 15px;">🔐 User Account Creation</h4>
+                <div style="padding: 20px; background: #f0f9ff; border-radius: 12px; border-left: 4px solid #3b82f6;">
+
+                    <!-- Create User Account Checkbox -->
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                            <input type="checkbox" name="create_user_account" id="createUserAccount" value="1"
+                                {{ old('create_user_account') ? 'checked' : '' }} onchange="toggleUserAccountOptions()">
+                            <span style="font-weight: 600; color: #1e40af;">Create User Account for System Access</span>
+                        </label>
+                        <small style="color: #6b7280; margin-left: 30px;">Check this to create a login account for this
+                            employee</small>
+                    </div>
+
+                    <!-- User Account Options (Hidden by default) -->
+                    <div id="userAccountOptions"
+                        style="display: none; margin-top: 20px; padding-top: 20px; border-top: 1px solid #bfdbfe;">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">User Role</label>
+                                <select name="user_role" id="userRole" class="form-input">
+                                    <option value="">Auto-assign based on department</option>
+                                    @php
+                                        $roles = \App\Models\Role::where('is_active', true)->get();
+                                    @endphp
+                                    @foreach ($roles as $role)
+                                        <option value="{{ $role->slug }}"
+                                            {{ old('user_role') == $role->slug ? 'selected' : '' }}>
+                                            {{ $role->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <small style="color: #6b7280; font-size: 12px;">Leave empty to auto-assign role based on
+                                    department</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                                    <input type="checkbox" name="auto_generate_email" id="autoGenerateEmail"
+                                        value="1" {{ old('auto_generate_email', true) ? 'checked' : '' }}>
+                                    <span style="font-weight: 600;">Auto-generate Company Email</span>
+                                </label>
+                                <small style="color: #6b7280; margin-left: 30px;">Generate email like:
+                                    john.doe@{{ config('app.employee_email_domain', 'logistas.com') }}</small>
+                            </div>
+                        </div>
+
+                        <!-- Account Creation Info -->
+                        <div style="margin-top: 20px; padding: 15px; background: white; border-radius: 8px;">
+                            <h5 style="color: #1e40af; margin-bottom: 10px;">📋 Account Creation Details</h5>
+                            <ul style="margin: 0; padding-left: 20px; color: #374151; font-size: 14px;">
+                                <li>A secure random password will be generated</li>
+                                <li>Password will be displayed after creation (save it securely)</li>
+                                <li>Employee must change password on first login</li>
+                                <li>Account will be active immediately</li>
+                                <li>Admin can block/unblock the account anytime</li>
+                                <li>Role permissions based on department unless manually selected</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    @error('user_role')
+                        <span class="error-message">{{ $message }}</span>
+                    @enderror
+                </div>
+            </div>
+        @endif
+
         <!-- Contact Information -->
         <div style="margin-bottom: 30px;">
             <h4 style="color: #1e40af; margin-bottom: 15px;">📞 Contact Information</h4>
             <div class="form-grid">
                 <div class="form-group">
                     <label class="form-label">Email</label>
-                    <input type="email" name="email" class="form-input" value="{{ old('email') }}">
+                    <input type="email" name="email" id="emailInput" class="form-input"
+                        value="{{ old('email') }}">
                     @error('email')
                         <span class="error-message">{{ $message }}</span>
                     @enderror
+                    <small id="emailHelp" style="color: #6b7280; font-size: 12px;">
+                        Will be auto-generated if creating user account and left empty
+                    </small>
                 </div>
 
                 <div class="form-group">
@@ -241,21 +328,6 @@
             </div>
         </div>
 
-        <!-- Information Notice -->
-        <div
-            style="margin-bottom: 30px; padding: 20px; background: #f0f9ff; border-radius: 12px; border-left: 4px solid #3b82f6;">
-            <h4 style="color: #1e40af; margin-bottom: 15px;">📋 Employee Creation Guidelines</h4>
-            <ul style="margin: 0; padding-left: 20px; color: #374151;">
-                <li>Fields marked with (*) are required</li>
-                <li>Employee ID will be auto-generated if left empty (EMP-001, EMP-002, etc.)</li>
-                <li>Email must be unique across all employees</li>
-                <li>Hire date cannot be in the future</li>
-                <li>Date of birth must be at least 18 years ago</li>
-                <li>Salary is stored in USD and supports up to 2 decimal places</li>
-                <li>All personal information is optional but recommended for HR records</li>
-            </ul>
-        </div>
-
         <!-- Action Buttons -->
         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
             <button type="submit" class="btn btn-primary">
@@ -264,10 +336,80 @@
             <a href="{{ route('management.employees.index') }}" class="btn btn-secondary" style="margin-left: 15px;">
                 <i class="fas fa-times"></i> Cancel
             </a>
-            <button type="reset" class="btn btn-secondary" style="margin-left: 15px;">
+            <button type="reset" class="btn btn-secondary" style="margin-left: 15px;" onclick="resetForm()">
                 <i class="fas fa-undo"></i> Reset Form
             </button>
         </div>
     </form>
 
+@endsection
+
+@section('scripts')
+    <script>
+        // Department to role mapping for auto-suggestion
+        const departmentRoleMap = {
+            'Management': 'manager',
+            'Finance & Accounting': 'finance',
+            'Human Resources': 'manager',
+            'IT & Technology': 'user',
+            'Operations': 'user',
+            'Customer Service': 'user',
+            'Sales': 'user',
+            'Customs Clearance': 'user',
+            'Warehousing': 'user',
+            'Transportation': 'user',
+            'Administration': 'user'
+        };
+
+        // Toggle user account options visibility
+        function toggleUserAccountOptions() {
+            const checkbox = document.getElementById('createUserAccount');
+            const options = document.getElementById('userAccountOptions');
+            const emailInput = document.getElementById('emailInput');
+            const emailHelp = document.getElementById('emailHelp');
+
+            if (checkbox.checked) {
+                options.style.display = 'block';
+                emailHelp.textContent = 'Will be auto-generated if left empty and auto-generate is checked';
+            } else {
+                options.style.display = 'none';
+                emailHelp.textContent = 'Enter employee email address';
+            }
+        }
+
+        // Auto-suggest role based on department
+        document.getElementById('department').addEventListener('change', function() {
+            const department = this.value;
+            const roleSelect = document.getElementById('userRole');
+            const checkbox = document.getElementById('createUserAccount');
+
+            if (checkbox.checked && department && departmentRoleMap[department]) {
+                const suggestedRole = departmentRoleMap[department];
+                // Find and select the suggested role
+                for (let option of roleSelect.options) {
+                    if (option.value === suggestedRole) {
+                        option.selected = true;
+                        break;
+                    }
+                }
+            }
+        });
+
+        // Reset form function
+        function resetForm() {
+            document.getElementById('userAccountOptions').style.display = 'none';
+            toggleUserAccountOptions();
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            toggleUserAccountOptions();
+
+            // If there are old values, maintain the state
+            @if (old('create_user_account'))
+                document.getElementById('createUserAccount').checked = true;
+                toggleUserAccountOptions();
+            @endif
+        });
+    </script>
 @endsection

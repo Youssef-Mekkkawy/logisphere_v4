@@ -1,12 +1,12 @@
-{{-- File: resources/views/auth/users/index.blade.php (Compatible with Your Layout) --}}
+{{-- File: resources/views/auth/users/index.blade.php (ENHANCED VERSION) --}}
 @extends('layouts.app')
 
-@section('title', 'User Management - LogiFlow')
+@section('title', 'User Management - logisphere')
 
 @section('content')
     <div style="margin-bottom: 2rem;">
         <h2 style="font-size: 1.5rem; font-weight: 600; color: #1e293b; margin-bottom: 0.5rem;">👥 User Management</h2>
-        <p style="color: #64748b;">Manage users, roles, and permissions</p>
+        <p style="color: #64748b;">Manage users, roles, permissions, and account status</p>
     </div>
 
     <!-- Tabs Navigation -->
@@ -44,9 +44,18 @@
                         @endforeach
                     </select>
                 </div>
+                <div class="form-group">
+                    <label class="form-label">Status</label>
+                    <select name="status" class="form-input">
+                        <option value="">All Status</option>
+                        <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
+                        <option value="blocked" {{ request('status') == 'blocked' ? 'selected' : '' }}>Blocked</option>
+                    </select>
+                </div>
                 <div>
                     <button type="submit" class="btn btn-primary">Filter</button>
-                    <a href="{{ route('auth.users.index') }}" class="btn btn-secondary" style="margin-left: 0.5rem;">Clear</a>
+                    <a href="{{ route('auth.users.index') }}" class="btn btn-secondary"
+                        style="margin-left: 0.5rem;">Clear</a>
                 </div>
             </form>
         </div>
@@ -59,27 +68,43 @@
                         <th>User</th>
                         <th>Username</th>
                         <th>Email</th>
+                        <th>Employee</th>
                         <th>Roles</th>
+                        <th>Status</th>
                         <th>Last Login</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($users as $user)
-                        <tr>
+                        <tr id="user-row-{{ $user->id }}">
                             <td>
                                 <div style="display: flex; align-items: center; gap: 10px;">
                                     <div
-                                        style="width: 40px; height: 40px; background: #3b82f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                                        style="width: 40px; height: 40px; background: {{ $user->statusColor }}; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
                                         {{ strtoupper(substr($user->name, 0, 1)) }}
                                     </div>
                                     <div>
                                         <strong>{{ $user->name }}</strong>
+                                        @if ($user->mustChangePassword())
+                                            <div style="font-size: 11px; color: #f59e0b;">🔑 Must change password</div>
+                                        @endif
                                     </div>
                                 </div>
                             </td>
                             <td>{{ $user->username }}</td>
                             <td>{{ $user->email }}</td>
+                            <td>
+                                @if ($user->employee)
+                                    <div>
+                                        <strong>{{ $user->employee->employee_id }}</strong>
+                                        <div style="font-size: 12px; color: #6b7280;">{{ $user->employee->department }}
+                                        </div>
+                                    </div>
+                                @else
+                                    <span style="color: #6b7280;">No Employee</span>
+                                @endif
+                            </td>
                             <td>
                                 @forelse($user->roles as $role)
                                     <span class="status-badge"
@@ -91,26 +116,84 @@
                                 @endforelse
                             </td>
                             <td>
+                                <span class="status-badge status-{{ $user->isActive() ? 'active' : 'blocked' }}"
+                                    id="status-badge-{{ $user->id }}">
+                                    {{ $user->statusText }}
+                                </span>
+                            </td>
+                            <td>
                                 @if ($user->last_login)
-                                    {{ $user->last_login->format('M d, Y H:i') }}
+                                    <div>{{ $user->last_login->format('M d, Y') }}</div>
+                                    <small style="color: #6b7280;">{{ $user->last_login->diffForHumans() }}</small>
                                 @else
                                     <span style="color: #64748b;">Never</span>
                                 @endif
                             </td>
-                            <td style="display: flex; gap: 0.5rem;">
-                                <a href="{{ route('auth.users.show', $user) }}" class="btn btn-secondary"
-                                    style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">View</a>
-                                <a href="{{ route('auth.users.edit', $user) }}" class="btn btn-primary"
-                                    style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Edit</a>
-                                @if ($user->id !== auth()->id())
-                                    <button class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;"
-                                        onclick="deleteUser({{ $user->id }})">Delete</button>
-                                @endif
+                            <td>
+                                <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                                    <a href="{{ route('auth.users.show', $user) }}" class="btn btn-secondary"
+                                        style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">
+                                        View
+                                    </a>
+                                    <a href="{{ route('auth.users.edit', $user) }}" class="btn btn-primary"
+                                        style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">
+                                        Edit
+                                    </a>
+
+                                    @if (auth()->user()->isAdmin() || auth()->user()->hasPermission('users.manage'))
+                                        @if ($user->id !== auth()->id())
+                                            <!-- Block/Unblock Button -->
+                                            <button class="btn {{ $user->isActive() ? 'btn-warning' : 'btn-success' }}"
+                                                style="padding: 0.25rem 0.5rem; font-size: 0.75rem;"
+                                                onclick="toggleUserBlock({{ $user->id }})"
+                                                id="block-btn-{{ $user->id }}">
+                                                {{ $user->isActive() ? 'Block' : 'Unblock' }}
+                                            </button>
+
+                                            <!-- Force Password Reset -->
+                                            <button class="btn btn-info"
+                                                style="padding: 0.25rem 0.5rem; font-size: 0.75rem;"
+                                                onclick="forcePasswordReset({{ $user->id }})"
+                                                title="Force password change on next login">
+                                                Reset PWD
+                                            </button>
+                                            @if ($user->id !== auth()->id())
+                                                <!-- Existing Block/Unblock Button -->
+                                                <button class="btn {{ $user->isActive() ? 'btn-warning' : 'btn-success' }}"
+                                                    style="padding: 0.25rem 0.5rem; font-size: 0.75rem;"
+                                                    onclick="toggleUserBlock({{ $user->id }})"
+                                                    id="block-btn-{{ $user->id }}">
+                                                    {{ $user->isActive() ? 'Block' : 'Unblock' }}
+                                                </button>
+
+                                                <!-- 🔥 NEW: Force Logout Button -->
+                                                @if ($user->isActive())
+                                                    <button class="btn"
+                                                        style="background: #f59e0b; color: white; padding: 0.25rem 0.5rem; font-size: 0.75rem;"
+                                                        onclick="forceLogoutUser({{ $user->id }})"
+                                                        title="Force logout from all devices">
+                                                        Force Logout
+                                                    </button>
+                                                @endif
+
+                                                <!-- Delete Button -->
+                                                <button class="btn btn-danger"
+                                                    style="padding: 0.25rem 0.5rem; font-size: 0.75rem;"
+                                                    onclick="deleteUser({{ $user->id }})">
+                                                    Delete
+                                                </button>
+                                            @else
+                                                <span
+                                                    style="font-size: 0.75rem; color: #6b7280; padding: 0.25rem;">You</span>
+                                            @endif
+                                        @endif
+                                    @endif
+                                </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" style="text-align: center; padding: 2rem; color: #64748b;">
+                            <td colspan="8" style="text-align: center; padding: 2rem; color: #64748b;">
                                 No users found.
                                 <button class="btn btn-primary" onclick="openModal('createUserModal')">Create your first
                                     user</button>
@@ -462,6 +545,153 @@
             console.log('🔑 Opening permission modal');
             openModal('createPermissionModal');
         };
+        /**
+         * Toggle user block/unblock status
+         */
+        function toggleUserBlock(userId) {
+            const btn = document.getElementById(`block-btn-${userId}`);
+            const statusBadge = document.getElementById(`status-badge-${userId}`);
+            const originalBtnText = btn.textContent;
+
+            // Show loading state
+            btn.textContent = 'Loading...';
+            btn.disabled = true;
+
+            fetch(`/auth/users/${userId}/toggle-block`, {
+                    method: 'PATCH',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update button
+                        btn.textContent = data.new_status ? 'Block' : 'Unblock';
+                        btn.className = data.new_status ? 'btn btn-warning' : 'btn btn-success';
+                        btn.style.cssText = 'padding: 0.25rem 0.5rem; font-size: 0.75rem;';
+
+                        // Update status badge
+                        statusBadge.textContent = data.new_status ? 'Active' : 'Blocked';
+                        statusBadge.className = `status-badge status-${data.new_status ? 'active' : 'blocked'}`;
+
+                        // Show success message
+                        showMessage(data.message, 'success');
+                    } else {
+                        // Restore button
+                        btn.textContent = originalBtnText;
+                        showMessage(data.message || 'Failed to update user status', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    btn.textContent = originalBtnText;
+                    showMessage('An error occurred while updating user status', 'error');
+                })
+                .finally(() => {
+                    btn.disabled = false;
+                });
+        }
+
+        /**
+         * Force password reset for user
+         */
+        function forcePasswordReset(userId) {
+            if (!confirm('Are you sure you want to force this user to change their password on next login?')) {
+                return;
+            }
+
+            fetch(`/auth/users/${userId}/force-password-reset`, {
+                    method: 'PATCH',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showMessage(data.message, 'success');
+                    } else {
+                        showMessage(data.message || 'Failed to force password reset', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showMessage('An error occurred while forcing password reset', 'error');
+                });
+        }
+
+        /**
+         * Delete user
+         */
+        function deleteUser(userId) {
+            if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+                return;
+            }
+
+            fetch(`/auth/users/${userId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Remove user row from table
+                        document.getElementById(`user-row-${userId}`).remove();
+                        showMessage(data.message, 'success');
+                    } else {
+                        showMessage(data.message || 'Failed to delete user', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showMessage('An error occurred while deleting user', 'error');
+                });
+        }
+
+        /**
+         * Show message to user
+         */
+        function showMessage(message, type = 'info') {
+            // Create message element
+            const messageDiv = document.createElement('div');
+            messageDiv.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 20px;
+        border-radius: 8px;
+        color: white;
+        font-weight: 500;
+        z-index: 1000;
+        max-width: 400px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    `;
+
+            // Set background color based on type
+            const colors = {
+                success: '#10b981',
+                error: '#ef4444',
+                warning: '#f59e0b',
+                info: '#3b82f6'
+            };
+            messageDiv.style.background = colors[type] || colors.info;
+            messageDiv.textContent = message;
+
+            // Add to page
+            document.body.appendChild(messageDiv);
+
+            // Remove after 5 seconds
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 5000);
+        }
 
         // ===== PERMISSION ACTIONS =====
         window.deletePermission = function(id) {

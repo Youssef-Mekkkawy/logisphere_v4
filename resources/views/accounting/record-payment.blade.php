@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Record Payment - LogiFlow')
+@section('title', 'Record Payment - logisphere')
 @section('page-title', 'Record Payment')
 
 @section('content')

@@ -1,9 +1,9 @@
 import './bootstrap';
-import './logiflow';
+import './logisphere';
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('LogiFlow Application Loaded');
+    console.log('logisphere Application Loaded');
     
     // Initialize any global functionality here
     initializeApp();

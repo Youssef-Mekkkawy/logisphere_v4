@@ -1,7 +1,7 @@
 {{-- File: resources/views/users/edit.blade.php (FIXED FORM STRUCTURE) --}}
 @extends('layouts.app')
 
-@section('title', 'Edit User - LogiFlow')
+@section('title', 'Edit User - logisphere')
 @section('page-title', 'Edit User: ' . $user->name)
 
 @section('content')

@@ -1,7 +1,7 @@
 {{-- File: resources/views/permissions/create.blade.php --}}
 @extends('layouts.app')
 
-@section('title', 'Create Permission - LogiFlow')
+@section('title', 'Create Permission - logisphere')
 @section('page-title', 'Create New Permission')
 
 @section('content')

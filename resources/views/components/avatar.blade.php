@@ -1,40 +1,45 @@
 {{-- File: resources/views/components/avatar.blade.php --}}
 
-@php
-    $isOnline = $showStatus ? $isUserOnline() : false;
-    $userName = $user->name ?? 'Guest';
+@props(['user', 'size' => 40, 'showStatus' => false, 'clickable' => false, 'tooltip' => null, 'class' => ''])
 
-    $containerClasses = [
-        'avatar-container',
-        $class,
-        $clickable ? 'avatar-clickable' : '',
-        $showStatus ? 'avatar-with-status' : '',
-    ];
+@php
+    $initials = strtoupper(substr($user->name ?? 'U', 0, 1));
+    $colors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#84cc16', '#f97316'];
+    $colorIndex = crc32($user->email ?? ($user->name ?? 'default')) % count($colors);
+    $bgColor = $colors[$colorIndex];
+
+    $containerClass = $class . ' relative inline-block';
+    if ($clickable) {
+        $containerClass .= ' cursor-pointer hover:opacity-80 transition-opacity';
+    }
 @endphp
 
-<div class="{{ implode(' ', array_filter($containerClasses)) }}"
-    style="width: {{ $size }}px; height: {{ $size }}px; position: relative; display: inline-block;"
-    @if ($tooltip) title="{{ $tooltip }}" @endif
-    @if ($clickable) role="button" tabindex="0" onclick="window.location.href='{{ route('profile.show') }}'" @endif>
+<div class="{{ $containerClass }}" @if ($tooltip) title="{{ $tooltip }}" @endif
+    @if ($clickable) onclick="window.location.href='{{ route('auth.users.show', $user) }}'" @endif>
+    <div
+        style="
+            width: {{ $size }}px; 
+            height: {{ $size }}px; 
+            background: {{ $bgColor }}; 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            color: white; 
+            font-weight: bold;
+            font-size: {{ $size * 0.4 }}px;
+        ">
+        {{ $initials }}
+    </div>
 
-    <!-- Avatar Image -->
-    <img src="{{ $avatarUrl }}" alt="{{ $userName }}'s avatar" class="avatar-img"
-        style="width: {{ $size }}px; height: {{ $size }}px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.3); transition: all 0.3s ease;"
-        onerror="this.src='https://ui-avatars.com/api/?name={{ urlencode($userName) }}&size={{ $size }}&background=3b82f6&color=ffffff'">
-
-    <!-- Online Status Indicator -->
-    @if ($showStatus)
-        <div class="avatar-status {{ $isOnline ? 'online' : 'offline' }}"
-            style="position: absolute; bottom: 0; right: 0; width: {{ max(8, $size * 0.25) }}px; height: {{ max(8, $size * 0.25) }}px; border: 2px solid #fff; border-radius: 50%; background: {{ $isOnline ? '#10b981' : '#6b7280' }};">
-        </div>
-    @endif
-
-    <!-- Role Badge (optional, for larger avatars) -->
-    @if ($size >= 64 && $user)
-        <div class="avatar-role-badge"
-            style="position: absolute; top: -5px; right: -5px; background: {{ $user->isAdmin() ? '#ffd700' : '#3b82f6' }}; color: {{ $user->isAdmin() ? '#000' : '#fff' }}; font-size: 10px; padding: 2px 6px; border-radius: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">
-            {{ $user->isAdmin() ? 'Admin' : $user->roles->first()->name ?? 'User' }}
-        </div>
+    @if ($showStatus && isset($user->last_login))
+        <div class="absolute -bottom-1 -right-1 rounded-full border-2 border-white"
+            style="
+                width: {{ $size * 0.3 }}px; 
+                height: {{ $size * 0.3 }}px; 
+                background: {{ $user->last_login?->isToday() ? '#10b981' : '#6b7280' }};
+            "
+            title="{{ $user->last_login?->isToday() ? 'Online today' : 'Offline' }}"></div>
     @endif
 </div>
 

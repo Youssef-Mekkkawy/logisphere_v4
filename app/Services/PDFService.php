@@ -351,14 +351,14 @@ class PDFService extends BaseAccountingService
     private function getCompanyInfo()
     {
         return [
-            'name' => config('app.name', 'LogiFlow Logistics'),
+            'name' => config('app.name', 'logisphere Logistics'),
             'address' => config('accounting.company.address', '123 Business Street'),
             'city' => config('accounting.company.city', 'Business City'),
             'postal_code' => config('accounting.company.postal_code', '12345'),
             'country' => config('accounting.company.country', 'Egypt'),
             'phone' => config('accounting.company.phone', '+20-xxx-xxx-xxxx'),
-            'email' => config('accounting.company.email', 'info@logiflow.com'),
-            'website' => config('accounting.company.website', 'www.logiflow.com'),
+            'email' => config('accounting.company.email', 'info@logisphere.com'),
+            'website' => config('accounting.company.website', 'www.logisphere.com'),
             'tax_number' => config('accounting.company.tax_number', 'TAX123456789'),
             'registration_number' => config('accounting.company.registration_number', 'REG123456789'),
             'logo_path' => config('accounting.company.logo_path', 'images/logo.png'),
@@ -378,7 +378,7 @@ class PDFService extends BaseAccountingService
             'late_fee' => 'Late payment may incur additional charges',
             'bank_details' => [
                 'bank_name' => config('accounting.bank.name', 'National Bank of Egypt'),
-                'account_name' => config('accounting.bank.account_name', 'LogiFlow Logistics'),
+                'account_name' => config('accounting.bank.account_name', 'logisphere Logistics'),
                 'account_number' => config('accounting.bank.account_number', '1234567890'),
                 'swift_code' => config('accounting.bank.swift_code', 'NBEXXXX'),
             ]

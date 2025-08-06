@@ -1,7 +1,7 @@
 {{-- Replace resources/views/profile/edit.blade.php --}}
 @extends('layouts.app')
 
-@section('title', 'Profile Settings - LogiFlow')
+@section('title', 'Profile Settings - logisphere')
 @section('page_title', 'Profile Settings')
 
 @section('content')

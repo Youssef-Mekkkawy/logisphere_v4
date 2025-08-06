@@ -1,7 +1,7 @@
 {{-- File: resources/views/shared/sidebar.blade.php --}}
 <nav class="sidebar">
     <div class="logo">
-        <h1>🚢 LogiFlow</h1>
+        <h1>🚢 logisphere</h1>
         <p>Logistics Management System</p>
     </div>
     <ul class="nav-menu">

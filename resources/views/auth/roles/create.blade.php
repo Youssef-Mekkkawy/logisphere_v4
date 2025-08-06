@@ -1,7 +1,7 @@
 {{-- File: resources/views/roles/create.blade.php --}}
 @extends('layouts.app')
 
-@section('title', 'Create Role - LogiFlow')
+@section('title', 'Create Role - logisphere')
 @section('page-title', 'Create New Role')
 
 @section('content')

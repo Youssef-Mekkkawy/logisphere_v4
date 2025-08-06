@@ -1,7 +1,7 @@
 {{-- File: resources/views/users/create.blade.php (FIXED) --}}
 @extends('layouts.app')
 
-@section('title', 'Create User - LogiFlow')
+@section('title', 'Create User - logisphere')
 @section('page-title', 'Create New User')
 
 @section('content')

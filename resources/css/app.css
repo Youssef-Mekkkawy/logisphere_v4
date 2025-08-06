@@ -3,7 +3,7 @@
 @import "tailwindcss/utilities";
 
 /* Import your custom CSS files */
-@import "./logiflow.css";
+@import "./logisphere.css";
 @import "./components.css";
 
 * {

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', $shipment->shipment_id . ' - LogiFlow')
+@section('title', $shipment->shipment_id . ' - logisphere')
 @section('page-title', 'Shipment Details')
 
 @section('content')

@@ -322,7 +322,7 @@ window.showSubmenuOverview = showSubmenuOverview;
 window.switchSubmenuTab = switchSubmenuTab;
 window.trackShipment = trackShipment;
 
-console.log('LogiFlow JavaScript loaded successfully');
+console.log('logisphere JavaScript loaded successfully');
 console.log('Available keyboard shortcuts:');
 console.log('- Ctrl+F1: Create new shipment');
 console.log('- Ctrl+U: Users section');

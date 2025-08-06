@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\UserController;
+use App\Http\Controllers\Auth\PasswordChangeController;
 // routes/auth/user
 Route::prefix('users')->name('users.')->group(function () {
     // Main user CRUD
@@ -11,6 +12,16 @@ Route::prefix('users')->name('users.')->group(function () {
     Route::get('/{user}/edit', [UserController::class, 'edit'])->name('edit');
     Route::put('/{user}', [UserController::class, 'update'])->name('update');
     Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
+
+    // 🔥 NEW: User Account Management
+    // Enhanced Account Management
+    Route::patch('/{user}/toggle-block', [UserController::class, 'toggleBlock'])->name('toggle-block');
+    Route::patch('/{user}/force-password-reset', [UserController::class, 'forcePasswordReset'])->name('force-password-reset');
+
+    // 🔥 NEW: Force logout specific user
+    Route::post('/{user}/force-logout', [UserController::class, 'forceLogout'])->name('force-logout');
+
+    Route::get('/{user}/status', [UserController::class, 'getUserStatus'])->name('status');
 
     // 🔥 ROLE MANAGEMENT (INTEGRATED)
     Route::post('/roles', [UserController::class, 'storeRole'])->name('roles.store');
@@ -23,5 +34,13 @@ Route::prefix('users')->name('users.')->group(function () {
     Route::get('/permissions/{permission}', [UserController::class, 'getPermission'])->name('permissions.get');
 
     // 🔥 USER AJAX ENDPOINTS
+
     Route::get('/get-user/{user}', [UserController::class, 'getUser'])->name('get-user');
+});
+
+
+// Password Change Routes
+Route::middleware(['auth', 'force.password.change'])->group(function () {
+    Route::get('/change-password', [PasswordChangeController::class, 'showChangeForm'])->name('password.change.form');
+    Route::post('/change-password', [PasswordChangeController::class, 'changePassword'])->name('password.update');
 });
