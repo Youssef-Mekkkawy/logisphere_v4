@@ -3,14 +3,14 @@
 namespace App\Http\Controllers\logistics;
 
 use App\Http\Controllers\Controller;
-use App\Models\Destination;
-use App\Models\InspectionType;
+use App\Models\Logistics\Destination;
+use App\Models\Logistics\InspectionType;
 use Illuminate\Http\Request;
 
-use App\Models\Port;
-use App\Models\Service;
-use App\Models\ShippingAgency;
-use App\Models\ShipmentType;
+use App\Models\Logistics\Port;
+use App\Models\Logistics\Service;
+use App\Models\Logistics\ShippingAgency;
+use App\Models\Logistics\ShipmentType;
 
 class logisticsController extends Controller
 {

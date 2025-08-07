@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\logistics;
 
 use App\Http\Controllers\Controller;
-use App\Models\BoslaGomrok;
+use App\Models\Logistics\BoslaGomrok;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 

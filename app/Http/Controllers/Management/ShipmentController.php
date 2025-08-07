@@ -7,12 +7,12 @@ namespace App\Http\Controllers\Management;
 
 use App\Http\Controllers\Controller;
 
-use App\Models\Shipment;
-use App\Models\Company;
-use App\Models\Employee;
-use App\Models\Port;
-use App\Models\ShippingAgency;
-use App\Models\ShipmentType;
+use App\Models\Management\Shipment;
+use App\Models\Management\Company;
+use App\Models\Management\Employee;
+use App\Models\Logistics\Port;
+use App\Models\Logistics\ShippingAgency;
+use App\Models\Logistics\ShipmentType;
 use App\Services\ShipmentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Management\Accounting;
 
 use App\Http\Controllers\Controller;
-use App\Models\Account;
+use App\Models\Management\Account\Account;
 use App\Http\Requests\Accounting\{StoreAccountRequest, UpdateAccountRequest};
 use App\Services\AccountService;
 

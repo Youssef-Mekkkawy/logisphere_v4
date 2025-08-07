@@ -4,9 +4,9 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\PortOperation;
-use App\Models\Port;
-use App\Models\Shipment;
+use App\Models\Logistics\PortOperation;
+use App\Models\Logistics\Port;
+use App\Models\Management\Shipment;
 
 class PortOperationSeeder extends Seeder
 {

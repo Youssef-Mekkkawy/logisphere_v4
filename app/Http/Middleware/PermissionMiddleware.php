@@ -43,7 +43,14 @@ class PermissionMiddleware
                 'user_permissions' => $user->getAllPermissions()->pluck('slug')->toArray()
             ], 403);
         }
-
-        abort(403, 'Access denied. You do not have the required permissions.');
+        if (!$user->isActive()) {
+            Auth::logout();
+            return redirect()->route('login')->with('error', 'Account blocked');
+        }
+        if (Auth::user()->is_active == 0) {
+            abort(403, 'Access denied. You Get Banned from Admin please contact your admin.');
+        } else {
+            abort(403, 'Access denied. You do not have the required permissions.');
+        }
     }
 }

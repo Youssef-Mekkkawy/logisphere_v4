@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
-use App\Models\Shipment;
-use App\Models\User;
+use App\Models\Management\Shipment;
+use App\Models\Auth\User;
 use App\Traits\HasRoleBasedAuthorization;
 use Illuminate\Auth\Access\Response;
 

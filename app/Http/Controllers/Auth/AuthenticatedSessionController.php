@@ -28,7 +28,7 @@ class AuthenticatedSessionController extends Controller
     public function store(LoginRequest $request): RedirectResponse
     {
         // Get user before authentication to check status
-        $user = \App\Models\User::where('email', $request->email)
+        $user = \App\Models\Auth\User::where('email', $request->email)
             ->orWhere('username', $request->email)
             ->first();
 

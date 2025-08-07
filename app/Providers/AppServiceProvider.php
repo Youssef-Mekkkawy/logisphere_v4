@@ -6,7 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Auth;
-use App\Models\User;
+use App\Models\Auth\User;
 use App\Services\ShipmentService;
 use App\Services\CompanyService;
 use App\Services\EmployeeService;

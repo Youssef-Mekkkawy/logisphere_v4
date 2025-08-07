@@ -2,10 +2,10 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\Container;
-use App\Models\Booking;
-use App\Models\Shipment;
-use App\Models\Port;
+use App\Models\Logistics\Container;
+use App\Models\Logistics\Booking;
+use App\Models\Management\Shipment;
+use App\Models\Logistics\Port;
 
 class ContainerSeeder extends Seeder
 {

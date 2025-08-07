@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\Account;
+use App\Models\Management\Account\Account;
 
 class AccountService
 {

@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
-use App\Models\Account;
-use App\Models\User;
+use App\Models\Management\Account\Account;
+use App\Models\Auth\User;
 use App\Traits\HasRoleBasedAuthorization;
 use Illuminate\Auth\Access\Response;
 

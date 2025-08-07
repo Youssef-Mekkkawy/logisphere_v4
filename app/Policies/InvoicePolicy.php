@@ -3,7 +3,7 @@
 namespace App\Policies;
 
 use App\Models\Invoice;
-use App\Models\User;
+use App\Models\Auth\User;
 use App\Traits\HasRoleBasedAuthorization;
 use Illuminate\Auth\Access\Response;
 

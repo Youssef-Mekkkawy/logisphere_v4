@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\BoslaGomrok;
+use App\Models\Logistics\BoslaGomrok;
 
 class BoslaGomrokSeeder extends Seeder
 {

@@ -3,10 +3,10 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\Booking;
-use App\Models\Shipment;
-use App\Models\Company;
-use App\Models\ShippingAgency;
+use App\Models\Logistics\Booking;
+use App\Models\Management\Shipment;
+use App\Models\Management\Company;
+use App\Models\Logistics\ShippingAgency;
 
 class BookingSeeder extends Seeder
 {

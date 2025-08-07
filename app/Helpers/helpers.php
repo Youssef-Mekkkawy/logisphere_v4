@@ -6,7 +6,7 @@ if (!function_exists('canAccess')) {
     /**
      * Simple permission check function
      * @param string|array $permissions - Permission name(s) to check
-     * @param \App\Models\User|null $user - User to check (defaults to current user)
+     * @param \App\Models\Auth\User|null $user - User to check (defaults to current user)
      * @return bool
      */
     function canAccess($permissions, $user = null)
@@ -43,7 +43,7 @@ if (!function_exists('canAccessAny')) {
     /**
      * Check if user can access any of the given permissions
      * @param array $permissions
-     * @param \App\Models\User|null $user
+     * @param \App\Models\Auth\User|null $user
      * @return bool
      */
     function canAccessAny(array $permissions, $user = null)
@@ -56,7 +56,7 @@ if (!function_exists('canAccessAll')) {
     /**
      * Check if user can access ALL of the given permissions
      * @param array $permissions
-     * @param \App\Models\User|null $user
+     * @param \App\Models\Auth\User|null $user
      * @return bool
      */
     function canAccessAll(array $permissions, $user = null)
@@ -84,7 +84,7 @@ if (!function_exists('canAccessAll')) {
 if (!function_exists('isAdmin')) {
     /**
      * Check if current user is admin
-     * @param \App\Models\User|null $user
+     * @param \App\Models\Auth\User|null $user
      * @return bool
      */
     function isAdmin($user = null)
@@ -197,8 +197,8 @@ if (!function_exists('generateEmployeeEmail')) {
         $finalEmail = $baseEmail;
 
         while (
-            \App\Models\Employee::where('email', $finalEmail)->exists() ||
-            \App\Models\User::where('email', $finalEmail)->exists()
+            \App\Models\Management\Employee::where('email', $finalEmail)->exists() ||
+            \App\Models\Auth\User::where('email', $finalEmail)->exists()
         ) {
             $finalEmail = $emailName . $counter . '@' . $domain;
             $counter++;

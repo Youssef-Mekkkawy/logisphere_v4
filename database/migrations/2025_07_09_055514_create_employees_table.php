@@ -18,9 +18,11 @@ return new class extends Migration
             $table->string('department')->nullable();
             $table->string('position')->nullable();
             $table->string('email')->nullable();
+            $table->enum('gender', ['male', 'female'])->default('male')->nullable();
             $table->string('phone')->nullable();
             $table->date('hire_date')->nullable();
             $table->decimal('salary', 10, 2)->nullable();
+
             $table->enum('status', ['Active', 'Inactive'])->default('Active');
             $table->timestamps();
         });

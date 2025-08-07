@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Models\Logistics\Port;
+use App\Models\Logistics\ShippingAgency;
+use App\Models\Management\Company;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 

@@ -5,7 +5,7 @@ namespace App\Http\Controllers\logistics;
 use App\Http\Controllers\Controller;
 
 
-use App\Models\COOType;
+use App\Models\Logistics\COOType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 

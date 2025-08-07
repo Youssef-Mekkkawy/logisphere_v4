@@ -3,8 +3,8 @@
 // File: app/Http/Controllers/RoleController.php
 namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
-use App\Models\Role;
-use App\Models\Permission;
+use App\Models\Auth\Role;
+use App\Models\Auth\Permission;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 

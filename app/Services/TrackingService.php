@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\Tracking;
-use App\Models\Shipment;
+use App\Models\Logistics\Tracking;
+use App\Models\Management\Shipment;
 use App\Models\Container;
 use App\Models\Booking;
 use Illuminate\Support\Facades\Auth;

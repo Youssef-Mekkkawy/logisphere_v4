@@ -2,12 +2,12 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use App\Models\Company;
-use App\Models\Port;
-use App\Models\Employee;
-use App\Models\ShippingAgency;
-use App\Models\ShipmentType;
+use App\Models\Auth\User;
+use App\Models\Logistics\Port;
+use App\Models\Logistics\ShipmentType;
+use App\Models\Logistics\ShippingAgency;
+use App\Models\Management\Company;
+use App\Models\Management\Employee;
 use Database\Seeders\RouteSeeder;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -73,7 +73,7 @@ class DatabaseSeeder extends Seeder
 
         $results = [];
         foreach ($users as $userData) {
-            $user = \App\Models\User::updateOrCreate(
+            $user = User::updateOrCreate(
                 ['username' => $userData['username']],
                 $userData
             );

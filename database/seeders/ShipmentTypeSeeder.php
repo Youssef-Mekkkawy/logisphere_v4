@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\ShipmentType;
+use App\Models\Logistics\ShipmentType;
 
 class ShipmentTypeSeeder extends Seeder
 {

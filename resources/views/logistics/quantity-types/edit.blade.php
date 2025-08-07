@@ -43,7 +43,7 @@
                         <label class="form-label">Category *</label>
                         <select name="quantity_category" class="form-input" required>
                             <option value="">Select Category</option>
-                            @foreach (\App\Models\QuantityType::getCategories() as $key => $label)
+                            @foreach (\App\Models\Logistics\QuantityType::getCategories() as $key => $label)
                                 <option value="{{ $key }}"
                                     {{ old('quantity_category', $quantityType->quantity_category) == $key ? 'selected' : '' }}>
                                     {{ $label }}
@@ -146,7 +146,7 @@
                     <div class="form-group">
                         <label class="form-label">Rounding Method *</label>
                         <select name="rounding_method" class="form-input" required>
-                            @foreach (\App\Models\QuantityType::getRoundingMethods() as $key => $label)
+                            @foreach (\App\Models\Logistics\QuantityType::getRoundingMethods() as $key => $label)
                                 <option value="{{ $key }}"
                                     {{ old('rounding_method', $quantityType->rounding_method) == $key ? 'selected' : '' }}>
                                     {{ $label }}
@@ -214,7 +214,7 @@
                         @php
                             $selectedRules = old('validation_rules', $quantityType->validation_rules ?? []);
                         @endphp
-                        @foreach (\App\Models\QuantityType::getDefaultValidationRules() as $rule => $description)
+                        @foreach (\App\Models\Logistics\QuantityType::getDefaultValidationRules() as $rule => $description)
                             <label style="display: flex; align-items: center; gap: 0.5rem;">
                                 <input type="checkbox" name="validation_rules[]" value="{{ $rule }}"
                                     {{ in_array($rule, $selectedRules) ? 'checked' : '' }}>
@@ -325,7 +325,7 @@
                             $quantityType->applicable_cargo_types ?? [],
                         );
                     @endphp
-                    @foreach (\App\Models\QuantityType::getCargoTypes() as $cargoType)
+                    @foreach (\App\Models\Logistics\QuantityType::getCargoTypes() as $cargoType)
                         <label style="display: flex; align-items: center; gap: 0.5rem;">
                             <input type="checkbox" name="applicable_cargo_types[]" value="{{ $cargoType }}"
                                 {{ in_array($cargoType, $selectedCargoTypes) ? 'checked' : '' }}>

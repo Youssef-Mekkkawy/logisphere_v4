@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Route;
-use App\Models\Port;
+use App\Models\Logistics\Port;
 
 class RouteSeeder extends Seeder
 {

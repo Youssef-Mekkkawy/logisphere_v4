@@ -4,7 +4,7 @@ namespace App\Http\Controllers\logistics;
 
 use App\Http\Controllers\Controller;
 
-use App\Models\ShippingAgency;
+use App\Models\Logistics\ShippingAgency;
 use App\Models\Country;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;

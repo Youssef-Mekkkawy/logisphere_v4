@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Logistics;
 
 use App\Http\Controllers\Controller;
-use App\Models\Shipper;
+use App\Models\Logistics\Shipper;
 use App\Models\Country;
-use App\Models\Shipment;
+use App\Models\Management\Shipment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 

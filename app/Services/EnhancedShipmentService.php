@@ -7,7 +7,7 @@
 // File: app/Services/EnhancedShipmentService.php
 namespace App\Services;
 
-use App\Models\Shipment;
+use App\Models\Management\Shipment;
 use App\Models\Booking;
 use App\Models\Container;
 use App\Models\AllStatus;

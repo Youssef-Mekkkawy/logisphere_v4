@@ -5,8 +5,8 @@ namespace App\Services;
 
 use App\Models\Invoice;
 use App\Models\InvoiceDetail;
-use App\Models\Company;
-use App\Models\Account;
+use App\Models\Management\Company;
+use App\Models\Management\Account\Account;
 use Illuminate\Support\Facades\Auth;
 
 class InvoiceService

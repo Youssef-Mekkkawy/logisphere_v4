@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Management;
 use App\Http\Controllers\Controller;
 
 
-use App\Models\Company;
+use App\Models\Management\Company;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;

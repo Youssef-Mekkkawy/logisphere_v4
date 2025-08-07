@@ -3,11 +3,11 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\Tracking;
-use App\Models\Shipment;
-use App\Models\Container;
-use App\Models\Booking;
-use App\Models\Port;
+use App\Models\Logistics\Tracking;
+use App\Models\Management\Shipment;
+use App\Models\Logistics\Container;
+use App\Models\Logistics\Booking;
+use App\Models\Logistics\Port;
 
 class TrackingSeeder extends Seeder
 {

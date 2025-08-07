@@ -5,9 +5,9 @@ namespace App\Http\Controllers\Management;
 use App\Http\Controllers\Controller;
 
 use Illuminate\Http\Request;
-use App\Models\Shipment;
-use App\Models\Company;
-use App\Models\Employee;
+use App\Models\Management\Shipment;
+use App\Models\Management\Company;
+use App\Models\Management\Employee;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\ShipmentsExport;
 use App\Imports\ShipmentsImport;

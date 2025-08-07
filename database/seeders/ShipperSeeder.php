@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\Shipper;
+use App\Models\Logistics\Shipper;
 use App\Models\Country;
 
 class ShipperSeeder extends Seeder

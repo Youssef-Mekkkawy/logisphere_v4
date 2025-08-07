@@ -39,10 +39,10 @@ namespace App\Providers;
 
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
-use App\Models\Shipment;
-use App\Models\Company;
-use App\Models\Employee;
-use App\Models\User;
+use App\Models\Management\Shipment;
+use App\Models\Management\Company;
+use App\Models\Management\Employee;
+use App\Models\Auth\User;
 use App\Policies\ShipmentPolicy;
 use App\Policies\CompanyPolicy;
 use App\Policies\EmployeePolicy;

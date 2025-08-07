@@ -41,7 +41,7 @@
                         <label class="form-label">Category *</label>
                         <select name="quantity_category" class="form-input" required>
                             <option value="">Select Category</option>
-                            @foreach (\App\Models\QuantityType::getCategories() as $key => $label)
+                            @foreach (\App\Models\Logistics\QuantityType::getCategories() as $key => $label)
                                 <option value="{{ $key }}"
                                     {{ old('quantity_category') == $key ? 'selected' : '' }}>
                                     {{ $label }}
@@ -139,7 +139,7 @@
                     <div class="form-group">
                         <label class="form-label">Rounding Method *</label>
                         <select name="rounding_method" class="form-input" required>
-                            @foreach (\App\Models\QuantityType::getRoundingMethods() as $key => $label)
+                            @foreach (\App\Models\Logistics\QuantityType::getRoundingMethods() as $key => $label)
                                 <option value="{{ $key }}"
                                     {{ old('rounding_method', 'nearest') == $key ? 'selected' : '' }}>
                                     {{ $label }}
@@ -201,7 +201,7 @@
                 <div class="form-group" style="margin-top: 1.5rem;">
                     <label class="form-label">Validation Rules</label>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                        @foreach (\App\Models\QuantityType::getDefaultValidationRules() as $rule => $description)
+                        @foreach (\App\Models\Logistics\QuantityType::getDefaultValidationRules() as $rule => $description)
                             <label style="display: flex; align-items: center; gap: 0.5rem;">
                                 <input type="checkbox" name="validation_rules[]" value="{{ $rule }}"
                                     {{ is_array(old('validation_rules')) && in_array($rule, old('validation_rules')) ? 'checked' : '' }}>
@@ -304,7 +304,7 @@
             </div>
             <div class="card-body">
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                    @foreach (\App\Models\QuantityType::getCargoTypes() as $cargoType)
+                    @foreach (\App\Models\Logistics\QuantityType::getCargoTypes() as $cargoType)
                         <label style="display: flex; align-items: center; gap: 0.5rem;">
                             <input type="checkbox" name="applicable_cargo_types[]" value="{{ $cargoType }}"
                                 {{ is_array(old('applicable_cargo_types')) && in_array($cargoType, old('applicable_cargo_types')) ? 'checked' : '' }}>

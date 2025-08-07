@@ -2,14 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\cr;
-use App\Models\Shipment;
-use App\Models\Company;
-use App\Models\Employee;
-use Illuminate\Foundation\Auth\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Models\Management\Shipment;
+use App\Models\Management\Company;
+use App\Models\Management\Employee;
 
 class DashboardController extends Controller
 {

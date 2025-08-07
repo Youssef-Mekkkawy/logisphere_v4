@@ -2,7 +2,7 @@
 
 namespace App\services;
 
-use App\Models\Shipment;
+use App\Models\Management\Shipment;
 use Illuminate\Support\Facades\DB;
 
 class DashboardService

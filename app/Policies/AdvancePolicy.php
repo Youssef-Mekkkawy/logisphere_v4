@@ -3,7 +3,7 @@
 namespace App\Policies;
 
 use App\Models\EmployeeAdvance;
-use App\Models\User;
+use App\Models\Auth\User;
 use App\Traits\HasRoleBasedAuthorization;
 use Illuminate\Auth\Access\Response;
 

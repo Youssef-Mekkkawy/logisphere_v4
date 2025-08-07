@@ -5,8 +5,8 @@ namespace App\Http\Controllers\logistics;
 
 use App\Http\Controllers\Controller;
 
-use App\Models\Service;
-// use App\Models\Account; // TODO: Uncomment when Account model exists
+use App\Models\Logistics\Service;
+// use App\Models\Management\Account\Account; // TODO: Uncomment when Account model exists
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;

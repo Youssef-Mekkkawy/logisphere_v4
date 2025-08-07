@@ -259,7 +259,8 @@
                 <div style="padding: 40px; text-align: center; color: #6b7280;">
                     <p>Assignment tracking and employment history features will be implemented in future updates.</p>
                     <p style="margin-top: 15px;">
-                        <a href="{{ route('accounting.index') }}" class="btn btn-primary">View Accounting Module</a>
+                        {{-- {{ route('accounting.index') }} --}}
+                        <a href="" class="btn btn-primary">View Accounting Module</a>
                     </p>
                 </div>
             </div>
@@ -356,8 +357,8 @@
                             Call Employee
                         </a>
                     @endif
-
-                    <a href="{{ route('accounting.index') }}" class="btn btn-secondary" style="text-align: center;">
+                    {{-- {{ route('accounting.index') }} --}}
+                    <a href="" class="btn btn-secondary" style="text-align: center;">
                         View Accounting
                     </a>
 

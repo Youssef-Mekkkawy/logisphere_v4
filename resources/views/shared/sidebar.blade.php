@@ -82,7 +82,8 @@
         {{-- Accounting - Check permission --}}
         @if (canAccess('accounting.view'))
             <li class="nav-item">
-                <a href="{{ route('management.accounting.index') }}"
+                {{-- {{ route('management.accounting.index') }} --}}
+                <a href=""
                     class="nav-link {{ request()->routeIs('management.accounting.*') ? 'active' : '' }}">
                     <span class="nav-icon">💰</span>
                     Accounting

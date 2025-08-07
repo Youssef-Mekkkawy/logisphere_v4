@@ -2,7 +2,7 @@
 
 namespace App\Traits;
 
-use App\Models\User;
+use App\Models\Auth\User;
 
 trait HasRoleBasedAuthorization
 {

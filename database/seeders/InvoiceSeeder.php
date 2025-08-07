@@ -4,11 +4,11 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\Invoice;
-use App\Models\InvoiceDetail;
-use App\Models\Company;
-use App\Models\Shipment;
-use App\Models\Account;
+use App\Models\Management\Account\Invoice;
+use App\Models\Management\Account\InvoiceDetail;
+use App\Models\Management\Company;
+use App\Models\Management\Shipment;
+use App\Models\Management\Account\Account;
 
 class InvoiceSeeder extends Seeder
 {

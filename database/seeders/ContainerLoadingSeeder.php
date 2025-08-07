@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\ContainerLoading;
+use App\Models\Logistics\ContainerLoading;
 use App\Models\Country;
 
 class ContainerLoadingSeeder extends Seeder

@@ -3,8 +3,8 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\TrackingEvent;
-use App\Models\Shipment;
+use App\Models\Logistics\TrackingEvent;
+use App\Models\Management\Shipment;
 use Carbon\Carbon;
 
 class TrackingEventSeeder extends Seeder

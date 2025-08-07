@@ -3,7 +3,7 @@ namespace App\Http\Controllers\logistics;
 
 use App\Http\Controllers\Controller;
 
-use App\Models\Port;
+use App\Models\Logistics\Port;
 use App\Models\Country;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;

@@ -8,7 +8,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use App\Models\User;
+use App\Models\Auth\User;
 
 class UserAccountCreated extends Notification implements ShouldQueue
 {
@@ -108,7 +108,7 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use App\Models\User;
+use App\Models\Auth\User;
 
 class EmployeeWelcome extends Mailable implements ShouldQueue
 {

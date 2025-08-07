@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Management;
 
 use App\Http\Controllers\Controller;
 
-use App\Models\Employee;
-use App\Models\Role;
-use app\Models\user;
+use App\Models\Management\Employee;
+use App\Models\Auth\Role;
+use App\Models\Auth\User;
 // use Illuminate\Foundation\Auth\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;

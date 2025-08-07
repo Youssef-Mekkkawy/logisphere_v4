@@ -3,10 +3,10 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\Attachment;
-use App\Models\Shipment;
-use App\Models\Company;
-use App\Models\Invoice;
+use App\Models\Management\Account\Attachment;
+use App\Models\Management\Shipment;
+use App\Models\Management\Company;
+use App\Models\Management\Account\Invoice;
 
 class AttachmentSeeder extends Seeder
 {
@@ -30,7 +30,7 @@ class AttachmentSeeder extends Seeder
                 'file_size' => 245760, // 240 KB
                 'category' => 'bill_of_lading',
                 'description' => 'Original bill of lading document',
-                'uploaded_by_type' => 'App\Models\User',
+                'uploaded_by_type' => '\App\Models\Auth\User',
                 'uploaded_by_id' => 1,
                 'is_public' => true,
                 'is_required' => true,
@@ -47,7 +47,7 @@ class AttachmentSeeder extends Seeder
                 'file_size' => 156340, // 152 KB
                 'category' => 'commercial_invoice',
                 'description' => 'Commercial invoice for customs clearance',
-                'uploaded_by_type' => 'App\Models\User',
+                'uploaded_by_type' => '\App\Models\Auth\User',
                 'uploaded_by_id' => 1,
                 'is_public' => true,
                 'is_required' => true,
@@ -82,7 +82,7 @@ class AttachmentSeeder extends Seeder
                 'file_size' => 512000, // 500 KB
                 'category' => 'license',
                 'description' => 'Valid trade license certificate',
-                'uploaded_by_type' => 'App\Models\User',
+                'uploaded_by_type' => '\App\Models\Auth\User',
                 'uploaded_by_id' => 1,
                 'is_public' => false,
                 'is_required' => true,
@@ -101,7 +101,7 @@ class AttachmentSeeder extends Seeder
                 'file_size' => 387420, // 378 KB
                 'category' => 'signed_copy',
                 'description' => 'Customer signed invoice copy',
-                'uploaded_by_type' => 'App\Models\User',
+                'uploaded_by_type' => '\App\Models\Auth\User',
                 'uploaded_by_id' => 1,
                 'is_public' => true,
                 'is_required' => false,
