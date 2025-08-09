@@ -14,7 +14,7 @@
         </li>
 
         {{-- File - Check permission --}}
-        {{-- @if (canAccess('tools.file.view'))
+        @if (canAccess('tools.file.view'))
             <li class="nav-item">
                 <a href="{{ route('tools.file.index') }}"
                     class="nav-link {{ request()->routeIs('tools.file.*') ? 'active' : '' }}">
@@ -22,7 +22,7 @@
                     File
                 </a>
             </li>
-        @endif --}}
+        @endif
 
         {{-- Logistics - Check permission --}}
         @if (canAccess('logistics.view'))
@@ -83,8 +83,8 @@
         @if (canAccess('accounting.view'))
             <li class="nav-item">
                 {{-- {{ route('management.accounting.index') }} --}}
-                <a href=""
-                    class="nav-link {{ request()->routeIs('management.accounting.*') ? 'active' : '' }}">
+                <a href="{{ route('management.account.index') }}"
+                    class="nav-link {{ request()->routeIs('management.account.*') ? 'active' : '' }}">
                     <span class="nav-icon">💰</span>
                     Accounting
                 </a>

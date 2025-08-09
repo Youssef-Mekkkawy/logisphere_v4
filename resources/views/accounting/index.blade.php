@@ -6,7 +6,33 @@
 @section('content')
     <div class="accounting-dashboard">
         <!-- Financial Stats Overview -->
-        <div class="stats-grid">
+        <div class="accounting-dashboard">
+            <!-- Financial Stats Overview -->
+            <div class="coming-soon">Coming Soon</div>
+        </div>
+
+        <style>
+            .accounting-dashboard {
+                max-width: 1400px;
+                margin: 0 auto;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 70vh;
+                /* Make it take up most of the screen height */
+            }
+
+            .coming-soon {
+                font-size: 3rem;
+                /* Bigger text */
+                font-weight: bold;
+                color: #6b7280;
+                /* Soft gray */
+                text-align: center;
+            }
+        </style>
+
+        {{-- <div class="stats-grid">
             <div class="stat-card revenue">
                 <div class="stat-icon">💰</div>
                 <div class="stat-details">
@@ -143,7 +169,7 @@
                     @endforelse
                 </div>
             </div>
-        </div>
+        </div> --}}
     </div>
 
     <style>

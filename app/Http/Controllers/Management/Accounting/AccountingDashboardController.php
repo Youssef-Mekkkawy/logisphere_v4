@@ -17,7 +17,7 @@ class AccountingDashboardController extends Controller
 
     public function index()
     {
-        $data = $this->dashboardService->getDashboardData();
-        return view('accounting.index', $data);
+        // $data = $this->dashboardService->getDashboardData();
+        return view('accounting.index' );
     }
 }

@@ -2,8 +2,9 @@
 
 namespace App\Policies;
 
-use App\Models\Invoice;
+
 use App\Models\Auth\User;
+use App\Models\Management\Account\Invoice;
 use App\Traits\HasRoleBasedAuthorization;
 use Illuminate\Auth\Access\Response;
 

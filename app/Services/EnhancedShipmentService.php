@@ -7,12 +7,11 @@
 // File: app/Services/EnhancedShipmentService.php
 namespace App\Services;
 
-use App\Models\Management\Shipment;
-use App\Models\Booking;
-use App\Models\Container;
 use App\Models\AllStatus;
-use App\Models\Route;
-use App\Models\Invoice;
+use App\Models\Logistics\Booking;
+use App\Models\Management\Shipment;
+
+
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 

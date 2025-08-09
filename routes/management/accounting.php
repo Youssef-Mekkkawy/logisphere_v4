@@ -11,9 +11,10 @@ use App\Http\Controllers\Management\Accounting\{
     PaymentController,
     ReportController
 };
-
+Route::resource('account', AccountingDashboardController::class);
 // ===== ACCOUNTING SYSTEM =====
-Route::middleware('permission:accounting.view')->prefix('accounting')->name('accounting.')->group(function () {
+Route::middleware('permission:accounting.view')->prefix('account')->name('account.')->group(function () {
+    
     Route::get('/', [AccountingDashboardController::class, 'index'])->name('index');
 
     // Employee Jobs & Advances
