@@ -96,7 +96,7 @@ class EnhancedShipmentService extends ShipmentService
                 'status' => 'Available'
             ]);
 
-            $container = Container::create($containerData);
+            $container = Contaier::create($containerData);
 
             // Add container tracking
             $container->addTrackingEvent([

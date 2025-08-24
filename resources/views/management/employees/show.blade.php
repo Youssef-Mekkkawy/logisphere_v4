@@ -217,7 +217,7 @@
                                 <select name="user_role" class="form-input" required>
                                     <option value="">Select Role</option>
                                     @php
-                                        $roles = \App\Models\Role::where('is_active', true)->get();
+                                        $roles = \App\Models\Auth\Role::where('is_active', true)->get();
                                         $suggestedRole = match ($employee->department) {
                                             'Management' => 'manager',
                                             'Finance & Accounting' => 'finance',

@@ -4,19 +4,19 @@ namespace App\services;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-
+use App\Models\Management\Employee;
 class EmployeeService
 {
     /**
      * Create a new employee with auto-generated ID
      */
-    public function createEmployee(array $data): \App\Models\Employee
+    public function createEmployee(array $data): Employee
     {
         $data['employee_id'] = $this->generateEmployeeId();
         $data['status'] = 'Active';
         $data['created_by'] = Auth::id();
 
-        $employee = \App\Models\Employee::create($data);
+        $employee = Employee::create($data);
 
         // Log employee creation
         Log::info("Employee created", [
@@ -34,7 +34,7 @@ class EmployeeService
      */
     private function generateEmployeeId(): string
     {
-        $lastEmployee = \App\Models\Employee::orderBy('employee_id', 'desc')->first();
+        $lastEmployee = Employee::orderBy('employee_id', 'desc')->first();
 
         if ($lastEmployee) {
             $lastNumber = intval(substr($lastEmployee->employee_id, 4));
@@ -49,7 +49,7 @@ class EmployeeService
     /**
      * Get employee performance metrics
      */
-    public function getEmployeeMetrics(\App\Models\Employee $employee): array
+    public function getEmployeeMetrics(Employee $employee): array
     {
         $assignedShipments = $employee->shipments();
 
@@ -66,7 +66,7 @@ class EmployeeService
     /**
      * Calculate employee average completion time
      */
-    private function calculateEmployeeAvgCompletionTime(\App\Models\Employee $employee): float
+    private function calculateEmployeeAvgCompletionTime( $employee): float
     {
         $completedShipments = $employee->shipments()
             ->where('status', 'Delivered')
@@ -87,7 +87,7 @@ class EmployeeService
     /**
      * Calculate employee success rate (on-time deliveries)
      */
-    private function calculateEmployeeSuccessRate(\App\Models\Employee $employee): float
+    private function calculateEmployeeSuccessRate(Employee $employee): float
     {
         $completedShipments = $employee->shipments()
             ->where('status', 'Delivered')
@@ -110,7 +110,7 @@ class EmployeeService
      */
     public function getDepartmentStatistics(): array
     {
-        return \App\Models\Employee::select('department')
+        return Employee::select('department')
             ->selectRaw('COUNT(*) as employee_count')
             ->selectRaw('AVG(salary) as avg_salary')
             ->selectRaw('SUM(CASE WHEN status = "Active" THEN 1 ELSE 0 END) as active_count')

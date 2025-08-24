@@ -7,7 +7,7 @@
 // File: app/Services/ReportService.php
 namespace App\Services;
 
-use App\Models\{Account, Invoice, Payment, Expense, EmployeeAdvance, JournalEntry, JournalEntryLine};
+use App\Models\Management\Account\{Account, Invoice, Payment, Expense, EmployeeAdvance, JournalEntry, JournalEntryLine};
 use Illuminate\Support\Collection;
 use Carbon\Carbon;
 use Exception;

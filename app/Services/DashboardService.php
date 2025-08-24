@@ -2,9 +2,11 @@
 
 namespace App\services;
 
+use App\Models\Logistics\TrackingEvent;
 use App\Models\Management\Shipment;
 use Illuminate\Support\Facades\DB;
-
+use App\Models\Management\Company;
+use App\Models\Management\Employee;
 class DashboardService
 {
     protected $shipmentService;
@@ -42,14 +44,14 @@ class DashboardService
         return [
             'shipments' => $this->shipmentService->getShipmentMetrics(),
             'companies' => [
-                'total_clients' => \App\Models\Company::where('type', 'Client')->count(),
-                'total_suppliers' => \App\Models\Company::where('type', 'Supplier')->count(),
-                'active_companies' => \App\Models\Company::where('status', 'Active')->count()
+                'total_clients' => Company::where('type', 'Client')->count(),
+                'total_suppliers' => Company::where('type', 'Supplier')->count(),
+                'active_companies' => Company::where('status', 'Active')->count()
             ],
             'employees' => [
-                'total_employees' => \App\Models\Employee::count(),
-                'active_employees' => \App\Models\Employee::where('status', 'Active')->count(),
-                'departments' => \App\Models\Employee::distinct('department')->count('department')
+                'total_employees' => Employee::count(),
+                'active_employees' => Employee::where('status', 'Active')->count(),
+                'departments' => Employee::distinct('department')->count('department')
             ],
             'revenue' => [
                 'current_month' => $this->calculateMonthlyRevenue(),
@@ -147,7 +149,7 @@ class DashboardService
      */
     private function getTopClients(): array
     {
-        return \App\Models\Company::where('type', 'Client')
+        return Company::where('type', 'Client')
             ->withCount('shipments')
             ->orderByDesc('shipments_count')
             ->limit(10)

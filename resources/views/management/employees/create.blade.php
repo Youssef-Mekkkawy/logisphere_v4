@@ -180,7 +180,7 @@
                                 <select name="user_role" id="userRole" class="form-input">
                                     <option value="">Auto-assign based on department</option>
                                     @php
-                                        $roles = \App\Models\Role::where('is_active', true)->get();
+                                        $roles = \App\Models\Auth\Role::where('is_active', true)->get();
                                     @endphp
                                     @foreach ($roles as $role)
                                         <option value="{{ $role->slug }}"

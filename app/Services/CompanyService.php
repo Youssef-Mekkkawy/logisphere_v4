@@ -4,19 +4,19 @@ namespace App\services;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-
+use App\Models\Management\Company;
 class CompanyService
 {
     /**
      * Create a new company with validation and setup
      */
-    public function createCompany(array $data): \App\Models\Company
+    public function createCompany(array $data): Company
     {
         $data['company_code'] = $this->generateCompanyCode($data['type']);
         $data['status'] = 'Active';
         $data['created_by'] = Auth::id();
 
-        $company = \App\Models\Company::create($data);
+        $company = Company::create($data);
 
         // Log company creation
         Log::info("Company created", [
@@ -36,7 +36,7 @@ class CompanyService
     {
         $prefix = $type === 'Client' ? 'CLT' : 'SUP';
 
-        $lastCompany = \App\Models\Company::where('company_code', 'like', $prefix . '%')
+        $lastCompany = Company::where('company_code', 'like', $prefix . '%')
             ->orderBy('company_code', 'desc')
             ->first();
 
@@ -53,7 +53,7 @@ class CompanyService
     /**
      * Get company performance metrics
      */
-    public function getCompanyMetrics(\App\Models\Company $company): array
+    public function getCompanyMetrics(Company $company): array
     {
         $shipments = $company->shipments();
 
@@ -71,7 +71,7 @@ class CompanyService
     /**
      * Calculate company-specific on-time delivery rate
      */
-    private function calculateCompanyOnTimeRate(\App\Models\Company $company): float
+    private function calculateCompanyOnTimeRate(Company $company): float
     {
         $deliveredShipments = $company->shipments()
             ->where('status', 'Delivered')
