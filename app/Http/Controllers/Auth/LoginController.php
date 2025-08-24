@@ -87,10 +87,10 @@ class LoginController extends Controller
             ]);
 
             // 🔥 NEW: Check if user must change password
-            if ($authenticatedUser->mustChangePassword()) {
-                return redirect()->route('password.change.form')
-                    ->with('warning', 'You must change your password before continuing.');
-            }
+            // if ($authenticatedUser->mustChangePassword()) {
+            //     return redirect()->route('password.change.form')
+            //         ->with('warning', 'You must change your password before continuing.');
+            // }
 
             return $this->sendLoginResponse($request);
         }

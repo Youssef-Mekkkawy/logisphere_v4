@@ -70,17 +70,17 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/refresh-token', [LoginController::class, 'refreshToken'])->name('refresh-token');
 
     // Password Change Routes (Enhanced)
-    // Route::middleware(['auth', 'force.password.change'])->group(function () {
-    //     Route::get('/change-password', [PasswordChangeController::class, 'showChangeForm'])->name('password.change.form');
-    //     Route::post('/change-password', [PasswordChangeController::class, 'changePassword'])->name('password.update');
-    // });
+    Route::middleware(['auth'])->group(function () {
+        Route::get('/change-password', [PasswordChangeController::class, 'showChangeForm'])->name('password.change.form');
+        Route::post('/change-password', [PasswordChangeController::class, 'changePassword'])->name('password.update');
+    });
 
     // Dashboard Route (Protected)
-    // Route::middleware(['auth', 'force.password.change'])->group(function () {
-    //     Route::get('/dashboard', function () {
-    //         return view('dashboard');
-    //     })->name('dashboard');
-    // });
+    Route::middleware(['auth' ])->group(function () {
+        Route::get('/dashboard', function () {
+            return view('dashboard');
+        })->name('dashboard');
+    });
     // ========================================================================
     // 👤 SHARED USER FEATURES
     // ========================================================================
@@ -107,7 +107,7 @@ Route::middleware(['auth'])->group(function () {
 
         require __DIR__ . '/management/shipments.php';
     });
-    Route::prefix('management')->name('management.')->middleware(['auth', 'force.password.change'])->group(function () {
+    Route::prefix('management')->name('management.')->middleware(['auth'])->group(function () {
         require __DIR__ . '/management/employees.php';
     });
 
@@ -154,7 +154,7 @@ Route::middleware(['auth'])->group(function () {
     // ========================================================================
     // 🔐 ADMIN ROUTES - Role & Permission Management
     // ========================================================================
-    Route::prefix('auth/')->name('auth.')->middleware(['auth', 'force.password.change'])->group(function () {
+    Route::prefix('auth/')->name('auth.')->middleware(['auth'])->group(function () {
         require __DIR__ . '/auth/roles.php'; // Role & Permissions
         // require __DIR__ . '/auth/permissions.php';
         require __DIR__ . '/auth/users.php';

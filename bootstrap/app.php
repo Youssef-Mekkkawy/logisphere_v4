@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Middleware\ForcePasswordChange;
+// use App\Http\Middleware\ForcePasswordChange;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -19,7 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => \App\Http\Middleware\PermissionMiddleware::class,
             'role' => \App\Http\Middleware\RoleMiddleware::class,
 
-            'force.password.change' => ForcePasswordChange::class,
+            // 'force.password.change' => ForcePasswordChange::class,
 
         ]);
 

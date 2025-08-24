@@ -39,8 +39,8 @@ Route::prefix('users')->name('users.')->group(function () {
 });
 
 
-// Password Change Routes
-Route::middleware(['auth', 'force.password.change'])->group(function () {
-    Route::get('/change-password', [PasswordChangeController::class, 'showChangeForm'])->name('password.change.form');
-    Route::post('/change-password', [PasswordChangeController::class, 'changePassword'])->name('password.update');
-});
+// // Password Change Routes
+// Route::middleware(['auth', 'force.password.change'])->group(function () {
+//     Route::get('/change-password', [PasswordChangeController::class, 'showChangeForm'])->name('password.change.form');
+//     Route::post('/change-password', [PasswordChangeController::class, 'changePassword'])->name('password.update');
+// });
