@@ -7,6 +7,7 @@ use App\Http\Controllers\logistics\logisticsController;
 use App\Http\Controllers\Management\ShipmentController;
 use Illuminate\Support\Facades\Route;
 
+
 /*
 |--------------------------------------------------------------------------
 | Main Web Routes - Reorganized Structure
@@ -77,9 +78,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Dashboard Route (Protected)
     Route::middleware(['auth' ])->group(function () {
-        Route::get('/dashboard', function () {
-            return view('dashboard');
-        })->name('dashboard');
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     });
     // ========================================================================
     // 👤 SHARED USER FEATURES
