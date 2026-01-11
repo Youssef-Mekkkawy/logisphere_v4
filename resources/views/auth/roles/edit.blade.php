@@ -1,7 +1,7 @@
 {{-- File: resources/views/roles/edit.blade.php --}}
 @extends('layouts.app')
 
-@section('title', 'Edit Role - logisphere')
+@section('title', 'Edit Role - logistics')
 @section('page-title', 'Edit Role: ' . $role->name)
 
 @section('content')

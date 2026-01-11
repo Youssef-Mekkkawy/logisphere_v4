@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'logisphere - Logistics Management System')</title>
+    <title>@yield('title', 'logistics - Logistics Management System')</title>
 
     <!-- Use public directory CSS instead of Vite -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
@@ -40,11 +40,11 @@
     </div>
 
     <!-- Use public directory JS instead of Vite -->
-    <script src="{{ asset('js/logisphere.js') }}"></script>
+    <script src="{{ asset('js/logiflow.js') }}"></script>
 
     <!-- 🔥 ADD: Global JavaScript Functions for User Management -->
     <script>
-        console.log('🚀 logisphere User Management JavaScript Loading...');
+        console.log('🚀 logistics User Management JavaScript Loading...');
 
         // ===== GLOBAL MODAL FUNCTIONS =====
         window.openModal = function(modalId) {
@@ -380,7 +380,7 @@
         // CSRF Token setup for AJAX requests
         window.csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
-        console.log('🎉 logisphere User Management JavaScript Loaded Successfully!');
+        console.log('🎉 logistics User Management JavaScript Loaded Successfully!');
     </script>
 
     @stack('scripts')

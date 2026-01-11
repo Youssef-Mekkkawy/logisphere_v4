@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Track Shipment - logisphere')
+@section('title', 'Track Shipment - logistics')
 @section('page-title', 'Shipment Tracking')
 
 @section('content')
@@ -731,7 +731,7 @@
                 if (navigator.share) {
                     navigator.share({
                         title: `Track Shipment ${shipmentId}`,
-                        text: `Track shipment ${shipmentId} on logisphere`,
+                        text: `Track shipment ${shipmentId} on logistics`,
                         url: url
                     });
                 } else {

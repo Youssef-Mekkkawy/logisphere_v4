@@ -29,7 +29,7 @@ class PDFService extends BaseAccountingService
     public function generateInvoicePDF(Invoice $invoice, array $options = [])
     {
         $invoice->load(['company', 'shipment', 'payments']);
-        
+
         $data = [
             'invoice' => $invoice,
             'company_info' => $this->getCompanyInfo(),
@@ -38,14 +38,14 @@ class PDFService extends BaseAccountingService
             'qr_code' => $this->generateInvoiceQRCode($invoice),
             'template_options' => array_merge($this->defaultOptions, $options)
         ];
-        
+
         $template = $options['template'] ?? 'default';
         $view = "pdfs.invoices.{$template}";
-        
+
         $pdf = $this->createPDF($view, $data, $options);
-        
+
         $filename = $this->generateInvoiceFilename($invoice);
-        
+
         return [
             'pdf' => $pdf,
             'filename' => $filename,
@@ -59,7 +59,7 @@ class PDFService extends BaseAccountingService
     public function generatePaymentReceiptPDF(Payment $payment, array $options = [])
     {
         $payment->load(['invoice.company', 'company']);
-        
+
         $data = [
             'payment' => $payment,
             'invoice' => $payment->invoice,
@@ -67,14 +67,14 @@ class PDFService extends BaseAccountingService
             'amount_in_words' => $this->numberToWords($payment->amount),
             'template_options' => array_merge($this->defaultOptions, $options)
         ];
-        
+
         $template = $options['template'] ?? 'default';
         $view = "pdfs.receipts.{$template}";
-        
+
         $pdf = $this->createPDF($view, $data, $options);
-        
+
         $filename = $this->generatePaymentReceiptFilename($payment);
-        
+
         return [
             'pdf' => $pdf,
             'filename' => $filename,
@@ -88,26 +88,26 @@ class PDFService extends BaseAccountingService
     public function generateReportPDF(array $reportData, array $options = [])
     {
         $reportType = strtolower(str_replace([' ', '&'], ['_', 'and'], $reportData['report_name']));
-        
+
         $data = [
             'report' => $reportData,
             'company_info' => $this->getCompanyInfo(),
             'generated_by' => auth()->user()->name ?? 'System',
             'template_options' => array_merge($this->defaultOptions, $options)
         ];
-        
+
         $template = $options['template'] ?? $reportType;
         $view = "pdfs.reports.{$template}";
-        
+
         // Fallback to generic report template if specific template doesn't exist
         if (!View::exists($view)) {
             $view = 'pdfs.reports.generic';
         }
-        
+
         $pdf = $this->createPDF($view, $data, $options);
-        
+
         $filename = $this->generateReportFilename($reportData);
-        
+
         return [
             'pdf' => $pdf,
             'filename' => $filename,
@@ -121,7 +121,7 @@ class PDFService extends BaseAccountingService
     public function generateExpenseReportPDF(array $expenses, array $options = [])
     {
         $totalAmount = collect($expenses)->sum('amount');
-        
+
         $data = [
             'expenses' => $expenses,
             'total_amount' => $totalAmount,
@@ -131,14 +131,14 @@ class PDFService extends BaseAccountingService
             'employee' => $options['employee'] ?? null,
             'template_options' => array_merge($this->defaultOptions, $options)
         ];
-        
+
         $template = $options['template'] ?? 'default';
         $view = "pdfs.expenses.{$template}";
-        
+
         $pdf = $this->createPDF($view, $data, $options);
-        
+
         $filename = $this->generateExpenseReportFilename($options);
-        
+
         return [
             'pdf' => $pdf,
             'filename' => $filename,
@@ -152,7 +152,7 @@ class PDFService extends BaseAccountingService
     public function generateAdvanceStatementPDF(EmployeeAdvance $advance, array $options = [])
     {
         $advance->load('employee');
-        
+
         $data = [
             'advance' => $advance,
             'employee' => $advance->employee,
@@ -162,14 +162,14 @@ class PDFService extends BaseAccountingService
             'repayment_schedule' => $this->calculateRepaymentSchedule($advance),
             'template_options' => array_merge($this->defaultOptions, $options)
         ];
-        
+
         $template = $options['template'] ?? 'default';
         $view = "pdfs.advances.{$template}";
-        
+
         $pdf = $this->createPDF($view, $data, $options);
-        
+
         $filename = $this->generateAdvanceStatementFilename($advance);
-        
+
         return [
             'pdf' => $pdf,
             'filename' => $filename,
@@ -182,19 +182,19 @@ class PDFService extends BaseAccountingService
      */
     public function generateCompanyStatementPDF(Company $company, array $options = [])
     {
-        $dateRange = isset($options['period']) ? 
-            $this->getDateRange($options['period']) : 
+        $dateRange = isset($options['period']) ?
+            $this->getDateRange($options['period']) :
             $this->parseCustomDateRange($options['start_date'], $options['end_date']);
-        
+
         $invoices = Invoice::where('company_id', $company->id)
             ->whereBetween('invoice_date', $dateRange)
             ->with('payments')
             ->get();
-            
+
         $totalInvoiced = $invoices->sum('total_amount');
         $totalPaid = $invoices->sum('paid_amount');
         $balance = $totalInvoiced - $totalPaid;
-        
+
         $data = [
             'company' => $company,
             'invoices' => $invoices,
@@ -209,14 +209,14 @@ class PDFService extends BaseAccountingService
             'company_info' => $this->getCompanyInfo(),
             'template_options' => array_merge($this->defaultOptions, $options)
         ];
-        
+
         $template = $options['template'] ?? 'default';
         $view = "pdfs.statements.{$template}";
-        
+
         $pdf = $this->createPDF($view, $data, $options);
-        
+
         $filename = $this->generateCompanyStatementFilename($company, $options);
-        
+
         return [
             'pdf' => $pdf,
             'filename' => $filename,
@@ -234,14 +234,14 @@ class PDFService extends BaseAccountingService
             'company_info' => $this->getCompanyInfo(),
             'template_options' => array_merge($this->defaultOptions, $options)
         ];
-        
+
         $template = $options['template'] ?? 'default';
         $view = "pdfs.aging.{$template}";
-        
+
         $pdf = $this->createPDF($view, $data, $options);
-        
+
         $filename = $this->generateAgingReportFilename($agingData);
-        
+
         return [
             'pdf' => $pdf,
             'filename' => $filename,
@@ -257,20 +257,20 @@ class PDFService extends BaseAccountingService
         $invoices = Invoice::whereIn('id', $invoiceIds)
             ->with(['company', 'shipment', 'payments'])
             ->get();
-            
+
         $data = [
             'invoices' => $invoices,
             'company_info' => $this->getCompanyInfo(),
             'template_options' => array_merge($this->defaultOptions, $options)
         ];
-        
+
         $template = $options['template'] ?? 'bulk';
         $view = "pdfs.invoices.{$template}";
-        
+
         $pdf = $this->createPDF($view, $data, $options);
-        
+
         $filename = $this->generateBulkInvoicesFilename($invoices);
-        
+
         return [
             'pdf' => $pdf,
             'filename' => $filename,
@@ -284,13 +284,13 @@ class PDFService extends BaseAccountingService
     private function createPDF(string $view, array $data, array $options = [])
     {
         $mergedOptions = array_merge($this->defaultOptions, $options);
-        
+
         try {
             $pdf = Pdf::loadView($view, $data);
-            
+
             // Set paper format and orientation
             $pdf->setPaper($mergedOptions['format'], $mergedOptions['orientation']);
-            
+
             // Set margins if specified
             if (isset($mergedOptions['margin_top'])) {
                 $pdf->setOption('margin-top', $mergedOptions['margin_top']);
@@ -298,16 +298,16 @@ class PDFService extends BaseAccountingService
                 $pdf->setOption('margin-bottom', $mergedOptions['margin_bottom']);
                 $pdf->setOption('margin-left', $mergedOptions['margin_left']);
             }
-            
+
             // Additional PDF options
             $pdf->setOption('enable-local-file-access', true);
             $pdf->setOption('enable-javascript', true);
             $pdf->setOption('javascript-delay', 1000);
             $pdf->setOption('enable-smart-shrinking', true);
             $pdf->setOption('no-stop-slow-scripts', true);
-            
+
             return $pdf;
-            
+
         } catch (Exception $e) {
             throw new Exception("PDF generation failed: " . $e->getMessage());
         }
@@ -319,9 +319,9 @@ class PDFService extends BaseAccountingService
     public function savePDF($pdf, string $filename, string $disk = 'public')
     {
         $path = "pdfs/" . date('Y/m/') . $filename;
-        
+
         Storage::disk($disk)->put($path, $pdf->output());
-        
+
         return [
             'path' => $path,
             'url' => Storage::disk($disk)->url($path),
@@ -336,7 +336,7 @@ class PDFService extends BaseAccountingService
     {
         // This would integrate with your mail system
         // Implementation depends on your email setup
-        
+
         return [
             'status' => 'queued',
             'pdf' => $pdf,
@@ -351,14 +351,14 @@ class PDFService extends BaseAccountingService
     private function getCompanyInfo()
     {
         return [
-            'name' => config('app.name', 'logisphere Logistics'),
+            'name' => config('app.name', 'logistics Logistics'),
             'address' => config('accounting.company.address', '123 Business Street'),
             'city' => config('accounting.company.city', 'Business City'),
             'postal_code' => config('accounting.company.postal_code', '12345'),
             'country' => config('accounting.company.country', 'Egypt'),
             'phone' => config('accounting.company.phone', '+20-xxx-xxx-xxxx'),
-            'email' => config('accounting.company.email', 'info@logisphere.com'),
-            'website' => config('accounting.company.website', 'www.logisphere.com'),
+            'email' => config('accounting.company.email', 'info@logistics.com'),
+            'website' => config('accounting.company.website', 'www.logistics.com'),
             'tax_number' => config('accounting.company.tax_number', 'TAX123456789'),
             'registration_number' => config('accounting.company.registration_number', 'REG123456789'),
             'logo_path' => config('accounting.company.logo_path', 'images/logo.png'),
@@ -371,14 +371,14 @@ class PDFService extends BaseAccountingService
     private function getPaymentTerms(Invoice $invoice)
     {
         $dueDays = $invoice->due_date->diffInDays($invoice->invoice_date);
-        
+
         return [
             'due_days' => $dueDays,
             'terms' => "Payment due within {$dueDays} days",
             'late_fee' => 'Late payment may incur additional charges',
             'bank_details' => [
                 'bank_name' => config('accounting.bank.name', 'National Bank of Egypt'),
-                'account_name' => config('accounting.bank.account_name', 'logisphere Logistics'),
+                'account_name' => config('accounting.bank.account_name', 'logistics Logistics'),
                 'account_number' => config('accounting.bank.account_number', '1234567890'),
                 'swift_code' => config('accounting.bank.swift_code', 'NBEXXXX'),
             ]
@@ -397,7 +397,7 @@ class PDFService extends BaseAccountingService
             'company' => $invoice->company->name,
             'due_date' => $invoice->due_date->format('Y-m-d')
         ];
-        
+
         // You would use a QR code library here
         // For now, return the data that would be encoded
         return base64_encode(json_encode($qrData));
@@ -411,27 +411,27 @@ class PDFService extends BaseAccountingService
         if (!$advance->due_date || $advance->balance <= 0) {
             return [];
         }
-        
+
         $monthsToRepay = max(1, $advance->issued_date->diffInMonths($advance->due_date));
         $monthlyAmount = $advance->balance / $monthsToRepay;
-        
+
         $schedule = [];
         $currentDate = now()->startOfMonth();
         $remainingBalance = $advance->balance;
-        
+
         for ($i = 0; $i < $monthsToRepay; $i++) {
             $paymentAmount = min($monthlyAmount, $remainingBalance);
             $remainingBalance -= $paymentAmount;
-            
+
             $schedule[] = [
                 'date' => $currentDate->copy()->addMonths($i)->format('Y-m-d'),
                 'amount' => $paymentAmount,
                 'remaining_balance' => $remainingBalance
             ];
-            
+
             if ($remainingBalance <= 0) break;
         }
-        
+
         return $schedule;
     }
 
@@ -443,19 +443,19 @@ class PDFService extends BaseAccountingService
         // Simple implementation - you can enhance this
         $formatter = new \NumberFormatter('en', \NumberFormatter::SPELLOUT);
         $words = $formatter->format($number);
-        
+
         // Handle currency
         $currency = config('accounting.currency.code', 'USD');
         $wholePart = floor($number);
         $decimalPart = round(($number - $wholePart) * 100);
-        
+
         $result = ucfirst($words);
-        
+
         if ($decimalPart > 0) {
             $decimalWords = $formatter->format($decimalPart);
             $result .= " and {$decimalWords} cents";
         }
-        
+
         return "{$result} {$currency} only";
     }
 
@@ -541,11 +541,11 @@ class PDFService extends BaseAccountingService
     {
         $data['company_info'] = $this->getCompanyInfo();
         $data['template_options'] = array_merge($this->defaultOptions, $options);
-        
+
         $pdf = $this->createPDF($template, $data, $options);
-        
+
         $filename = $options['filename'] ?? 'Custom_Document_' . now()->format('Y-m-d_H-i-s') . '.pdf';
-        
+
         return [
             'pdf' => $pdf,
             'filename' => $filename,
@@ -593,15 +593,15 @@ class PDFService extends BaseAccountingService
     {
         $validFormats = ['A4', 'A3', 'A5', 'Letter', 'Legal'];
         $validOrientations = ['portrait', 'landscape'];
-        
+
         if (isset($options['format']) && !in_array($options['format'], $validFormats)) {
             throw new Exception('Invalid PDF format. Valid formats: ' . implode(', ', $validFormats));
         }
-        
+
         if (isset($options['orientation']) && !in_array($options['orientation'], $validOrientations)) {
             throw new Exception('Invalid PDF orientation. Valid orientations: ' . implode(', ', $validOrientations));
         }
-        
+
         return true;
     }
 
@@ -612,7 +612,7 @@ class PDFService extends BaseAccountingService
     {
         // This would track PDF generation statistics
         // For now, return a placeholder structure
-        
+
         return [
             'period' => $period,
             'total_pdfs_generated' => 0,

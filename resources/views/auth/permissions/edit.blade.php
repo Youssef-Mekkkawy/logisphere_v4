@@ -1,7 +1,7 @@
 {{-- File: resources/views/permissions/edit.blade.php --}}
 @extends('layouts.app')
 
-@section('title', 'Edit Permission - logisphere')
+@section('title', 'Edit Permission - logistics')
 @section('page-title', 'Edit Permission: ' . $permission->name)
 
 @section('content')

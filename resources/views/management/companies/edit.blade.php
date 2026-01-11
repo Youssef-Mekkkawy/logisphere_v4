@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Company - logisphere')
+@section('title', 'Edit Company - logistics')
 @section('page-title', 'Edit Company: ' . $company->name)
 
 @section('content')
@@ -13,7 +13,7 @@
     style="background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);">
     @csrf
     @method('PUT')
-    
+
     <!-- Company Info Header -->
     <div style="margin-bottom: 30px; padding: 20px; background: #f8fafc; border-radius: 12px;">
         <h4 style="color: #1e40af; margin-bottom: 10px;">Edit Company Information</h4>
@@ -29,13 +29,13 @@
         <div class="form-grid">
             <div class="form-group">
                 <label class="form-label">Company Name *</label>
-                <input type="text" name="name" class="form-input" 
+                <input type="text" name="name" class="form-input"
                        value="{{ old('name', $company->name) }}" required>
                 @error('name')
                     <span class="error-message">{{ $message }}</span>
                 @enderror
             </div>
-            
+
             <div class="form-group">
                 <label class="form-label">Company Type *</label>
                 <select name="type" class="form-input" required>
@@ -67,25 +67,25 @@
         <div class="form-grid">
             <div class="form-group">
                 <label class="form-label">Contact Person *</label>
-                <input type="text" name="contact_person" class="form-input" 
+                <input type="text" name="contact_person" class="form-input"
                        value="{{ old('contact_person', $company->contact_person) }}" required>
                 @error('contact_person')
                     <span class="error-message">{{ $message }}</span>
                 @enderror
             </div>
-            
+
             <div class="form-group">
                 <label class="form-label">Email *</label>
-                <input type="email" name="email" class="form-input" 
+                <input type="email" name="email" class="form-input"
                        value="{{ old('email', $company->email) }}" required>
                 @error('email')
                     <span class="error-message">{{ $message }}</span>
                 @enderror
             </div>
-            
+
             <div class="form-group">
                 <label class="form-label">Phone</label>
-                <input type="tel" name="phone" class="form-input" 
+                <input type="tel" name="phone" class="form-input"
                        value="{{ old('phone', $company->phone) }}">
                 @error('phone')
                     <span class="error-message">{{ $message }}</span>
@@ -94,7 +94,7 @@
 
             <div class="form-group">
                 <label class="form-label">Website</label>
-                <input type="url" name="website" class="form-input" 
+                <input type="url" name="website" class="form-input"
                        value="{{ old('website', $company->website) }}">
                 @error('website')
                     <span class="error-message">{{ $message }}</span>
@@ -124,7 +124,7 @@
 
             <div class="form-group">
                 <label class="form-label">City</label>
-                <input type="text" name="city" class="form-input" 
+                <input type="text" name="city" class="form-input"
                        value="{{ old('city', $company->city) }}">
                 @error('city')
                     <span class="error-message">{{ $message }}</span>
@@ -133,7 +133,7 @@
 
             <div class="form-group">
                 <label class="form-label">Postal Code</label>
-                <input type="text" name="postal_code" class="form-input" 
+                <input type="text" name="postal_code" class="form-input"
                        value="{{ old('postal_code', $company->postal_code) }}">
                 @error('postal_code')
                     <span class="error-message">{{ $message }}</span>
@@ -142,7 +142,7 @@
 
             <div class="form-group">
                 <label class="form-label">Tax Number</label>
-                <input type="text" name="tax_number" class="form-input" 
+                <input type="text" name="tax_number" class="form-input"
                        value="{{ old('tax_number', $company->tax_number) }}">
                 @error('tax_number')
                     <span class="error-message">{{ $message }}</span>
@@ -230,7 +230,7 @@
             @endif
         </div>
     </div>
-    
+
     <!-- Action Buttons -->
     <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
         <button type="submit" class="btn btn-primary">
@@ -239,7 +239,7 @@
         <a href="{{ route('management.companies.show', $company) }}" class="btn btn-secondary" style="margin-left: 15px;">
             <i class="fas fa-times"></i> Cancel
         </a>
-        
+
         @if(auth()->user()->isAdmin() && in_array($company->status, ['Inactive']))
         <button type="button" class="btn btn-danger" style="margin-left: 15px; float: right;"
                 onclick="if(confirm('Are you sure you want to delete this company? This action cannot be undone and will affect all related shipments.')) { document.getElementById('delete-form').submit(); }">

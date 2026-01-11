@@ -16,7 +16,7 @@ class UpdatedUserSeeder extends Seeder
             [
                 'name' => 'System Administrator',
                 'username' => 'admin',
-                'email' => 'admin@logisphere.com',
+                'email' => 'admin@logistics.com',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
                 'role_slug' => 'admin'
@@ -24,7 +24,7 @@ class UpdatedUserSeeder extends Seeder
             [
                 'name' => 'Operations Manager',
                 'username' => 'ops_manager',
-                'email' => 'operations@logisphere.com',
+                'email' => 'operations@logistics.com',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
                 'role_slug' => 'manager'
@@ -32,7 +32,7 @@ class UpdatedUserSeeder extends Seeder
             [
                 'name' => 'Customer Service',
                 'username' => 'customer_service',
-                'email' => 'cs@logisphere.com',
+                'email' => 'cs@logistics.com',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
                 'role_slug' => 'customer-service'
@@ -40,7 +40,7 @@ class UpdatedUserSeeder extends Seeder
             [
                 'name' => 'Finance Officer',
                 'username' => 'finance',
-                'email' => 'finance@logisphere.com',
+                'email' => 'finance@logistics.com',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
                 'role_slug' => 'finance'
@@ -48,7 +48,7 @@ class UpdatedUserSeeder extends Seeder
             [
                 'name' => 'Regular User',
                 'username' => 'user',
-                'email' => 'user@logisphere.com',
+                'email' => 'user@logistics.com',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
                 'role_slug' => 'user'
@@ -82,6 +82,6 @@ class UpdatedUserSeeder extends Seeder
         }
 
         $this->command->info('Users with roles seeded successfully!');
-        $this->command->info('Default login: admin@logisphere.com / password');
+        $this->command->info('Default login: admin@logistics.com / password');
     }
 }

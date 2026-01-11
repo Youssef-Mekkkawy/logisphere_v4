@@ -1,10 +1,10 @@
 import './bootstrap';
-import './logisphere';
+import './logistics';
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('logisphere Application Loaded');
-    
+    console.log('logistics Application Loaded');
+
     // Initialize any global functionality here
     initializeApp();
 });

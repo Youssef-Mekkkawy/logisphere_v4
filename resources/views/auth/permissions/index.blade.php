@@ -1,7 +1,7 @@
 {{-- File: resources/views/permissions/index.blade.php --}}
 @extends('layouts.app')
 
-@section('title', 'Permissions Management - logisphere')
+@section('title', 'Permissions Management - logistics')
 @section('page-title', 'Permissions Management')
 
 @section('content')

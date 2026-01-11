@@ -165,10 +165,10 @@ class ShipmentService
     private function getCompanyInfo(): array
     {
         return [
-            'name' => config('app_name', 'logisphere Logistics'),
+            'name' => config('app_name', 'logistics Logistics'),
             'address' => config('company_address', 'Your Company Address'),
             'phone' => config('company_phone', '+20-xxx-xxx-xxxx'),
-            'email' => config('company_email', 'info@logisphere.com')
+            'email' => config('company_email', 'info@logistics.com')
         ];
     }
 

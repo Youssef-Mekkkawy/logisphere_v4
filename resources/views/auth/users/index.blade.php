@@ -1,7 +1,7 @@
 {{-- File: resources/views/auth/users/index.blade.php (ENHANCED VERSION) --}}
 @extends('layouts.app')
 
-@section('title', 'User Management - logisphere')
+@section('title', 'User Management - logistics')
 
 @section('content')
     <div style="margin-bottom: 2rem;">

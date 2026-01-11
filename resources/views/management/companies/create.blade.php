@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Create Company - logisphere')
+@section('title', 'Create Company - logistics')
 @section('page-title', 'Create New Company')
 
 @section('content')

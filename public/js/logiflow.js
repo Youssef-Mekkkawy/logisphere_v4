@@ -1,6 +1,6 @@
 // Main JavaScript functionality
 document.addEventListener("DOMContentLoaded", function () {
-    console.log("logisphere JavaScript loaded from public directory");
+    console.log("logistics JavaScript loaded from public directory");
 
     initializeApp();
 });

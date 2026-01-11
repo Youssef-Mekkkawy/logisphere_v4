@@ -18,27 +18,27 @@ document.addEventListener('DOMContentLoaded', function() {
 function initializeNavigation() {
     const navLinks = document.querySelectorAll('.nav-link');
     const sections = document.querySelectorAll('.content-area');
-    
+
     navLinks.forEach(link => {
         link.addEventListener('click', function(e) {
             e.preventDefault();
-            
+
             // Remove active class from all links
             navLinks.forEach(l => l.classList.remove('active'));
-            
+
             // Add active class to clicked link
             this.classList.add('active');
-            
+
             // Hide all sections
             sections.forEach(section => section.classList.add('hidden'));
-            
+
             // Show target section
             const target = this.getAttribute('data-section') + '-section';
             const targetSection = document.getElementById(target);
             if (targetSection) {
                 targetSection.classList.remove('hidden');
             }
-            
+
             // Update page title
             const pageTitle = document.getElementById('page-title');
             if (pageTitle) {
@@ -54,19 +54,19 @@ function initializeTabs() {
         tab.addEventListener('click', function() {
             const tabGroup = this.closest('.content-area');
             if (!tabGroup) return;
-            
+
             const tabContents = tabGroup.querySelectorAll('.tab-content');
             const targetTab = this.getAttribute('data-tab') + '-tab';
-            
+
             // Remove active class from all tabs in this group
             tabGroup.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            
+
             // Add active class to clicked tab
             this.classList.add('active');
-            
+
             // Hide all tab contents in this group
             tabContents.forEach(content => content.classList.remove('active'));
-            
+
             // Show target tab content
             const targetContent = document.getElementById(targetTab);
             if (targetContent) {
@@ -111,7 +111,7 @@ function initializeKeyboardShortcuts() {
                     break;
             }
         }
-        
+
         if (e.altKey && e.key === 's') {
             e.preventDefault();
             alert('Opening Service management...');
@@ -124,7 +124,7 @@ function initializeForms() {
     forms.forEach(form => {
         // Skip login form to allow normal submission
         if (form.id === 'login-form') return;
-        
+
         form.addEventListener('submit', function(e) {
             if (this.id === 'shipment-form') {
                 e.preventDefault();
@@ -144,7 +144,7 @@ function initializeSearch() {
         searchBar.addEventListener('input', function() {
             const searchTerm = this.value.toLowerCase();
             const table = this.nextElementSibling?.nextElementSibling; // Skip button, get table
-            
+
             if (table && table.classList.contains('data-table')) {
                 const rows = table.querySelectorAll('tbody tr');
                 rows.forEach(row => {
@@ -227,17 +227,17 @@ function showSubmenuDetail(logistics.ype) {
     // Hide logistics.overview
     const overview = document.getElementById('logistics.overview');
     if (overview) overview.classList.add('hidden');
-    
+
     // Hide all logistics.details
     const allDetails = document.querySelectorAll('.logistics.detail');
     allDetails.forEach(detail => detail.classList.add('hidden'));
-    
+
     // Show specific logistics.detail
     const targetDetail = document.getElementById(logistics.ype + '-management');
     if (targetDetail) {
         targetDetail.classList.remove('hidden');
     }
-    
+
     // Show back button
     const backBtn = document.getElementById('back-to-logistics.);
     if (backBtn) backBtn.style.display = 'inline-block';
@@ -247,11 +247,11 @@ function showSubmenuOverview() {
     // Show logistics.overview
     const overview = document.getElementById('logistics.overview');
     if (overview) overview.classList.remove('hidden');
-    
+
     // Hide all logistics.details
     const allDetails = document.querySelectorAll('.logistics.detail');
     allDetails.forEach(detail => detail.classList.add('hidden'));
-    
+
     // Hide back button
     const backBtn = document.getElementById('back-to-logistics.);
     if (backBtn) backBtn.style.display = 'none';
@@ -264,14 +264,14 @@ function switchSubmenuTab(tabName) {
         // Remove active from all tabs in this detail
         const tabs = activeDetail.querySelectorAll('.tab');
         const tabContents = activeDetail.querySelectorAll('.tab-content');
-        
+
         tabs.forEach(tab => tab.classList.remove('active'));
         tabContents.forEach(content => content.classList.remove('active'));
-        
+
         // Add active to target tab and content
         const targetTab = activeDetail.querySelector(`[data-tab="${tabName}"]`);
         const targetContent = activeDetail.querySelector(`#${tabName}-tab`);
-        
+
         if (targetTab) targetTab.classList.add('active');
         if (targetContent) targetContent.classList.add('active');
     }
@@ -280,7 +280,7 @@ function switchSubmenuTab(tabName) {
 function fillDemoCredentials(username, password) {
     const usernameField = document.getElementById('username');
     const passwordField = document.getElementById('password');
-    
+
     if (usernameField) usernameField.value = username;
     if (passwordField) passwordField.value = password;
 }
@@ -322,7 +322,7 @@ window.showSubmenuOverview = showSubmenuOverview;
 window.switchSubmenuTab = switchSubmenuTab;
 window.trackShipment = trackShipment;
 
-console.log('logisphere JavaScript loaded successfully');
+console.log('logistics JavaScript loaded successfully');
 console.log('Available keyboard shortcuts:');
 console.log('- Ctrl+F1: Create new shipment');
 console.log('- Ctrl+U: Users section');

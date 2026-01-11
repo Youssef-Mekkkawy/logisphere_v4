@@ -1,7 +1,7 @@
 {{-- File: resources/views/users/show.blade.php (FIXED) --}}
 @extends('layouts.app')
 
-@section('title', $user->name . ' - logisphere')
+@section('title', $user->name . ' - logistics')
 @section('page-title', 'User Details')
 
 @section('content')

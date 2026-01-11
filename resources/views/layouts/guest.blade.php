@@ -4,15 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Login - logisphere')</title>
-    
+    <title>@yield('title', 'Login - logistics')</title>
+
     <!-- Use public directory CSS -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 </head>
 <body>
     @yield('content')
-    
+
     <!-- Use public directory JS -->
-    <script src="{{ asset('js/logisphere.js') }}"></script>
+    <script src="{{ asset('js/logistics.js') }}"></script>
 </body>
 </html>

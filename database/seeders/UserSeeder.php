@@ -18,7 +18,7 @@ class UserSeeder extends Seeder
             [
                 'name' => 'System Administrator',
                 'username' => 'admin',
-                'email' => 'admin@logisphere.com',
+                'email' => 'admin@logistics.com',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
                 'gender' => 'male',
@@ -27,7 +27,7 @@ class UserSeeder extends Seeder
             [
                 'name' => 'Operations Manager',
                 'username' => 'ops_manager',
-                'email' => 'operations@logisphere.com',
+                'email' => 'operations@logistics.com',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
                 'gender' => 'female',
@@ -36,7 +36,7 @@ class UserSeeder extends Seeder
             [
                 'name' => 'Customer Service',
                 'username' => 'customer_service',
-                'email' => 'cs@logisphere.com',
+                'email' => 'cs@logistics.com',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
                 'gender' => 'male',
@@ -45,7 +45,7 @@ class UserSeeder extends Seeder
             [
                 'name' => 'Shipping Coordinator',
                 'username' => 'shipping_coord',
-                'email' => 'shipping@logisphere.com',
+                'email' => 'shipping@logistics.com',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
                 'gender' => 'female',
@@ -54,7 +54,7 @@ class UserSeeder extends Seeder
             [
                 'name' => 'Finance Officer',
                 'username' => 'finance',
-                'email' => 'finance@logisphere.com',
+                'email' => 'finance@logistics.com',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
                 'gender' => 'female',
@@ -89,7 +89,7 @@ class UserSeeder extends Seeder
         }
 
         $this->command->info('Users seeded successfully!');
-        $this->command->info('Default login: admin@logisphere.com / password');
+        $this->command->info('Default login: admin@logistics.com / password');
     }
 
     /**

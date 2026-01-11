@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Invoices - logisphere')
+@section('title', 'Invoices - logistics')
 @section('page-title', 'Invoice Management')
 
 @section('content')

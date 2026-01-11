@@ -2,7 +2,7 @@
 
 @extends('layouts.guest')
 
-@section('title', 'Account Blocked - logisphere')
+@section('title', 'Account Blocked - logistics')
 
 @section('content')
     <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #f9fafb;">

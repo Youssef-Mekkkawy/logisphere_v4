@@ -1,7 +1,7 @@
 {{-- File: resources/views/roles/index.blade.php --}}
 @extends('layouts.app')
 
-@section('title', 'Roles Management - logisphere')
+@section('title', 'Roles Management - logistics')
 @section('page-title', 'Roles Management')
 
 @section('content')

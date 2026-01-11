@@ -30,7 +30,7 @@ class DatabaseSeeder extends Seeder
             ContainerSeeder::class,
             PermissionSeeder::class,
             RoleSeeder::class,
- 
+
             ConsigneeNotifySeeder::class,
             ContainerLoadingSeeder::class,
             InspectionTypeSeeder::class,
@@ -40,7 +40,7 @@ class DatabaseSeeder extends Seeder
             CooTypeSeeder::class,
             QuantityTypeSeeder::class,
             ServiceSeeder::class,
-            ShipmentTypeSeeder::class, 
+            ShipmentTypeSeeder::class,
             ShipperSeeder::class,
         ]);
 
@@ -51,21 +51,21 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'System Administrator',
                 'username' => 'admin',
-                'email' => 'admin@logisphere.com',
+                'email' => 'admin@logistics.com',
                 'password' => Hash::make('admin123'),
                 'role' => 'admin'
             ],
             [
                 'name' => 'Operations Manager',
                 'username' => 'manager',
-                'email' => 'manager@logisphere.com',
+                'email' => 'manager@logistics.com',
                 'password' => Hash::make('manager123'),
                 'role' => 'manager'
             ],
             [
                 'name' => 'Standard User',
                 'username' => 'user',
-                'email' => 'user@logisphere.com',
+                'email' => 'user@logistics.com',
                 'password' => Hash::make('user123'),
                 'role' => 'user'
             ]
@@ -151,7 +151,7 @@ class DatabaseSeeder extends Seeder
                 'name' => 'Ahmed Hassan',
                 'department' => 'Operations',
                 'position' => 'Logistics Coordinator',
-                'email' => 'ahmed@logisphere.com',
+                'email' => 'ahmed@logistics.com',
                 'phone' => '+20-100-123-4567',
                 'hire_date' => '2024-01-15',
                 'salary' => 3000.00,
@@ -162,7 +162,7 @@ class DatabaseSeeder extends Seeder
                 'name' => 'Fatima Ali',
                 'department' => 'Customs',
                 'position' => 'Customs Specialist',
-                'email' => 'fatima@logisphere.com',
+                'email' => 'fatima@logistics.com',
                 'phone' => '+20-100-234-5678',
                 'hire_date' => '2024-02-01',
                 'salary' => 2800.00,

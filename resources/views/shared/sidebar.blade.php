@@ -1,7 +1,7 @@
 {{-- File: resources/views/shared/sidebar.blade.php --}}
 <nav class="sidebar">
     <div class="logo">
-        <h1>🚢 logisphere</h1>
+        <h1>🚢 logistics</h1>
         <p>Logistics Management System</p>
     </div>
     <ul class="nav-menu">
@@ -102,9 +102,9 @@
 
     {{-- Enhanced User Info with Your Avatar Component --}}
     {{-- <div class="user-info">
-       
+
         <div class="user-avatar-wrapper">
-            <x-avatar :user="auth()->user()" :size="48" :show-status="true" :clickable="true"
+            <x-avatar :user="auth()->user()" :size="48" :show       -status="true" :clickable="true"
                 tooltip="Click to view profile" class="user-main-avatar" />
         </div>
 
@@ -122,10 +122,10 @@
             @endif
         </div>
 
-      
+
         <form method="POST" action="{{ route('logout') }}" style="display: inline;">
             @csrf
-            <button type="submit" class="logout-btn" title="Logout">
+            <button       type="submit" class="logout-btn" title="Logout">
                 🚪
             </button>
         </form>

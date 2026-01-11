@@ -1,7 +1,7 @@
 {{-- File: resources/views/auth/change-password.blade.php --}}
 @extends('layouts.app')
 
-@section('title', 'Change Password - logisphere')
+@section('title', 'Change Password - logistics')
 @section('page-title', 'Change Password')
 
 @section('content')

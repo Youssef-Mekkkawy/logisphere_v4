@@ -246,7 +246,7 @@ class EmployeeController extends Controller
      */
     private function generateEmployeeEmail(string $name): string
     {
-        $domain = config('app.employee_email_domain', 'logisphere.com');
+        $domain = config('app.employee_email_domain', 'logistics.com');
 
         // Clean name and create email
         $emailName = strtolower(str_replace(' ', '.', trim($name)));

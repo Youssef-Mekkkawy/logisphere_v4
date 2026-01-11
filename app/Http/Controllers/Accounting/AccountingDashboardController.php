@@ -1,17 +1,16 @@
 <?php
 
-namespace App\Http\Controllers\Management\Accounting;
+namespace App\Http\Controllers\Accounting;
 
 use App\Http\Controllers\Controller;
-use App\Models\Management\Account\{Invoice, Payment, Expense, EmployeeAdvance};
 
-
-class AccountingDashboardController extends Controller
+    class AccountingDashboardController extends Controller
 {
 
 
     public function __construct()
     {
+        // dd("Accounting Dashboard __construct");
         $this->middleware('auth');
         $this->middleware('permission:accounting.view')->only(['index', 'show']);
         $this->middleware('permission:accounting.create')->only(['create', 'store']);
@@ -21,7 +20,9 @@ class AccountingDashboardController extends Controller
 
     public function index()
     {
-
+        // dd("Accounting Dashboard");
         return view('accounting.index');
     }
 }
+
+

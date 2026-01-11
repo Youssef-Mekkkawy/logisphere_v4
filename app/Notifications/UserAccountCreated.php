@@ -41,7 +41,7 @@ class UserAccountCreated extends Notification implements ShouldQueue
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $companyName = config('app.name', 'logisphere');
+        $companyName = config('app.name', 'logistics');
         $loginUrl = url('/login');
 
         return (new MailMessage)

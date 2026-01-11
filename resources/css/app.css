@@ -3,7 +3,7 @@
 @import "tailwindcss/utilities";
 
 /* Import your custom CSS files */
-@import "./logisphere.css";
+@import "./logistics.css";
 @import "./components.css";
 
 * {

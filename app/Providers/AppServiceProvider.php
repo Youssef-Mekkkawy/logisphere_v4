@@ -71,7 +71,7 @@ class AppServiceProvider extends ServiceProvider
 
     private function shareViewData(): void
     {
-        View::share('appName', config('app.name', 'logisphere Logistics'));
+        View::share('appName', config('app.name', 'logistics Logistics'));
         View::share('appVersion', '1.0.0');
 
         View::composer('*', function ($view) {
@@ -105,13 +105,13 @@ class AppServiceProvider extends ServiceProvider
         ]);
 
         config([
-            'company.name' => 'logisphere Logistics',
+            'company.name' => 'logistics Logistics',
             'company.address' => 'Your Company Address',
             'company.city' => 'Your City',
             'company.country' => 'Egypt',
             'company.phone' => '+20-xxx-xxx-xxxx',
-            'company.email' => 'info@logisphere.com',
-            'company.website' => 'www.logisphere.com',
+            'company.email' => 'info@logistics.com',
+            'company.website' => 'www.logistics.com',
             'company.tax_number' => 'TAX123456789',
             'company.registration_number' => 'REG123456789'
         ]);
