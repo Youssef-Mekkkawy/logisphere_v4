@@ -365,6 +365,7 @@ class ShipmentTypeSeeder extends Seeder
         ];
 
         foreach ($shipmentTypes as $typeData) {
+            $typeData['name'] = $typeData['type_name'];
             ShipmentType::create($typeData);
             $this->command->info("Created shipment type: {$typeData['type_name']}");
         }

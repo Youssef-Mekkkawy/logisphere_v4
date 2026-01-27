@@ -86,7 +86,7 @@ class ShipmentController extends Controller
     public function create(Request $request)
     {
         $companies = Company::where('type', 'Client')->orderBy('name')->get();
-        $ports = Port::where('status', 'Active')->orderBy('name')->get();
+        $ports = Port::where('status', 'Active')->orderBy('port_name')->get();
         $agencies = ShippingAgency::where('status', 'Active')->orderBy('name')->get();
         $shipmentTypes = ShipmentType::where('status', 'Active')->orderBy('name')->get();
         $employees = Employee::where('status', 'Active')->orderBy('name')->get();

@@ -677,6 +677,7 @@ class ShipperSeeder extends Seeder
         ];
 
         foreach ($shippers as $shipper) {
+            $shipper['name'] = $shipper['shipper_name'] ?? 'Unknown Port';
             Shipper::create($shipper);
         }
 

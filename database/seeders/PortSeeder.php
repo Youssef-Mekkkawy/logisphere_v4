@@ -26,6 +26,7 @@ class PortSeeder extends Seeder
 
         $ports = [
             [
+                'name' => 'Port of Alexandria',
                 'port_code' => 'EGALY',
                 'port_name' => 'Port of Alexandria',
                 'city' => 'Alexandria',
@@ -91,8 +92,9 @@ class PortSeeder extends Seeder
                 'status' => 'Active'
             ],
             [
+                'name' => 'Port of Suez',
                 'port_code' => 'EGSUZ',
-                
+
                 'port_name' => 'Port of Suez',
                 'city' => 'Suez',
                 'state_province' => 'Suez Governorate',
@@ -149,10 +151,11 @@ class PortSeeder extends Seeder
                 'status' => 'Active'
             ],
             [
+                'name' => 'Cairo International Airport Cargo Terminal',
                 'port_code' => 'CAILO',
                 'port_name' => 'Cairo International Airport Cargo Terminal',
                 'city' => 'Cairo',
-                'state_province' => 'Cairo Governorate', 
+                'state_province' => 'Cairo Governorate',
                 'country' => 'Egypt',
                 'country_id' => $egypt?->id,
                 'postal_code' => '11776',
@@ -201,6 +204,7 @@ class PortSeeder extends Seeder
                 'status' => 'Active'
             ],
             [
+                'name' => 'Port of Los Angeles',
                 'port_code' => 'USLAX',
                 'port_name' => 'Port of Los Angeles',
                 'city' => 'Los Angeles',
@@ -209,7 +213,7 @@ class PortSeeder extends Seeder
                 'country_id' => $usa?->id,
                 'postal_code' => '90731',
                 'address' => 'Port of Los Angeles, San Pedro Bay',
-                'port_type' => 'Seaport', 
+                'port_type' => 'Seaport',
                 'latitude' => 33.7367,
                 'longitude' => -118.2922,
                 'contact_person' => 'Robert Johnson',
@@ -263,6 +267,7 @@ class PortSeeder extends Seeder
                 'status' => 'Active'
             ],
             [
+                'name' => 'Port of Hamburg',
                 'port_code' => 'DEHAM',
                 'port_name' => 'Port of Hamburg',
                 'city' => 'Hamburg',
@@ -320,6 +325,7 @@ class PortSeeder extends Seeder
                 'status' => 'Active'
             ],
             [
+                'name' => 'Jebel Ali Port',
                 'port_code' => 'AEJEA',
                 'port_name' => 'Jebel Ali Port',
                 'city' => 'Dubai',
@@ -375,6 +381,7 @@ class PortSeeder extends Seeder
                 'status' => 'Active'
             ],
             [
+                'name' => 'Port of Shanghai',
                 'port_code' => 'CNSHA',
                 'port_name' => 'Port of Shanghai',
                 'city' => 'Shanghai',
@@ -430,6 +437,7 @@ class PortSeeder extends Seeder
                 'status' => 'Active'
             ],
             [
+                'name' => 'London Gateway Port',
                 'port_code' => 'GBLGW',
                 'port_name' => 'London Gateway Port',
                 'city' => 'London',
@@ -480,6 +488,7 @@ class PortSeeder extends Seeder
                 'status' => 'Active'
             ],
             [
+                'name' => 'Port of Singapore',
                 'port_code' => 'SGSIN',
                 'port_name' => 'Port of Singapore',
                 'city' => 'Singapore',
@@ -535,6 +544,7 @@ class PortSeeder extends Seeder
                 'status' => 'Active'
             ],
             [
+                'name' => 'Port of Rotterdam',
                 'port_code' => 'NLRTM',
                 'port_name' => 'Port of Rotterdam',
                 'city' => 'Rotterdam',
@@ -589,6 +599,7 @@ class PortSeeder extends Seeder
                 'status' => 'Active'
             ],
             [
+                'name' => 'Port Said East Port',
                 'port_code' => 'EGPOR',
                 'port_name' => 'Port Said East Port',
                 'city' => 'Port Said',
@@ -638,6 +649,7 @@ class PortSeeder extends Seeder
                 'status' => 'Active'
             ],
             [
+                'name' => 'Test Inactive Port',
                 'port_code' => 'TESTP',
                 'port_name' => 'Test Inactive Port',
                 'city' => 'Test City',
